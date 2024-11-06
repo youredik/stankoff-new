@@ -10,8 +10,8 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "@api-platform/admin": "^4.0.1",
-    "@api-platform/api-doc-parser": "^0.16.4",
+    "@api-platform/admin": "^4.0.2",
+    "@api-platform/api-doc-parser": "^0.16.6",
     "@auth/core": "^0.34.2",
     "@fontsource/poppins": "^5.0.14",
     "@mui/icons-material": "^5.16.7",
