@@ -1,11 +1,11 @@
-import { type Metadata } from "next";
+import {type Metadata} from "next";
 
 import {auth, type Session} from "../auth";
-import { List, type Props as ListProps } from "../../components/book/List";
-import { type Book } from "../../types/Book";
-import { type PagedCollection } from "../../types/collection";
-import { type FetchResponse, fetchApi } from "../../utils/dataAccess";
-import { type FiltersProps, buildUriFromFilters } from "../../utils/book";
+import {List, type Props as ListProps} from "../../components/book/List";
+import {type Book} from "../../types/Book";
+import {type PagedCollection} from "../../types/collection";
+import {fetchApi, type FetchResponse} from "../../utils/dataAccess";
+import {buildUriFromFilters, type FiltersProps} from "../../utils/book";
 
 interface Query extends URLSearchParams {
   page?: number|string|undefined;
@@ -17,7 +17,7 @@ interface Query extends URLSearchParams {
 }
 
 interface Props {
-  searchParams: Query;
+  searchParams: Promise<Query>;
 }
 
 async function getServerSideProps(query: Query, session: Session|null): Promise<ListProps> {
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
 export default async function Page({ searchParams }: Props) {
   // @ts-ignore
   const session: Session|null = await auth();
-  const props = await getServerSideProps(searchParams, session);
+  const props = await getServerSideProps(await searchParams, session);
 
   return <List {...props}/>;
 }
