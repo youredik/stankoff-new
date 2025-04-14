@@ -1,20 +1,16 @@
-#syntax=docker/dockerfile:1.4
+#syntax=docker/dockerfile:1
 
 
 # Versions
-FROM node:23-alpine AS node_upstream
+FROM node:lts AS node_upstream
 
 
 # Base stage for dev and build
 FROM node_upstream AS base
 
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-# hadolint ignore=DL3018
-RUN apk add --no-cache libc6-compat
-
 WORKDIR /srv/app
 
-RUN apk upgrade && \
+RUN npm install -g corepack@latest && \
     corepack enable && \
 	corepack prepare --activate pnpm@latest && \
 	pnpm config -g set store-dir /.pnpm-store
