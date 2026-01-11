@@ -78,7 +78,7 @@ class User implements UserInterface
      * @see https://schema.org/givenName
      */
     #[ApiProperty(types: ['https://schema.org/givenName'])]
-    #[Groups(groups: ['User:read', 'Review:read'])]
+    #[Groups(groups: ['User:read'])]
     #[ORM\Column]
     public string $firstName;
 
@@ -86,7 +86,7 @@ class User implements UserInterface
      * @see https://schema.org/familyName
      */
     #[ApiProperty(types: ['https://schema.org/familyName'])]
-    #[Groups(groups: ['User:read', 'Review:read'])]
+    #[Groups(groups: ['User:read'])]
     #[ORM\Column]
     public string $lastName;
 
@@ -116,7 +116,7 @@ class User implements UserInterface
      * @see https://schema.org/name
      */
     #[ApiProperty(iris: ['https://schema.org/name'])]
-    #[Groups(groups: ['User:read', 'Review:read'])]
+    #[Groups(groups: ['User:read'])]
     public function getName(): string
     {
         return trim(\sprintf('%s %s', $this->firstName, $this->lastName));
