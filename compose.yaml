@@ -28,9 +28,9 @@ services:
       - caddy_config:/config
     ports:
       # HTTP
-#      - target: 80
-#        published: ${HTTP_PORT:-80}
-#        protocol: tcp
+      - target: 80
+        published: ${HTTP_PORT:-8095}
+        protocol: tcp
       # HTTPS
       - target: 443
         published: ${HTTPS_PORT:-443}
@@ -39,6 +39,8 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
+    networks:
+      - stankoff
 
   pwa:
     image: ${IMAGES_PREFIX:-}app-pwa
@@ -51,6 +53,8 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-!ChangeThisNextAuthSecret!}
       AUTH_URL: ${AUTH_URL:-https://localhost/api/auth}
       NEXT_SHARP_PATH: /srv/app/node_modules/sharp
+    networks:
+      - stankoff
 
 ###> doctrine/doctrine-bundle ###
   database:
@@ -74,6 +78,8 @@ services:
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
+    networks:
+      - stankoff
 
   keycloak-database:
     image: docker.io/postgres:${KEYCLOAK_POSTGRES_VERSION:-16}-alpine
@@ -90,6 +96,8 @@ services:
       retries: 3
     volumes:
       - keycloak_db_data:/var/lib/postgresql/data
+    networks:
+      - stankoff
 
   keycloak:
     image: app_keycloak
@@ -119,6 +127,8 @@ services:
       - target: 8080
         published: 8080
         protocol: tcp
+    networks:
+      - stankoff
 
 volumes:
   caddy_data:
@@ -129,3 +139,7 @@ volumes:
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
   keycloak_db_data:
+
+networks:
+  stankoff:
+    external: true
