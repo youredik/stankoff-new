@@ -54,6 +54,13 @@ final class OidcRoleVoter extends OidcVoter
         $claims = json_decode((string) $jws->getPayload(), true);
         $roles = array_map(static fn (string $role): string => strtolower($role), $claims['realm_access']['roles'] ?? []);
 
+        // Also check client roles in resource_access
+        $clientRolesArrays = array_map(
+            static fn (array $clientRoles): array => array_map(static fn (string $role): string => strtolower($role), $clientRoles['roles'] ?? []),
+            $claims['resource_access'] ?? []
+        );
+        $roles = array_merge($roles, ...$clientRolesArrays);
+
         return \in_array(strtolower(substr($attribute, 5)), $roles, true);
     }
 }
