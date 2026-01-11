@@ -46,9 +46,10 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
         $user->email = $identifier;
 
         // Handle service accounts that may not have given_name/family_name
+        $isServiceAccount = isset($attributes['preferred_username']) && str_starts_with($attributes['preferred_username'], 'service-account-');
         if (isset($attributes['given_name'])) {
             $user->firstName = $attributes['given_name'];
-        } elseif (str_starts_with($identifier, 'service-account-')) {
+        } elseif ($isServiceAccount) {
             $user->firstName = 'Service';
         } else {
             throw new UnsupportedUserException('Property "given_name" is missing in token attributes.');
@@ -56,7 +57,7 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
 
         if (isset($attributes['family_name'])) {
             $user->lastName = $attributes['family_name'];
-        } elseif (str_starts_with($identifier, 'service-account-')) {
+        } elseif ($isServiceAccount) {
             $user->lastName = 'Account';
         } else {
             throw new UnsupportedUserException('Property "family_name" is missing in token attributes.');
