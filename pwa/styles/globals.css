@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,13 +10,13 @@
     }
 
     a {
-        @apply no-underline text-cyan-700;
+        @apply no-underline text-sky-700;
     }
 }
 
 @layer utilities {
     .bg-spider-cover {
-        @apply bg-cyan-700 bg-center bg-no-repeat;
+        @apply bg-sky-700 bg-center bg-no-repeat;
         background-image: url("../public/api-platform/web.svg");
         background-size: 110%;
     }
