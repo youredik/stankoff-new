@@ -53,15 +53,20 @@ use Symfony\Component\Uid\Uuid;
 #[UniqueEntity('email')]
 class User implements UserInterface
 {
-    /**
-     * @see https://schema.org/identifier
-     */
-    #[ApiProperty(types: ['https://schema.org/identifier'])]
-    #[ORM\Column(type: UuidType::NAME, unique: true)]
-    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+//    /**
+//     * @see https://schema.org/identifier
+//     */
+//    #[ApiProperty(types: ['https://schema.org/identifier'])]
+//    #[ORM\Column(type: UuidType::NAME, unique: true)]
+//    #[ORM\CustomIdGenerator(class: UuidGenerator::class)]
+//    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+//    #[ORM\Id]
+//    private Uuid $id;
+
     #[ORM\Id]
-    private Uuid $id;
+    #[ORM\Column(type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
+    private ?int $id = null;
 
     /**
      * @see https://schema.org/email
@@ -85,7 +90,7 @@ class User implements UserInterface
     #[ORM\Column]
     public string $lastName;
 
-    public function getId(): Uuid
+    public function getId(): int
     {
         return $this->id;
     }

@@ -16,6 +16,7 @@ import {ENTRYPOINT} from "../../config/entrypoint";
 import bookResourceProps from "./book";
 import reviewResourceProps from "./review";
 import i18nProvider from "./i18nProvider";
+import supportTicketResourceProps from "../supportticket";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -26,7 +27,7 @@ const apiDocumentationParser = (session: Session) => async () => {
     });
   } catch (result) {
     // @ts-ignore
-    const { api, response, status } = result;
+    const {api, response, status} = result;
     if (status !== 401 || !response) {
       throw result;
     }
@@ -40,15 +41,15 @@ const apiDocumentationParser = (session: Session) => async () => {
 };
 
 const AdminAdapter = ({
-  session,
-  children,
-}: {
+                        session,
+                        children,
+                      }: {
   session: Session;
   children?: React.ReactNode | undefined;
 }) => {
   // @ts-ignore
   const dataProvider = useRef<DataProvider>();
-  const { docType } = useContext(DocContext);
+  const {docType} = useContext(DocContext);
 
   dataProvider.current = hydraDataProvider({
     entrypoint: ENTRYPOINT,
@@ -92,16 +93,17 @@ const AdminAdapter = ({
 
 const store = localStorageStore();
 
-const AdminWithContext = ({ session }: { session: Session }) => {
+const AdminWithContext = ({session}: { session: Session }) => {
   const [docType, setDocType] = useState(
     store.getItem<string>("docType", "hydra")
   );
 
   return (
-    <DocContext.Provider value={{ docType, setDocType }}>
+    <DocContext.Provider value={{docType, setDocType}}>
       <AdminAdapter session={session}>
         <ResourceGuesser name="admin/books" {...bookResourceProps} />
         <ResourceGuesser name="admin/reviews" {...reviewResourceProps} />
+        <ResourceGuesser name="support_tickets" {...supportTicketResourceProps} />
       </AdminAdapter>
     </DocContext.Provider>
   );
@@ -109,10 +111,10 @@ const AdminWithContext = ({ session }: { session: Session }) => {
 
 const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
-  const { data: session, status } = useSession();
+  const {data: session, status} = useSession();
 
   if (status === "loading") {
-    return <SyncLoader size={8} color="#46B6BF" />;
+    return <SyncLoader size={8} color="#46B6BF"/>;
   }
 
   // @ts-ignore
@@ -123,7 +125,7 @@ const AdminWithOIDC = () => {
   }
 
   // @ts-ignore
-  return <AdminWithContext session={session} />;
+  return <AdminWithContext session={session}/>;
 };
 
 const Admin = () => (
@@ -133,7 +135,7 @@ const Admin = () => (
     </Head>
 
     {/*@ts-ignore*/}
-    <AdminWithOIDC />
+    <AdminWithOIDC/>
   </>
 );
 

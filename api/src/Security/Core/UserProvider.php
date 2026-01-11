@@ -45,17 +45,22 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
         $user = $this->repository->findOneBy(['email' => $identifier]) ?: new User();
         $user->email = $identifier;
 
-        if (!isset($attributes['given_name'])) {
+        // Handle service accounts that may not have given_name/family_name
+        if (isset($attributes['given_name'])) {
+            $user->firstName = $attributes['given_name'];
+        } elseif (str_starts_with($identifier, 'service-account-')) {
+            $user->firstName = 'Service';
+        } else {
             throw new UnsupportedUserException('Property "given_name" is missing in token attributes.');
         }
 
-        $user->firstName = $attributes['given_name'];
-
-        if (!isset($attributes['family_name'])) {
+        if (isset($attributes['family_name'])) {
+            $user->lastName = $attributes['family_name'];
+        } elseif (str_starts_with($identifier, 'service-account-')) {
+            $user->lastName = 'Account';
+        } else {
             throw new UnsupportedUserException('Property "family_name" is missing in token attributes.');
         }
-
-        $user->lastName = $attributes['family_name'];
 
         $this->repository->save($user);
 
