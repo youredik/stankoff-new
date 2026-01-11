@@ -94,11 +94,17 @@ final readonly class OidcDiscoveryTokenHandler implements AccessTokenHandlerInte
             );
 
             $claims = json_decode((string) $jws->getPayload(), true);
-            $this->claimCheckerManager->check(claims: $claims, mandatoryClaims: [$this->claim]);
+            $mandatoryClaims = [$this->claim];
+            // For service accounts, email may not be present
+            if (isset($claims['preferred_username']) && str_starts_with($claims['preferred_username'], 'service-account-')) {
+                $mandatoryClaims = ['sub'];
+            }
+            $this->claimCheckerManager->check(claims: $claims, mandatoryClaims: $mandatoryClaims);
             $this->headerCheckerManager->check(jwt: $jws, index: 0);
 
             // UserLoader argument can be overridden by a UserProvider on AccessTokenAuthenticator::authenticate
-            return new UserBadge($claims[$this->claim], new FallbackUserLoader(fn (): \Symfony\Component\Security\Core\User\OidcUser => $this->createUser($claims)), $claims);
+            $identifier = $claims[$this->claim] ?? $claims['sub'];
+            return new UserBadge($identifier, new FallbackUserLoader(fn (): \Symfony\Component\Security\Core\User\OidcUser => $this->createUser($claims)), $claims);
         } catch (\Throwable $throwable) {
             $this->logger?->error('An error occurred while decoding and validating the token.', [
                 'error' => $throwable->getMessage(),
