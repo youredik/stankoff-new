@@ -51,7 +51,6 @@ use Symfony\Component\Validator\Constraints as Assert;
         AbstractNormalizer::GROUPS => ['SupportTicketComment:write'],
     ],
     collectDenormalizationErrors: true,
-    mercure: true,
     security: 'is_granted("OIDC_ADMIN")'
 )]
 #[ORM\Entity]
