@@ -508,6 +508,23 @@
       "groups": []
     },
     {
+      "id": "12345678-1234-1234-1234-123456789abd",
+      "username": "service-account-stankoff-api",
+      "emailVerified": false,
+      "createdTimestamp": 1749131034129,
+      "enabled": true,
+      "totp": false,
+      "serviceAccountClientId": "stankoff-api",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "admin"
+      ],
+      "clientRoles": {},
+      "notBefore": 0,
+      "groups": []
+    },
+    {
       "id": "a9150bcf-a069-4f0f-be35-70bd903900d4",
       "username": "chuck.norris@example.com",
       "email": "chuck.norris@example.com",
@@ -1042,6 +1059,51 @@
       ],
       "defaultClientScopes": [
         "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "organization",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "12345678-1234-1234-1234-123456789abc",
+      "clientId": "stankoff-api",
+      "name": "Stankoff API Client",
+      "description": "M2M client for external API access",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "as3nJsncu74nsnGsjkgs29dnJsjbm52uesds2",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "service_account",
         "acr",
         "roles",
         "profile",

@@ -1,3 +1,14 @@
+POST http://localhost:8080/oidc/realms/demo/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id=stankoff-api&client_secret=as3nJsncu74nsnGsjkgs29dnJsjbm52uesds2
+
+> {% client.global.set("auth_token", response.body.access_token); %}
+###
+GET http://localhost:8095/support_tickets
+Accept: application/ld+json
+Authorization: Bearer {{auth_token}}
+
 ###
 POST https://new.local/oidc/realms/demo/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
