@@ -21,13 +21,18 @@ class OldSiteApiRepository
 
     public function getOrder(int $orderId): array
     {
-        $response = $this->client->request('GET', $this->baseUrl . '/actions/ajax/order_data.php?order_id=' . $orderId, [
-            'max_redirects' => 0,
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->token,
-                'Cookie' => 'PHPSESSID=494b2e20939317cbbab1901412521e54; __st_id=%2B',
+        $response = $this->client->request(
+            'GET',
+            $this->baseUrl . '/actions/ajax/order_data.php?order_id=' . $orderId,
+            [
+                'max_redirects' => 0,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->token,
+                    'Cookie' => 'PHPSESSID=494b2e20939317cbbab1901412521e54; __st_id=%2BsbQ.Nik_QGRFNr_QONWcNzBCk0rPaxF3ltiKqdFpERUgQ6-f2',
+                ],
             ],
-        ]);
+        );
+
         return $response->toArray();
     }
 }
