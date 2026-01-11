@@ -13,8 +13,6 @@ import DocContext from "../../components/admin/DocContext";
 import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
 import {ENTRYPOINT} from "../../config/entrypoint";
-import bookResourceProps from "./book";
-import reviewResourceProps from "./review";
 import i18nProvider from "./i18nProvider";
 import supportTicketResourceProps from "../supportticket";
 
@@ -101,8 +99,6 @@ const AdminWithContext = ({session}: { session: Session }) => {
   return (
     <DocContext.Provider value={{docType, setDocType}}>
       <AdminAdapter session={session}>
-        <ResourceGuesser name="admin/books" {...bookResourceProps} />
-        <ResourceGuesser name="admin/reviews" {...reviewResourceProps} />
         <ResourceGuesser name="support_tickets" {...supportTicketResourceProps} />
       </AdminAdapter>
     </DocContext.Provider>
