@@ -1,5 +1,4 @@
 import {
-  DateField,
   FunctionField,
   Show,
   SimpleShowLayout,
@@ -11,7 +10,7 @@ import {
   useRefresh,
   useShowContext
 } from 'react-admin';
-import { Box, Button, Card, CircularProgress, MenuItem, Select, Tooltip, Typography, Link } from '@mui/material';
+import {Box, Button, Card, CircularProgress, MenuItem, Select, Tooltip, Typography} from '@mui/material';
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
@@ -19,15 +18,14 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
-import { formatDistanceToNow } from "date-fns";
-import { ru } from "date-fns/locale";
+import {formatDistanceToNow} from "date-fns";
+import {ru} from "date-fns/locale";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import React from "react";
-import { getSession } from 'next-auth/react';
-import { getStatusColor, StatusChip } from './common';
-import { OrderInfo } from './OrderInfo';
+import {StatusChip} from './common';
+import {OrderInfo} from './OrderInfo';
 
-const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingReasonChoices }: {
+const TicketActions = ({ticketId, processInstanceKey, currentStatus, closingReasonChoices}: {
   ticketId: string,
   processInstanceKey?: string,
   currentStatus: string,
@@ -49,12 +47,12 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
       const commentData = comment.trim() || (action === 'take_in_work' || action === 'change_to_in_progress' ? '' : comment);
 
       if (action !== 'take_in_work' && action !== 'assign' && action !== 'change_to_in_progress' && !commentData) {
-        notify('Комментарий обязателен', { type: 'error' });
+        notify('Комментарий обязателен', {type: 'error'});
         return;
       }
 
       if (action === 'complete' && !closingReason) {
-        notify('Причина закрытия обязательна', { type: 'error' });
+        notify('Причина закрытия обязательна', {type: 'error'});
         return;
       }
 
@@ -88,13 +86,13 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
         });
       }
 
-      notify('Действие выполнено успешно', { type: 'success' });
+      notify('Действие выполнено успешно', {type: 'success'});
       setComment('');
       setClosingReason('');
       setShowCommentForm(null);
       refresh();
     } catch (error) {
-      notify('Ошибка при выполнении действия', { type: 'error' });
+      notify('Ошибка при выполнении действия', {type: 'error'});
     } finally {
       setActionLoading(null);
     }
@@ -104,17 +102,17 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
     switch (currentStatus) {
       case 'new':
         return [
-          { id: 'take_in_work', name: 'Взять в работу' }
+          {id: 'take_in_work', name: 'Взять в работу'}
         ];
       case 'postponed':
         return [
-          { id: 'change_to_in_progress', name: 'Сменить статус в работе' }
+          {id: 'change_to_in_progress', name: 'Сменить статус в работе'}
         ];
       case 'in_progress':
         return [
-          { id: 'postpone', name: 'Отложить' },
-          { id: 'complete', name: 'Завершить' },
-          { id: 'add_comment', name: 'Добавить комментарий' }
+          {id: 'postpone', name: 'Отложить'},
+          {id: 'complete', name: 'Завершить'},
+          {id: 'add_comment', name: 'Добавить комментарий'}
         ];
       default:
         return [];
@@ -156,12 +154,12 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
     setActionLoading('take_in_work');
     try {
       await dataProvider.create('support_tickets_take_in_work', {
-        data: { id: ticketId }
+        data: {id: ticketId}
       });
-      notify('Заявка успешно взята в работу', { type: 'success' });
+      notify('Заявка успешно взята в работу', {type: 'success'});
       refresh();
     } catch (error) {
-      notify('Ошибка при взятии заявки в работу', { type: 'error' });
+      notify('Ошибка при взятии заявки в работу', {type: 'error'});
     } finally {
       setActionLoading(null);
     }
@@ -177,10 +175,10 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
           supportTicket: ticketId,
         }
       });
-      notify('Статус заявки успешно изменен на "В работе"', { type: 'success' });
+      notify('Статус заявки успешно изменен на "В работе"', {type: 'success'});
       refresh();
     } catch (error) {
-      notify('Ошибка при изменении статуса заявки', { type: 'error' });
+      notify('Ошибка при изменении статуса заявки', {type: 'error'});
     } finally {
       setActionLoading(null);
     }
@@ -209,7 +207,7 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
           color="primary"
           onClick={() => handleActionSelect(option.id)}
           disabled={!!actionLoading}
-          startIcon={actionLoading === option.id ? <CircularProgress size={16} color="inherit" /> : null}
+          startIcon={actionLoading === option.id ? <CircularProgress size={16} color="inherit"/> : null}
         >
           {actionLoading === option.id ? 'Обработка...' : option.name}
         </Button>
@@ -218,7 +216,7 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
 
     // For other statuses, show dropdown
     return (
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+      <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center'}}>
         <Select
           value={selectedAction}
           onChange={(e) => handleActionSelect(e.target.value)}
@@ -239,8 +237,8 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
 
         {/* Form for adding comment when "Add comment" is selected */}
         {selectedAction === 'add_comment' && (
-          <Box sx={{ width: '100%', mt: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>Комментарий</Typography>
+          <Box sx={{width: '100%', mt: 2}}>
+            <Typography variant="body2" sx={{mb: 1}}>Комментарий</Typography>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -257,12 +255,12 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
               }}
               placeholder="Добавьте комментарий..."
             />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1 }}>
+            <Box sx={{display: 'flex', justifyContent: 'flex-start', mt: 1}}>
               <Button
                 variant="outlined"
                 onClick={() => handleAction('add_comment', undefined, currentStatus)}
                 disabled={!comment.trim() || !!actionLoading}
-                startIcon={actionLoading === 'add_comment' ? <CircularProgress size={16} color="inherit" /> : null}
+                startIcon={actionLoading === 'add_comment' ? <CircularProgress size={16} color="inherit"/> : null}
               >
                 {actionLoading === 'add_comment' ? 'Добавление...' : 'Добавить комментарий'}
               </Button>
@@ -277,13 +275,13 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
     if (!showCommentForm) return null;
 
     return (
-      <Card sx={{ mt: 2, p: 2 }}>
+      <Card sx={{mt: 2, p: 2}}>
         <Typography variant="h6" gutterBottom>
           {showCommentForm === 'postpone' ? 'Отложить заявку' : 'Завершить заявку'}
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
           <Box>
-            <Typography variant="body2" sx={{ mb: 1 }}>Комментарий</Typography>
+            <Typography variant="body2" sx={{mb: 1}}>Комментарий</Typography>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -303,7 +301,7 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
           </Box>
           {showCommentForm === 'complete' && (
             <Box>
-              <Typography variant="body2" sx={{ mb: 1 }}>Причина закрытия</Typography>
+              <Typography variant="body2" sx={{mb: 1}}>Причина закрытия</Typography>
               <select
                 value={closingReason}
                 onChange={(e) => setClosingReason(e.target.value)}
@@ -324,7 +322,7 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
               </select>
             </Box>
           )}
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-start' }}>
+          <Box sx={{display: 'flex', gap: 2, justifyContent: 'flex-start'}}>
             <Button
               variant="outlined"
               onClick={() => {
@@ -345,7 +343,7 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
                 showCommentForm === 'complete' ? closingReason : undefined
               )}
               disabled={actionLoading === showCommentForm || (showCommentForm === 'complete' && !closingReason)}
-              startIcon={actionLoading === showCommentForm ? <CircularProgress size={16} color="inherit" /> : null}
+              startIcon={actionLoading === showCommentForm ? <CircularProgress size={16} color="inherit"/> : null}
             >
               {actionLoading === showCommentForm ? 'Обработка...' :
                 showCommentForm === 'postpone' ? 'Отложить' : 'Завершить'}
@@ -357,14 +355,14 @@ const TicketActions = ({ ticketId, processInstanceKey, currentStatus, closingRea
   };
 
   return (
-    <Box sx={{ mt: 2, mb: 2 }}>
+    <Box sx={{mt: 2, mb: 2}}>
       {renderActionButtons()}
       {renderCommentForm()}
     </Box>
   );
 };
 
-const TakeInWorkButton = ({ ticketId, processInstanceKey }: {
+const TakeInWorkButton = ({ticketId, processInstanceKey}: {
   ticketId: string,
   processInstanceKey?: string
 }) => {
@@ -379,12 +377,12 @@ const TakeInWorkButton = ({ ticketId, processInstanceKey }: {
       // Extract numeric ID from IRI if needed
       const numericId = ticketId.toString().split('/').pop();
       await dataProvider.create('support_tickets_take_in_work', {
-        data: { id: numericId }
+        data: {id: numericId}
       });
-      notify('Заявка успешно взята в работу', { type: 'success' });
+      notify('Заявка успешно взята в работу', {type: 'success'});
       refresh();
     } catch (error) {
-      notify('Ошибка при взятии заявки в работу', { type: 'error' });
+      notify('Ошибка при взятии заявки в работу', {type: 'error'});
     } finally {
       setIsLoading(false);
     }
@@ -401,7 +399,7 @@ const TakeInWorkButton = ({ ticketId, processInstanceKey }: {
       color="primary"
       onClick={handleTakeInWork}
       size="small"
-      startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <PersonAddIcon />}
+      startIcon={isLoading ? <CircularProgress size={16} color="inherit"/> : <PersonAddIcon/>}
       disabled={isLoading}
     >
       {isLoading ? 'Обработка...' : 'Взять в работу'}
@@ -409,18 +407,22 @@ const TakeInWorkButton = ({ ticketId, processInstanceKey }: {
   );
 };
 
-const CommentsTimeline = ({ ticketId, processInstanceKey, statusColors }: { ticketId: string, processInstanceKey?: string, statusColors: Record<string, string> }) => {
-  const { data: comments, isLoading, error } = useGetList(
+const CommentsTimeline = ({ticketId, processInstanceKey, statusColors}: {
+  ticketId: string,
+  processInstanceKey?: string,
+  statusColors: Record<string, string>
+}) => {
+  const {data: comments, isLoading, error} = useGetList(
     'support_ticket_comments',
     {
-      filter: { 'supportTicket': ticketId },
-      sort: { field: 'createdAt', order: 'DESC' },
-      pagination: { page: 1, perPage: 100 }
+      filter: {'supportTicket': ticketId},
+      sort: {field: 'createdAt', order: 'DESC'},
+      pagination: {page: 1, perPage: 100}
     }
   );
 
   if (isLoading) {
-    return <CircularProgress />;
+    return <CircularProgress/>;
   }
 
   if (error) {
@@ -442,7 +444,7 @@ const CommentsTimeline = ({ ticketId, processInstanceKey, statusColors }: { tick
           const statusColor = statusColors[comment.status] || 'primary';
           return (
             <TimelineItem key={comment.id || index}>
-              <TimelineOppositeContent sx={{ m: 'auto 0' }}>
+              <TimelineOppositeContent sx={{m: 'auto 0'}}>
                 <Typography
                   variant="body2"
                   sx={{
@@ -452,7 +454,7 @@ const CommentsTimeline = ({ ticketId, processInstanceKey, statusColors }: { tick
                 >
                   {comment.statusDisplayName}
                 </Typography>
-                <Box sx={{ mt: 1 }}>
+                <Box sx={{mt: 1}}>
                   {comment.closingReason && (
                     <Typography variant="body2" color="secondary">
                       {comment.closingReasonDisplayName}
@@ -461,19 +463,19 @@ const CommentsTimeline = ({ ticketId, processInstanceKey, statusColors }: { tick
                 </Box>
               </TimelineOppositeContent>
               <TimelineSeparator>
-                <TimelineConnector />
-                <TimelineDot />
-                <TimelineConnector />
+                <TimelineConnector/>
+                <TimelineDot/>
+                <TimelineConnector/>
               </TimelineSeparator>
-              <TimelineContent sx={{ py: '12px', px: 2 }}>
-                <Box sx={{ mt: 1 }}>
+              <TimelineContent sx={{py: '12px', px: 2}}>
+                <Box sx={{mt: 1}}>
                   <Typography variant="body2" color="secondary">
                     <Tooltip title={new Date(comment.createdAt).toLocaleString('ru-RU')}>
-                      <span>{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: ru })}</span>
+                      <span>{formatDistanceToNow(new Date(comment.createdAt), {addSuffix: true, locale: ru})}</span>
                     </Tooltip>
                   </Typography>
                 </Box>
-                <Typography variant="body1" sx={{ mt: 1 }}>
+                <Typography variant="body1" sx={{mt: 1}}>
                   {comment.comment}
                 </Typography>
               </TimelineContent>
@@ -486,16 +488,16 @@ const CommentsTimeline = ({ ticketId, processInstanceKey, statusColors }: { tick
 };
 
 const SupportTicketActions = () => {
-  return <TopToolbar />;
+  return <TopToolbar/>;
 };
 
 const SupportTicketTitle = () => {
-  const { record } = useShowContext();
+  const {record} = useShowContext();
   return <span>Заявка {record?.subject || 'Заявка'}</span>;
 };
 
 const SupportTicketShowContent = () => {
-  const { record } = useShowContext();
+  const {record} = useShowContext();
   const dataProvider = useDataProvider();
   const [closingReasonChoices, setClosingReasonChoices] = React.useState<any[]>([]);
   const [statusColors, setStatusColors] = React.useState<Record<string, string>>({});
@@ -541,12 +543,13 @@ const SupportTicketShowContent = () => {
         },
       }}
     >
-      <TextField source="subject" label="Причина обращения" />
-      <TextField source="description" label="Цель обращения" />
+      <TextField source="subject" label="Причина обращения"/>
+      <TextField source="description" label="Цель обращения"/>
       {/*<DateField source="createdAt" label="Создана" showTime/>*/}
       <FunctionField
         label="Статус"
-        render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue} color={statusColors[record?.currentStatusValue]} />}
+        render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
+                                             color={statusColors[record?.currentStatusValue]}/>}
       />
       <FunctionField
         label="Информация о заказе"
@@ -557,19 +560,20 @@ const SupportTicketShowContent = () => {
         label="Действия"
         render={(record: any) => record?.id && record?.processInstanceKey &&
           <TicketActions ticketId={record.id} processInstanceKey={record.processInstanceKey}
-            currentStatus={record.currentStatusValue} closingReasonChoices={closingReasonChoices} />}
+                         currentStatus={record.currentStatusValue} closingReasonChoices={closingReasonChoices}/>}
       />
       <FunctionField
         label="Активность"
         render={(record: any) => record?.id &&
-          <CommentsTimeline ticketId={record.id} processInstanceKey={record.processInstanceKey} statusColors={statusColors} />}
+          <CommentsTimeline ticketId={record.id} processInstanceKey={record.processInstanceKey}
+                            statusColors={statusColors}/>}
       />
     </SimpleShowLayout>
   );
 };
 
 export const SupportTicketShow = () => (
-  <Show title={<SupportTicketTitle />} actions={<SupportTicketActions />}>
-    <SupportTicketShowContent />
+  <Show title={<SupportTicketTitle/>} actions={<SupportTicketActions/>}>
+    <SupportTicketShowContent/>
   </Show>
 );

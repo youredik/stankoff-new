@@ -94,8 +94,8 @@ const AdminAdapter = ({
 const store = localStorageStore();
 
 const AdminWithContext = ({session}: { session: Session }) => {
-  const [docType, setDocType] = useState(
-    store.getItem<string>("docType", "hydra")
+  const [docType, setDocType] = useState<string>(
+    store.getItem<string>("docType", "hydra") ?? "hydra"
   );
 
   return (
