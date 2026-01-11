@@ -1,0 +1,22 @@
+###
+POST https://new.local/oidc/realms/demo/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id=stankoff-api&client_secret=stankoff-api-secret
+
+
+> {% client.global.set("auth_token", response.body.access_token); %}
+
+###
+GET https://new.local/api/support_tickets?order%5BcreatedAt%5D=DESC&page=1&itemsPerPage=10
+Accept: application/ld+json
+Authorization: Bearer {{auth_token}}
+
+###
+GET http://stankoff.local/actions/ajax/order_data.php?order_id=2000
+Authorization: Bearer snchZ2V0X2FwaV90b2tlbl90b19jaGFuZ2VNaWUK
+
+###
+GET https://stankoff.ru/actions/ajax/order_data.php?order_id=2001
+Authorization: Bearer snchZ2V0X2FwaV90b2tlbl90b19jaGFuZ2VNaWUK
+Cookie: PHPSESSID=494b2e20939317cbbab1901412521e52; __st_id=%2BsbQ.Nik_QGRFNr_QONWcNzBCk0rPaxF3ltiKqdFpERUgQ6-f2

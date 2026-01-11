@@ -12,8 +12,9 @@ class OldSiteApiRepository
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->baseUrl = 'http://lamp-php83';
-        $this->token = $_ENV['OLD_SITE_API_TOKEN'];
+        $this->baseUrl = 'https://stankoff.ru';
+//        $this->token = $_ENV['OLD_SITE_API_TOKEN'];
+        $this->token = 'snchZ2V0X2FwaV90b2tlbl90b19jaGFuZ2VNaWUK';
     }
 
     private string $token;
@@ -24,6 +25,7 @@ class OldSiteApiRepository
             'max_redirects' => 0,
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->token,
+                'Cookie' => 'PHPSESSID=494b2e20939317cbbab1901412521e54; __st_id=%2B',
             ],
         ]);
         return $response->toArray();
