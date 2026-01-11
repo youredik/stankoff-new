@@ -12,8 +12,8 @@ class OldSiteApiRepository
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->baseUrl = 'https://stankoff.ru';
-//        $this->token = $_ENV['OLD_SITE_API_TOKEN'];
+        $this->baseUrl = 'https://www.stankoff.ru';
+        //$this->token = $_ENV['OLD_SITE_API_TOKEN'];
         $this->token = 'snchZ2V0X2FwaV90b2tlbl90b19jaGFuZ2VNaWUK';
     }
 
@@ -25,7 +25,6 @@ class OldSiteApiRepository
             'GET',
             $this->baseUrl . '/actions/ajax/order_data.php?order_id=' . $orderId,
             [
-                'max_redirects' => 0,
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->token,
                     'Cookie' => 'PHPSESSID=494b2e20939317cbbab1901412521e54; __st_id=%2BsbQ.Nik_QGRFNr_QONWcNzBCk0rPaxF3ltiKqdFpERUgQ6-f2',
