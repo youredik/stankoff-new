@@ -39,10 +39,8 @@ final class OidcRoleVoter extends OidcVoter
             throw new \InvalidArgumentException(\sprintf('Invalid subject type, expected empty string or "null", got "%s".', get_debug_type($subject)));
         }
 
-        // ensure user is authenticated
-        if (!$token->getUser() instanceof UserInterface) {
-            return false;
-        }
+        // ensure token is present
+        // for client credentials, no user is set, but roles are in token
 
         $accessToken = $this->getToken();
         if ('' === $accessToken || '0' === $accessToken) {
