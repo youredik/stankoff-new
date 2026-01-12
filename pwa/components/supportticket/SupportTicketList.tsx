@@ -1,45 +1,18 @@
-import {
-  AutocompleteInput,
-  CreateButton,
-  Datagrid,
-  FilterButton,
-  FunctionField,
-  List,
-  NumberField,
-  ReferenceInput,
-  TextField,
-  TopToolbar
-} from 'react-admin';
+import {Datagrid, FunctionField, List, NumberField, TextField, TopToolbar} from 'react-admin';
 import {ExportButton} from "ra-ui-materialui";
 import {Tooltip} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {StatusChip} from './common';
 
-const AuthorFilter = () => (
-  <ReferenceInput source="user" reference="admin/users">
-    <AutocompleteInput
-      label="Автор"
-      optionText="name"
-      filterToQuery={(searchText) => ({name: searchText})}
-    />
-  </ReferenceInput>
-);
-
-const filters = [
-  <AuthorFilter key="author"/>,
-];
-
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton/>
-    <CreateButton/>
     <ExportButton/>
   </TopToolbar>
 );
 
 export const SupportTicketList = () => (
-  <List sort={{field: 'createdAt', order: 'DESC'}} actions={<ListActions/>} filters={filters}>
+  <List sort={{field: 'createdAt', order: 'DESC'}} actions={<ListActions/>}>
     <Datagrid
       bulkActionButtons={false}
     >
