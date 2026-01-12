@@ -10,8 +10,7 @@
                 <#if !usernameHidden??>
                     <div class="${properties.kcFormGroupClass!}">
                         <p>
-                            Login as user: john.doe@example.com / Pa55w0rd<br />
-                            Login as admin: chuck.norris@example.com / Pa55w0rd
+                            <strong>Login as admin:</strong> chuck.norris@example.com / Pa55w0rd
                         </p>
 
                         <label for="username" class="${properties.kcLabelClass!}"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
