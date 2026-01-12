@@ -6,12 +6,14 @@ import { getSession } from 'next-auth/react';
 export const OrderInfo = ({ orderId, orderData }: { orderId: string, orderData: any }) => {
   const [orderInfo, setOrderInfo] = useState<any>(null);
   const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState(false);
 
   useEffect(() => {
     const fetchOrderInfo = async () => {
       if (!orderId) return;
 
       setOrderLoading(true);
+      setOrderError(false);
       try {
         const session = await getSession();
         const response = await fetch(`/api/orders/${orderId}`, {
@@ -22,9 +24,13 @@ export const OrderInfo = ({ orderId, orderData }: { orderId: string, orderData: 
         const data = await response.json();
         if (data.order) {
           setOrderInfo(data.order);
+        } else if (data.error) {
+          // Backend returned an error, treat as fetch failure
+          throw new Error(data.message || data.error);
         }
       } catch (err) {
         console.error('Failed to fetch order data', err);
+        setOrderError(true);
       } finally {
         setOrderLoading(false);
       }
@@ -35,6 +41,10 @@ export const OrderInfo = ({ orderId, orderData }: { orderId: string, orderData: 
 
   if (orderLoading) {
     return <CircularProgress size={20} />;
+  }
+
+  if (orderError) {
+    return <span style={{ color: 'red' }}>Ошибка загрузки данных</span>;
   }
 
   if (!orderInfo) {

@@ -32,6 +32,27 @@ class OldSiteApiRepository
             ],
         );
 
-        return $response->toArray();
+        $statusCode = $response->getStatusCode();
+
+        // Check if response is successful
+        if ($statusCode < 200 || $statusCode >= 300) {
+            throw new \RuntimeException("External API returned HTTP $statusCode");
+        }
+
+        $content = $response->getContent();
+        $contentType = $response->getHeaders()['content-type'][0] ?? '';
+
+        // Check if response is HTML (error page)
+        if (str_contains($contentType, 'text/html') || str_starts_with(trim($content), '<')) {
+            throw new \RuntimeException('External API returned HTML instead of JSON');
+        }
+
+        // Try to decode JSON
+        $data = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Invalid JSON response from external API');
+        }
+
+        return $data;
     }
 }
