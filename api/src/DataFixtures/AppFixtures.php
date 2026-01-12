@@ -83,6 +83,7 @@ final class AppFixtures extends Fixture
             ];
             $ticket->subject = $faker->randomElement($subjects);
             $ticket->description = $faker->randomElement($descriptions);
+            $ticket->authorName = $faker->name();
             $ticket->createdAt = \DateTimeImmutable::createFromMutable($faker->dateTimeBetween('-1 year', 'now'));
 
             //$ticket->orderId = $faker->optional(0.7)->numberBetween(1000, 9999);
@@ -99,9 +100,9 @@ final class AppFixtures extends Fixture
                     '3375_product',
                     '3376_product',
                 ],
-                'contactName' => $faker->firstName,
-                'contactPhone' => $faker->phoneNumber,
-                'contactEmail' => $faker->email,
+                'contactName' => $faker->firstName(),
+                'contactPhone' => $faker->phoneNumber(),
+                'contactEmail' => $faker->email(),
             ];
             $ticket->processInstanceKey = $faker->optional(0.3)->uuid();
             $ticket->user = $faker->randomElement($users);

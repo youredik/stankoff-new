@@ -49,7 +49,7 @@ export const SupportTicketList = () => (
         render={(record: any) => <StatusChip status={record?.currentStatus || ''}
                                              statusValue={record?.currentStatusValue || ''}/>}
       />
-      <TextField source="userName" label="Автор"/>
+      <TextField source="authorName" label="Автор"/>
       <FunctionField
         label="Создано"
         render={(record: any) => (

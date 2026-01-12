@@ -138,7 +138,15 @@ const SupportTicketShowContent = () => {
     <SimpleShowLayout>
       <TextField source="subject" label="Причина обращения"/>
       <TextField source="description" label="Цель обращения"/>
-      {/*<DateField source="createdAt" label="Создана" showTime/>*/}
+      <TextField source="authorName" label="Автор заявки"/>
+      <FunctionField
+        label="Создана"
+        render={(record: any) => (
+          <Tooltip title={new Date(record.createdAt).toLocaleString('ru-RU')}>
+            <span>{formatDistanceToNow(new Date(record.createdAt), {addSuffix: true, locale: ru})}</span>
+          </Tooltip>
+        )}
+      />
       <FunctionField
         label="Статус"
         render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
