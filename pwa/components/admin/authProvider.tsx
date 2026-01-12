@@ -44,10 +44,19 @@ const authProvider: AuthProvider = {
   },
   getPermissions: () => Promise.resolve(),
   getIdentity: async () => {
-    const session = getSession();
+    const session = await getSession();
 
     // @ts-ignore
-    return session ? Promise.resolve(session.user) : Promise.reject();
+    if (!session?.user) {
+      throw new Error('No user session');
+    }
+
+    return {
+      id: session.user.id || session.user.email || 'unknown',
+      fullName: session.user.name || undefined,
+      avatar: session.user.image || undefined,
+      ...session.user
+    };
   },
   // Nothing to do here, this function will never be called
   handleCallback: () => Promise.resolve(),
