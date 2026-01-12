@@ -96,8 +96,8 @@ final class AppFixtures extends Fixture
             ]);*/
             $ticket->orderData = [
                 'selectedItems' => [
-                    '56866_product',
-                    '56867_product',
+                    '3375_product',
+                    '3376_product',
                 ],
                 'contactName' => $faker->firstName,
                 'contactPhone' => $faker->phoneNumber,
