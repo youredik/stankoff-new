@@ -14,7 +14,6 @@ api_platform:
         json: ['application/json']
     docs_formats:
         jsonld: ['application/ld+json']
-        jsonopenapi: ['application/vnd.openapi+json']
         html: ['text/html']
     http_cache:
         public: true

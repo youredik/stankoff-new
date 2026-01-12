@@ -1,15 +1,14 @@
 "use client";
 
 import Head from "next/head";
-import {useContext, useRef, useState} from "react";
-import {type DataProvider, localStorageStore} from "react-admin";
+import React, {useRef} from "react";
+import {type DataProvider} from "react-admin";
 import {signIn, useSession} from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
-import {fetchHydra, HydraAdmin, hydraDataProvider, OpenApiAdmin, ResourceGuesser,} from "@api-platform/admin";
+import {fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser,} from "@api-platform/admin";
 import {parseHydraDocumentation} from "@api-platform/api-doc-parser";
 
 import {type Session} from "../../app/auth";
-import DocContext from "../../components/admin/DocContext";
 import authProvider from "../../components/admin/authProvider";
 import Layout from "./layout/Layout";
 import {ENTRYPOINT} from "../../config/entrypoint";
@@ -38,16 +37,12 @@ const apiDocumentationParser = (session: Session) => async () => {
   }
 };
 
-const AdminAdapter = ({
-                        session,
-                        children,
-                      }: {
+const AdminWithDataProvider = ({session, children,}: {
   session: Session;
   children?: React.ReactNode | undefined;
 }) => {
   // @ts-ignore
   const dataProvider = useRef<DataProvider>();
-  const {docType} = useContext(DocContext);
 
   dataProvider.current = hydraDataProvider({
     entrypoint: ENTRYPOINT,
@@ -61,7 +56,7 @@ const AdminAdapter = ({
     apiDocumentationParser: apiDocumentationParser(session),
   });
 
-  return docType === "hydra" ? (
+  return (
     <HydraAdmin
       requireAuth
       authProvider={authProvider}
@@ -73,37 +68,14 @@ const AdminAdapter = ({
     >
       {!!children && children}
     </HydraAdmin>
-  ) : (
-    <OpenApiAdmin
-      requireAuth
-      authProvider={authProvider}
-      // @ts-ignore
-      dataProvider={dataProvider.current}
-      entrypoint={window.origin}
-      docEntrypoint={`${window.origin}/docs.json`}
-      i18nProvider={i18nProvider}
-      layout={Layout}
-    >
-      {!!children && children}
-    </OpenApiAdmin>
   );
 };
 
-const store = localStorageStore();
-
-const AdminWithContext = ({session}: { session: Session }) => {
-  const [docType, setDocType] = useState<string>(
-    store.getItem<string>("docType", "hydra") ?? "hydra"
-  );
-
-  return (
-    <DocContext.Provider value={{docType, setDocType}}>
-      <AdminAdapter session={session}>
-        <ResourceGuesser name="support_tickets" {...supportTicketResourceProps} />
-      </AdminAdapter>
-    </DocContext.Provider>
-  );
-};
+const AdminWithDataProviderAndResources = ({session}: { session: Session }) => (
+  <AdminWithDataProvider session={session}>
+    <ResourceGuesser name="support_tickets" {...supportTicketResourceProps} />
+  </AdminWithDataProvider>
+);
 
 const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
@@ -121,7 +93,7 @@ const AdminWithOIDC = () => {
   }
 
   // @ts-ignore
-  return <AdminWithContext session={session}/>;
+  return <AdminWithDataProviderAndResources session={session}/>;
 };
 
 const Admin = () => (
