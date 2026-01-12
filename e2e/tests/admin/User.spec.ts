@@ -14,7 +14,7 @@ test.describe("User authentication", () => {
 
     // I should be logged out from Keycloak also
     await page.goto("/admin");
-    await page.waitForURL(/\/oidc\/realms\/demo\/protocol\/openid-connect\/auth/);
+    await page.waitForURL(/\/oidc\/realms\/stankoff\/protocol\/openid-connect\/auth/);
     // @ts-ignore assert declared on test.ts
     await expect(page).toBeOnLoginPage();
     await expect(page.locator("#kc-header-wrapper")).toContainText("API Platform - Demo");
