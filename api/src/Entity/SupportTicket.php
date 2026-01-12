@@ -66,6 +66,12 @@ class SupportTicket
     #[ORM\Column(type: Types::TEXT)]
     public string $description;
 
+    #[ApiProperty(example: 'Иван Иванов')]
+    #[Assert\NotBlank(allowNull: false)]
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
+    public string $authorName;
+
     #[ORM\Column(type: 'datetime_immutable')]
     #[ApiFilter(OrderFilter::class)]
     #[Groups(['SupportTicket:read',])]
