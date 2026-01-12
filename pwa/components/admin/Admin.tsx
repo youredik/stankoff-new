@@ -1,8 +1,7 @@
 "use client";
 
 import Head from "next/head";
-import React, {useRef} from "react";
-import {type DataProvider} from "react-admin";
+import React from "react";
 import {signIn, useSession} from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import {fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser,} from "@api-platform/admin";
@@ -41,10 +40,7 @@ const AdminWithDataProvider = ({session, children,}: {
   session: Session;
   children?: React.ReactNode | undefined;
 }) => {
-  // @ts-ignore
-  const dataProvider = useRef<DataProvider>();
-
-  dataProvider.current = hydraDataProvider({
+  const dataProvider = hydraDataProvider({
     entrypoint: ENTRYPOINT,
     httpClient: (url: URL, options = {}) =>
       fetchHydra(url, {
@@ -60,8 +56,7 @@ const AdminWithDataProvider = ({session, children,}: {
     <HydraAdmin
       requireAuth
       authProvider={authProvider}
-      // @ts-ignore
-      dataProvider={dataProvider.current}
+      dataProvider={dataProvider}
       entrypoint={window.origin}
       i18nProvider={i18nProvider}
       layout={Layout}
