@@ -10,7 +10,7 @@
                 <#if !usernameHidden??>
                     <div class="${properties.kcFormGroupClass!}">
                         <p>
-                            <strong>Login as admin:</strong> chuck.norris@example.com / Pa55w0rd
+                            <strong>Вход для администратора:</strong> chuck.norris@example.com / Pa55w0rd
                         </p>
 
                         <label for="username" class="${properties.kcLabelClass!}"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
@@ -81,29 +81,6 @@
                     <span>${msg("noAccount")} <a tabindex="6"
                                                  href="${url.registrationUrl}">${msg("doRegister")}</a></span>
                 </div>
-            </div>
-        </#if>
-    <#elseif section = "socialProviders" >
-        <#if realm.password && social.providers??>
-            <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
-                <hr/>
-                <h4>${msg("identity-provider-login-label")}</h4>
-
-                <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountListGridClass!}</#if>">
-                    <#list social.providers as p>
-                        <li>
-                            <a id="social-${p.alias}" class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
-                                    type="button" href="${p.loginUrl}">
-                                <#if p.iconClasses?has_content>
-                                    <i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}" aria-hidden="true"></i>
-                                    <span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">${p.displayName!}</span>
-                                <#else>
-                                    <span class="${properties.kcFormSocialAccountNameClass!}">${p.displayName!}</span>
-                                </#if>
-                            </a>
-                        </li>
-                    </#list>
-                </ul>
             </div>
         </#if>
     </#if>

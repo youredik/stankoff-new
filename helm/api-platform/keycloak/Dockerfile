@@ -15,5 +15,5 @@ FROM docker.io/bitnamilegacy/keycloak:26-debian-12 AS keycloak_upstream
 # Keycloak image
 FROM keycloak_upstream AS keycloak
 
-COPY --link themes/api-platform-demo /opt/bitnami/keycloak/themes/api-platform-demo
+COPY --link themes/api-platform-stankoff /opt/bitnami/keycloak/themes/api-platform-stankoff
 COPY --link providers/owner-policy.jar /opt/bitnami/keycloak/providers/owner-policy.jar

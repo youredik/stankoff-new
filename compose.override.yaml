@@ -13,7 +13,7 @@ services:
       #  from the bind-mount for better performance by enabling the next line:
       #- /app/vendor
     environment:
-      MERCURE_EXTRA_DIRECTIVES: demo
+      MERCURE_EXTRA_DIRECTIVES: stankoff
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
     extra_hosts:
@@ -59,5 +59,5 @@ services:
     environment:
       KEYCLOAK_EXTRA_ARGS: "--import-realm --override"
     volumes:
-      - ./helm/api-platform/keycloak/themes/api-platform-demo:/opt/bitnami/keycloak/themes/api-platform-demo
+      - ./helm/api-platform/keycloak/themes/api-platform-stankoff:/opt/bitnami/keycloak/themes/api-platform-stankoff
       - ./helm/api-platform/keycloak/config:/opt/bitnami/keycloak/data/import

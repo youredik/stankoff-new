@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GKE_CLUSTER: api-platform-demo
+  GKE_CLUSTER: api-platform-stankoff
   GCE_ZONE: europe-west1-c
 
 jobs:

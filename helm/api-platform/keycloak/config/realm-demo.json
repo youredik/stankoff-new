@@ -1,7 +1,7 @@
 {
   "id": "64ed6e3f-772f-4255-9a58-c0eb28c3b70e",
-  "realm": "demo",
-  "displayName": "API Platform - Demo",
+  "realm": "stankoff",
+  "displayName": "Админ панель Stankoff.RU",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -33,7 +33,7 @@
   "rememberMe": false,
   "verifyEmail": false,
   "loginWithEmailAllowed": true,
-  "loginTheme": "api-platform-demo",
+  "loginTheme": "api-platform-stankoff",
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": false,
   "editUsernameAllowed": false,
@@ -586,13 +586,13 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/demo/account/",
+      "baseUrl": "/realms/stankoff/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/demo/account/*"
+        "/realms/stankoff/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -633,13 +633,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/demo/account/",
+      "baseUrl": "/realms/stankoff/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/demo/account/*"
+        "/realms/stankoff/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1009,13 +1009,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/demo/console/",
+      "baseUrl": "/admin/stankoff/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/admin/demo/console/*"
+        "/admin/stankoff/console/*"
       ],
       "webOrigins": [
         "+"
