@@ -1,13 +1,4 @@
-import {
-  FunctionField,
-  Show,
-  SimpleShowLayout,
-  TextField,
-  TopToolbar,
-  useDataProvider,
-  useGetList,
-  useShowContext
-} from 'react-admin';
+import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useShowContext} from 'react-admin';
 import {Box, CircularProgress, Tooltip, Typography} from '@mui/material';
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
@@ -110,17 +101,18 @@ const SupportTicketTitle = () => {
 };
 
 const SupportTicketShowContent = () => {
-  const dataProvider = useDataProvider();
   const [, setClosingReasonChoices] = React.useState<any[]>([]);
   const [statusColors, setStatusColors] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
     const loadData = async () => {
       try {
-        const [reasons, statuses] = await Promise.all([
-          (dataProvider as any).getSupportTicketClosingReasons(),
-          (dataProvider as any).getSupportTicketStatuses()
+        const [reasonsResponse, statusesResponse] = await Promise.all([
+          fetch('/api/support-tickets/closing-reasons'),
+          fetch('/api/support-tickets/statuses')
         ]);
+        const reasons = await reasonsResponse.json();
+        const statuses = await statusesResponse.json();
         setClosingReasonChoices(reasons);
         const colorsMap = statuses.reduce((acc: Record<string, string>, status: any) => {
           acc[status.id] = status.color;
@@ -132,7 +124,7 @@ const SupportTicketShowContent = () => {
       }
     };
     loadData();
-  }, [dataProvider]);
+  }, []);
 
   return (
     <SimpleShowLayout>
