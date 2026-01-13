@@ -36,6 +36,13 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
   const currentStatus = record?.currentStatusValue;
   const isCompleted = currentStatus === 'completed';
 
+  // Set initial status to current status
+  React.useEffect(() => {
+    if (currentStatus && !status) {
+      setStatus(currentStatus);
+    }
+  }, [currentStatus, status]);
+
   React.useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -111,6 +118,10 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
   };
 
   const availableStatuses = getAvailableStatuses();
+  const isStatusDisabled = (statusId: string) => {
+    if (statusId === 'new') return true; // Always disable 'new' status
+    return !availableStatuses.some(s => s.id === statusId);
+  };
 
   if (isCompleted) {
     return (
@@ -127,20 +138,24 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
 
   return (
     <Box sx={{mb: 3}}>
-      <Typography variant="h6" gutterBottom>
+      {/*<Typography variant="h6" gutterBottom>
         Изменение статуса
-      </Typography>
+      </Typography>*/}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
-        <FormControl fullWidth required>
-          <InputLabel>Новый статус</InputLabel>
+      <Box component="form" onSubmit={handleSubmit} sx={{display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 600}}>
+        <FormControl required sx={{maxWidth: 300}}>
+          <InputLabel>Статус</InputLabel>
           <Select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             label="Новый статус"
           >
-            {availableStatuses.map((statusOption) => (
-              <MenuItem key={statusOption.id} value={statusOption.id}>
+            {statusOptions.map((statusOption) => (
+              <MenuItem
+                key={statusOption.id}
+                value={statusOption.id}
+                disabled={isStatusDisabled(statusOption.id)}
+              >
                 {statusOption.name}
               </MenuItem>
             ))}
@@ -154,10 +169,11 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Опишите изменения или причину смены статуса..."
+          sx={{maxWidth: 600}}
         />
 
         {status === 'completed' && (
-          <FormControl fullWidth required>
+          <FormControl required sx={{maxWidth: 400}}>
             <InputLabel>Причина закрытия</InputLabel>
             <Select
               value={closingReason}
@@ -180,7 +196,7 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
             disabled={loading || !status}
             startIcon={loading ? <CircularProgress size={20} /> : null}
           >
-            {loading ? 'Сохранение...' : 'Изменить статус'}
+            {loading ? 'Сохранение...' : 'Отправить'}
           </Button>
         </Box>
       </Box>
