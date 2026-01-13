@@ -97,8 +97,8 @@ class SupportTicket
     #[Groups(['SupportTicket:read', 'SupportTicket:write'])]
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
     #[ORM\ManyToOne(targetEntity: User::class, fetch: 'EAGER')]
-    #[ORM\JoinColumn(nullable: false)]
-    public User $user;
+    #[ORM\JoinColumn(nullable: true)]
+    public ?User $user = null;
 
     /** @var Collection<int, SupportTicketComment> */
     #[ORM\OneToMany(targetEntity: SupportTicketComment::class, mappedBy: 'supportTicket', cascade: [
@@ -161,8 +161,8 @@ class SupportTicket
     }
 
     #[Groups(['SupportTicket:read'])]
-    public function getUserName(): string
+    public function getUserName(): ?string
     {
-        return $this->user->getName();
+        return $this->user?->getName();
     }
 }

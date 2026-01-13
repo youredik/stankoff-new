@@ -1,0 +1,189 @@
+import React, {useState} from 'react';
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  CircularProgress
+} from '@mui/material';
+import {useShowContext, useNotify} from 'react-admin';
+
+interface StatusOption {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface ClosingReasonOption {
+  id: string;
+  name: string;
+}
+
+export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => void }) => {
+  const {record, refetch} = useShowContext();
+  const notify = useNotify();
+  const [status, setStatus] = useState('');
+  const [comment, setComment] = useState('');
+  const [closingReason, setClosingReason] = useState('');
+  const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
+  const [closingReasonOptions, setClosingReasonOptions] = useState<ClosingReasonOption[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const currentStatus = record?.currentStatusValue;
+  const isCompleted = currentStatus === 'completed';
+
+  React.useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [statusesRes, reasonsRes] = await Promise.all([
+          fetch('/api/support-tickets/statuses'),
+          fetch('/api/support-tickets/closing-reasons')
+        ]);
+        const statuses = await statusesRes.json();
+        const reasons = await reasonsRes.json();
+        setStatusOptions(statuses);
+        setClosingReasonOptions(reasons);
+      } catch (err) {
+        console.error('Failed to load options:', err);
+      }
+    };
+    loadOptions();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!status) return;
+
+    setLoading(true);
+
+    try {
+      const ticketId = record?.id?.split('/').pop();
+      const response = await fetch(`/api/support-tickets/${ticketId}/change-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          status,
+          comment,
+          closingReason: status === 'completed' ? closingReason : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to change status');
+      }
+
+      notify('Статус успешно изменен', { type: 'success' });
+      setStatus('');
+      setComment('');
+      setClosingReason('');
+      // Refetch the record to update the UI
+      refetch();
+      onStatusChanged?.();
+    } catch (err: any) {
+      notify(`Ошибка: ${err.message}`, { type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Determine available statuses based on current status
+  const getAvailableStatuses = () => {
+    if (!currentStatus) return statusOptions;
+
+    if (currentStatus === 'new') {
+      return statusOptions.filter(s => s.id === 'in_progress');
+    }
+
+    if (currentStatus === 'completed') {
+      return []; // No changes allowed
+    }
+
+    // For other statuses, allow all except 'new'
+    return statusOptions.filter(s => s.id !== 'new');
+  };
+
+  const availableStatuses = getAvailableStatuses();
+
+  if (isCompleted) {
+    return (
+      <Box sx={{mb: 3}}>
+        <Typography variant="h6" gutterBottom>
+          Изменение статуса
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Заявка завершена. Изменение статуса невозможно.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{mb: 3}}>
+      <Typography variant="h6" gutterBottom>
+        Изменение статуса
+      </Typography>
+
+      <Box component="form" onSubmit={handleSubmit} sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+        <FormControl fullWidth required>
+          <InputLabel>Новый статус</InputLabel>
+          <Select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            label="Новый статус"
+          >
+            {availableStatuses.map((statusOption) => (
+              <MenuItem key={statusOption.id} value={statusOption.id}>
+                {statusOption.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label="Комментарий"
+          multiline
+          rows={3}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Опишите изменения или причину смены статуса..."
+        />
+
+        {status === 'completed' && (
+          <FormControl fullWidth required>
+            <InputLabel>Причина закрытия</InputLabel>
+            <Select
+              value={closingReason}
+              onChange={(e) => setClosingReason(e.target.value)}
+              label="Причина закрытия"
+            >
+              {closingReasonOptions.map((reason) => (
+                <MenuItem key={reason.id} value={reason.id}>
+                  {reason.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+
+        <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading || !status}
+            startIcon={loading ? <CircularProgress size={20} /> : null}
+          >
+            {loading ? 'Сохранение...' : 'Изменить статус'}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+};

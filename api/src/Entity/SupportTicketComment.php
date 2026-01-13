@@ -91,8 +91,8 @@ class SupportTicketComment
     #[ApiProperty(types: ['https://schema.org/author'])]
     #[Groups(['SupportTicketComment:read', 'SupportTicketComment:write',])]
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    public User $user;
+    #[ORM\JoinColumn(nullable: true)]
+    public ?User $user = null;
 
     #[Groups(['SupportTicketComment:read',])]
     public function getStatusDisplayName(): string
