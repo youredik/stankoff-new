@@ -10,12 +10,13 @@ import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
 import React from "react";
-import {StatusChip} from './common';
 import {OrderInfo} from './OrderInfo';
 import {StatusChangeForm} from './StatusChangeForm';
 
 const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
-  ticketId: string, statusColors: Record<string, string>, refetchKey?: number
+  ticketId: string,
+  statusColors: Record<string, string>,
+  refetchKey?: number
 }) => {
   const {data: comments, isLoading, error, refetch} = useGetList(
     'support_ticket_comments',
@@ -27,7 +28,7 @@ const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
   );
 
   React.useEffect(() => {
-    if (refetchKey) {
+    if (refetchKey && refetchKey > 0) {
       refetch();
     }
   }, [refetchKey, refetch]);
@@ -41,11 +42,7 @@ const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
   }
 
   if (!comments || comments.length === 0) {
-    return /*(
-      <Box>
-        <Typography variant="body2" color="textSecondary">Пока нет активности</Typography>
-      </Box>
-    )*/;
+    return null;
   }
 
   return (
@@ -147,24 +144,28 @@ const SupportTicketShowContent = () => {
           </Tooltip>
         )}
       />
-      <FunctionField
+      {/*<FunctionField
         label="Статус"
         render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
                                              color={statusColors[record?.currentStatusValue]}/>}
-      />
+      />*/}
       <FunctionField
         label="Информация о заказе"
         render={(record: any) => record?.orderId &&
           <OrderInfo orderId={record.orderId} orderData={record.orderData}/>}
       />
       <FunctionField
-        label="Изменение статуса"
-        render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)} />}
+        label=""
+        render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
       />
       <FunctionField
         label="Активность"
         render={(record: any) => record?.id &&
-          <CommentsTimeline ticketId={record.id} statusColors={statusColors} refetchKey={commentsRefetchKey}/>}
+          <CommentsTimeline
+            ticketId={record.id}
+            statusColors={statusColors}
+            refetchKey={commentsRefetchKey}
+          />}
       />
     </SimpleShowLayout>
   );
