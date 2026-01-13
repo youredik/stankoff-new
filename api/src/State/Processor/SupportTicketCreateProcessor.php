@@ -19,6 +19,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  */
 final readonly class SupportTicketCreateProcessor implements ProcessorInterface
 {
+    /**
+     * @param ProcessorInterface<SupportTicket, SupportTicket> $persistProcessor
+     */
     public function __construct(
         #[Autowire(service: PersistProcessor::class)]
         private ProcessorInterface $persistProcessor,
