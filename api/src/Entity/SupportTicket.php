@@ -100,6 +100,7 @@ class SupportTicket
     #[ORM\JoinColumn(nullable: false)]
     public User $user;
 
+    /** @var Collection<int, SupportTicketComment> */
     #[ORM\OneToMany(targetEntity: SupportTicketComment::class, mappedBy: 'supportTicket', cascade: [
         'persist',
         'remove',
@@ -137,7 +138,7 @@ class SupportTicket
         return $this->id;
     }
 
-    public static function validateOrderId($value, $context): void
+    public static function validateOrderId(mixed $value, mixed $context): void
     {
         if ($value === null || $value === '') {
             return;
