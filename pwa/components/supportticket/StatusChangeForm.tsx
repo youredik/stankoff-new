@@ -2,15 +2,15 @@ import React, {useState} from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   TextField,
-  Typography,
-  CircularProgress
+  Typography
 } from '@mui/material';
-import {useShowContext, useNotify} from 'react-admin';
+import {useNotify, useShowContext} from 'react-admin';
 
 interface StatusOption {
   id: string;
@@ -23,7 +23,7 @@ interface ClosingReasonOption {
   name: string;
 }
 
-export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => void }) => {
+export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => void }) => {
   const {record, refetch} = useShowContext();
   const notify = useNotify();
   const [status, setStatus] = useState('');
@@ -36,12 +36,12 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
   const currentStatus = record?.currentStatusValue;
   const isCompleted = currentStatus === 'completed';
 
-  // Set initial status to current status
+  // Update status when current status changes
   React.useEffect(() => {
-    if (currentStatus && !status) {
+    if (currentStatus) {
       setStatus(currentStatus);
     }
-  }, [currentStatus, status]);
+  }, [currentStatus]);
 
   React.useEffect(() => {
     const loadOptions = async () => {
@@ -63,7 +63,7 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!status) return;
+    if (!status || !comment.trim()) return;
 
     setLoading(true);
 
@@ -87,7 +87,7 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
         throw new Error(errorData.message || 'Failed to change status');
       }
 
-      notify('Статус успешно изменен', { type: 'success' });
+      notify('Статус успешно изменен', {type: 'success'});
       setStatus('');
       setComment('');
       setClosingReason('');
@@ -95,7 +95,7 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
       refetch();
       onStatusChanged?.();
     } catch (err: any) {
-      notify(`Ошибка: ${err.message}`, { type: 'error' });
+      notify(`Ошибка: ${err.message}`, {type: 'error'});
     } finally {
       setLoading(false);
     }
@@ -126,11 +126,8 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
   if (isCompleted) {
     return (
       <Box sx={{mb: 3}}>
-        <Typography variant="h6" gutterBottom>
-          Изменение статуса
-        </Typography>
         <Typography variant="body2" color="text.secondary">
-          Заявка завершена. Изменение статуса невозможно.
+          Заявка завершена
         </Typography>
       </Box>
     );
@@ -142,7 +139,8 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
         Изменение статуса
       </Typography>*/}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 600}}>
+      <Box component="form" onSubmit={handleSubmit}
+           sx={{display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 600}}>
         <FormControl required sx={{maxWidth: 300}}>
           <InputLabel>Статус</InputLabel>
           <Select
@@ -168,7 +166,9 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
           rows={3}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Опишите изменения или причину смены статуса..."
+          placeholder={currentStatus === 'new' && status === 'new' ? "Сначала выберите статус 'В работе'" : "Опишите изменения или причину смены статуса..."}
+          required={status !== currentStatus}
+          disabled={currentStatus === 'new' && status === 'new'}
           sx={{maxWidth: 600}}
         />
 
@@ -193,8 +193,8 @@ export const StatusChangeForm = ({ onStatusChanged }: { onStatusChanged?: () => 
           <Button
             type="submit"
             variant="contained"
-            disabled={loading || !status}
-            startIcon={loading ? <CircularProgress size={20} /> : null}
+            disabled={loading || !status || !comment.trim()}
+            startIcon={loading ? <CircularProgress size={20}/> : null}
           >
             {loading ? 'Сохранение...' : 'Отправить'}
           </Button>
