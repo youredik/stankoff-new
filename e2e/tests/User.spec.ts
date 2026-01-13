@@ -1,8 +1,8 @@
 import { expect, test } from "./test";
 
 test.describe("User authentication", () => {
-  test.beforeEach(async ({ bookPage }) => {
-    await bookPage.gotoList();
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
   });
 
   test("I can log in Books Store @login", async ({ userPage, page }) => {
