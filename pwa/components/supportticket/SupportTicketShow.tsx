@@ -12,11 +12,12 @@ import {ru} from "date-fns/locale";
 import React from "react";
 import {StatusChip} from './common';
 import {OrderInfo} from './OrderInfo';
+import {StatusChangeForm} from './StatusChangeForm';
 
-const CommentsTimeline = ({ticketId, statusColors}: {
-  ticketId: string, statusColors: Record<string, string>
+const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
+  ticketId: string, statusColors: Record<string, string>, refetchKey?: number
 }) => {
-  const {data: comments, isLoading, error} = useGetList(
+  const {data: comments, isLoading, error, refetch} = useGetList(
     'support_ticket_comments',
     {
       filter: {'supportTicket': ticketId},
@@ -24,6 +25,12 @@ const CommentsTimeline = ({ticketId, statusColors}: {
       pagination: {page: 1, perPage: 100}
     }
   );
+
+  React.useEffect(() => {
+    if (refetchKey) {
+      refetch();
+    }
+  }, [refetchKey, refetch]);
 
   if (isLoading) {
     return <CircularProgress/>;
@@ -103,6 +110,7 @@ const SupportTicketTitle = () => {
 const SupportTicketShowContent = () => {
   const [, setClosingReasonChoices] = React.useState<any[]>([]);
   const [statusColors, setStatusColors] = React.useState<Record<string, string>>({});
+  const [commentsRefetchKey, setCommentsRefetchKey] = React.useState(0);
 
   React.useEffect(() => {
     const loadData = async () => {
@@ -150,9 +158,13 @@ const SupportTicketShowContent = () => {
           <OrderInfo orderId={record.orderId} orderData={record.orderData}/>}
       />
       <FunctionField
+        label="Изменение статуса"
+        render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)} />}
+      />
+      <FunctionField
         label="Активность"
         render={(record: any) => record?.id &&
-          <CommentsTimeline ticketId={record.id} statusColors={statusColors}/>}
+          <CommentsTimeline ticketId={record.id} statusColors={statusColors} refetchKey={commentsRefetchKey}/>}
       />
     </SimpleShowLayout>
   );
