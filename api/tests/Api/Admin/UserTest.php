@@ -164,7 +164,7 @@ final class UserTest extends ApiTestCase
             'name' => 'Chuck NORRIS',
         ]);
 
-        $this->client->request('GET', '/books', ['auth_bearer' => $token]);
+        $this->client->request('GET', '/users/' . $user->getId(), ['auth_bearer' => $token]);
 
         self::assertResponseIsSuccessful();
         $user = self::getContainer()->get(UserRepository::class)->find($user->getId());

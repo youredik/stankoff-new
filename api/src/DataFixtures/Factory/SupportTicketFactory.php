@@ -83,6 +83,7 @@ final class SupportTicketFactory extends PersistentProxyObjectFactory
         return [
             'subject' => self::faker()->randomElement($subjects),
             'description' => self::faker()->randomElement($descriptions),
+            'authorName' => self::faker()->name(),
             'createdAt' => self::faker()->dateTimeBetween('-1 year', 'now'),
             'orderId' => self::faker()->optional(0.7)->numberBetween(1000, 9999),
             'orderData' => self::faker()->optional(0.5)->passthrough([
