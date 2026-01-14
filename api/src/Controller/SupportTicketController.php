@@ -11,10 +11,12 @@ use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/support-tickets')]
@@ -55,6 +57,7 @@ final class SupportTicketController extends AbstractController
         return $this->json($reasons);
     }
 
+    #[IsGranted(new Expression('is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER")'))]
     #[Route('/{id}/change-status', name: 'api_support_ticket_change_status', methods: ['POST'])]
     public function changeStatus(Request $request, SupportTicket $supportTicket): JsonResponse
     {
