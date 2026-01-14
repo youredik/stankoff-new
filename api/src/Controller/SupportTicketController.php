@@ -9,12 +9,16 @@ use App\Entity\SupportTicketComment;
 use App\Entity\User;
 use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -24,6 +28,7 @@ final class SupportTicketController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ValidatorInterface $validator,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -107,6 +112,7 @@ final class SupportTicketController extends AbstractController
         $user = $this->getUser();
         if ($user instanceof User) {
             $supportTicket->user = $user;
+            $this->entityManager->flush();
         }
 
         // Create comment

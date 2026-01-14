@@ -22,6 +22,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -100,7 +101,7 @@ class SupportTicket
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
     #[ORM\ManyToOne(targetEntity: User::class, fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: true)]
-    public ?User $user = null;
+    public ?UserInterface $user = null;
 
     /** @var Collection<int, SupportTicketComment> */
     #[ORM\OneToMany(targetEntity: SupportTicketComment::class, mappedBy: 'supportTicket', cascade: [
@@ -165,6 +166,6 @@ class SupportTicket
     #[Groups(['SupportTicket:read'])]
     public function getUserName(): ?string
     {
-        return $this->user?->getName();
+        return $this->user instanceof User ? $this->user->getName() : null;
     }
 }

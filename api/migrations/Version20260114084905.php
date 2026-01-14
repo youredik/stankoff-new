@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260112100538 extends AbstractMigration
+final class Version20260114084905 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -23,7 +23,7 @@ final class Version20260112100538 extends AbstractMigration
         $this->addSql('CREATE SEQUENCE support_ticket_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE support_ticket_comment_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE "user_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('CREATE TABLE support_ticket (id INT NOT NULL, subject VARCHAR(255) NOT NULL, description TEXT NOT NULL, author_name VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, order_id INT DEFAULT NULL, order_data JSON DEFAULT NULL, process_instance_key VARCHAR(255) DEFAULT NULL, user_id INT NOT NULL, PRIMARY KEY (id))');
+        $this->addSql('CREATE TABLE support_ticket (id INT NOT NULL, subject VARCHAR(255) NOT NULL, description TEXT NOT NULL, author_name VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, order_id INT DEFAULT NULL, order_data JSON DEFAULT NULL, process_instance_key VARCHAR(255) DEFAULT NULL, user_id INT DEFAULT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE INDEX IDX_1F5A4D53A76ED395 ON support_ticket (user_id)');
         $this->addSql('CREATE TABLE support_ticket_comment (id INT NOT NULL, comment TEXT NOT NULL, closing_reason VARCHAR(255) DEFAULT NULL, status VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, support_ticket_id INT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE INDEX IDX_51EC784FC6D2DC64 ON support_ticket_comment (support_ticket_id)');

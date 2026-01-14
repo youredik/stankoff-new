@@ -18,6 +18,7 @@ use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
 use App\State\Processor\SupportTicketCommentCreateProcessor;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
@@ -92,7 +93,7 @@ class SupportTicketComment
     #[Groups(['SupportTicketComment:read', 'SupportTicketComment:write',])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
-    public ?User $user = null;
+    public ?UserInterface $user = null;
 
     #[Groups(['SupportTicketComment:read',])]
     public function getStatusDisplayName(): string
