@@ -69,12 +69,13 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
 
     try {
       const ticketId = record?.id?.split('/').pop();
+      const token = localStorage.getItem('token'); // Adjust the key if token is stored differently
       const response = await fetch(`/api/support-tickets/${ticketId}/change-status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        credentials: 'include',
         body: JSON.stringify({
           status,
           comment,
