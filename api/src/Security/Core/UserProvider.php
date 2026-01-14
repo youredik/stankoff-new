@@ -62,7 +62,7 @@ final readonly class UserProvider implements AttributesBasedUserProviderInterfac
             throw new UnsupportedUserException('Property "family_name" is missing in token attributes.');
         }
 
-        $this->repository->save($user);
+        $this->repository->save($user, true);
 
         return $user;
     }

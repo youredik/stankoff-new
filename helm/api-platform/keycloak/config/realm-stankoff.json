@@ -101,6 +101,24 @@
         "clientRole": false,
         "containerId": "64ed6e3f-772f-4255-9a58-c0eb28c3b70e",
         "attributes": {}
+      },
+      {
+        "id": "support-employee-id",
+        "name": "support_employee",
+        "description": "Support employee role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "64ed6e3f-772f-4255-9a58-c0eb28c3b70e",
+        "attributes": {}
+      },
+      {
+        "id": "support-manager-id",
+        "name": "support_manager",
+        "description": "Support manager role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "64ed6e3f-772f-4255-9a58-c0eb28c3b70e",
+        "attributes": {}
       }
     ],
     "client": {
@@ -432,7 +450,17 @@
       ]
     }
   },
-  "groups": [],
+  "groups": [
+    {
+      "id": "technical-support-group-id",
+      "name": "Technical Support Department",
+      "path": "/Technical Support Department",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    }
+  ],
   "defaultRole": {
     "id": "0a34f93f-a81a-4edd-b6a2-7ed3d06a392c",
     "name": "user",
@@ -558,6 +586,75 @@
       ],
       "realmRoles": [
         "user"
+      ]
+    },
+    {
+      "id": "viktor-karasev-id",
+      "username": "viktor.karasev@stankoff.ru",
+      "email": "viktor.karasev@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Viktor",
+      "lastName": "Karasev",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_employee"
+      ],
+      "groups": [
+        "/Technical Support Department"
+      ]
+    },
+    {
+      "id": "sergey-mavrin-id",
+      "username": "sergey.mavrin@stankoff.ru",
+      "email": "sergey.mavrin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Sergey",
+      "lastName": "Mavrin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_employee"
+      ],
+      "groups": [
+        "/Technical Support Department"
+      ],
+      "requiredActions": [
+        "UPDATE_PASSWORD"
+      ]
+    },
+    {
+      "id": "manager-id",
+      "username": "manager@stankoff.ru",
+      "email": "manager@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Manager",
+      "lastName": "Support",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_manager"
+      ],
+      "groups": [
+        "/Technical Support Department"
       ]
     }
   ],

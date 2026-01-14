@@ -53,7 +53,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         AbstractNormalizer::GROUPS => ['SupportTicketComment:write'],
     ],
     collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_ADMIN")'
+    security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER")'
 )]
 #[ORM\Entity]
 class SupportTicketComment
