@@ -11,6 +11,7 @@ import {
   Typography
 } from '@mui/material';
 import {useNotify, useShowContext} from 'react-admin';
+import {getStatuses, getClosingReasons, changeStatus} from '../../services/supportTicketService';
 
 interface StatusOption {
   id: string;
@@ -26,6 +27,7 @@ interface ClosingReasonOption {
 export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => void }) => {
   const {record, refetch} = useShowContext();
   const notify = useNotify();
+  // const {data: session} = useSession();
   const [status, setStatus] = useState('');
   const [comment, setComment] = useState('');
   const [closingReason, setClosingReason] = useState('');
@@ -46,12 +48,10 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
   React.useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [statusesRes, reasonsRes] = await Promise.all([
-          fetch('/api/support-tickets/statuses'),
-          fetch('/api/support-tickets/closing-reasons')
+        const [statuses, reasons] = await Promise.all([
+          getStatuses(),
+          getClosingReasons()
         ]);
-        const statuses = await statusesRes.json();
-        const reasons = await reasonsRes.json();
         setStatusOptions(statuses);
         setClosingReasonOptions(reasons);
       } catch (err) {
@@ -69,7 +69,8 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
 
     try {
       const ticketId = record?.id?.split('/').pop();
-      const token = localStorage.getItem('token'); // Adjust the key if token is stored differently
+      const {data: session} = useSession();
+      const token = session?.accessToken;
       const response = await fetch(`/api/support-tickets/${ticketId}/change-status`, {
         method: 'POST',
         headers: {
