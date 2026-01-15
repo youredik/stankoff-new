@@ -31,6 +31,7 @@
     "ra-i18n-polyglot": "^5.13.5",
     "ra-language-english": "^5.13.5",
     "ra-language-french": "^5.13.5",
+    "ra-language-russian": "^5.4.4",
     "ra-ui-materialui": "^5.13.5",
     "react": "^19.2.3",
     "react-admin": "^5.13.5",

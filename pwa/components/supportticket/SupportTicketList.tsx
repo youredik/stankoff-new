@@ -1,6 +1,6 @@
 import {Datagrid, FunctionField, List, NumberField, TextField, TopToolbar} from 'react-admin';
 import {ExportButton} from "ra-ui-materialui";
-import {Tooltip} from '@mui/material';
+import {Box, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {StatusChip} from './common';
@@ -11,8 +11,16 @@ const ListActions = () => (
   </TopToolbar>
 );
 
+const Empty = () => (
+  <Box textAlign="center" m={1}>
+    <Typography variant="h4" paragraph>
+      Заявок пока нет
+    </Typography>
+  </Box>
+);
+
 export const SupportTicketList = () => (
-  <List sort={{field: 'createdAt', order: 'DESC'}} actions={<ListActions/>}>
+  <List sort={{field: 'createdAt', order: 'DESC'}} actions={<ListActions/>} empty={<Empty/>}>
     <Datagrid
       bulkActionButtons={false}
     >

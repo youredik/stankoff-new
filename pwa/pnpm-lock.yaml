@@ -74,6 +74,9 @@ importers:
       ra-language-french:
         specifier: ^5.13.5
         version: 5.13.5(@tanstack/react-query@5.90.16(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.0(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+      ra-language-russian:
+        specifier: ^5.4.4
+        version: 5.4.4(@tanstack/react-query@5.90.16(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.0(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       ra-ui-materialui:
         specifier: ^5.13.5
         version: 5.13.5(b99c44cbbb53fcb06170656927d0f74f)
@@ -2305,6 +2308,9 @@ packages:
 
   ra-language-french@5.13.5:
     resolution: {integrity: sha512-jDle/HQkuhtbzlhMfuCaiVfI2GCiXH+LGdwes8FN9IfCU7YCyTwoOcrFuBi7XqK9WzQRRs0HgnRgs3YGpfgkGg==}
+
+  ra-language-russian@5.4.4:
+    resolution: {integrity: sha512-a3zPOBZWan3pWW70Oj7MA0xnOlll//5iY3cwURUnzH4lkzChmYY9nUvMugErDy5n6PWY/GzpVkFyXLPFtD5whg==}
 
   ra-ui-materialui@5.13.5:
     resolution: {integrity: sha512-RcCskAqMAxwb/0GjzyK+VjxEXFiz7O5OdXgB4kX1t4XtkvqNCxvjGtWGPWLpbnO4Y5X09ryzYB5VMrw13/MOPA==}
@@ -5050,6 +5056,17 @@ snapshots:
       - react-router-dom
 
   ra-language-french@5.13.5(@tanstack/react-query@5.90.16(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.0(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
+    dependencies:
+      ra-core: 5.13.5(@tanstack/react-query@5.90.16(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.0(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+    transitivePeerDependencies:
+      - '@tanstack/react-query'
+      - react
+      - react-dom
+      - react-hook-form
+      - react-router
+      - react-router-dom
+
+  ra-language-russian@5.4.4(@tanstack/react-query@5.90.16(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.0(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
     dependencies:
       ra-core: 5.13.5(@tanstack/react-query@5.90.16(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.0(react@19.2.3))(react-router-dom@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
     transitivePeerDependencies:

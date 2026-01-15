@@ -38,6 +38,11 @@
   "resetPasswordAllowed": false,
   "editUsernameAllowed": false,
   "bruteForceProtected": false,
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "ru"
+  ],
+  "defaultLocale": "ru",
   "permanentLockout": false,
   "maxTemporaryLockouts": 0,
   "bruteForceStrategy": "MULTIPLE",
@@ -2063,8 +2068,6 @@
       }
     ]
   },
-  "internationalizationEnabled": false,
-  "supportedLocales": [],
   "authenticatorConfig": [
     {
       "id": "ac5983ca-378b-43a6-b8dc-2d964f27750d",
