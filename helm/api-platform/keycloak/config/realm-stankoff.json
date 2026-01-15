@@ -554,42 +554,6 @@
       "groups": []
     },
     {
-      "id": "a9150bcf-a069-4f0f-be35-70bd903900d4",
-      "username": "chuck.norris@example.com",
-      "email": "chuck.norris@example.com",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "Chuck",
-      "lastName": "Norris",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Pa55w0rd"
-        }
-      ],
-      "realmRoles": [
-        "admin"
-      ]
-    },
-    {
-      "id": "a3f81006-21ee-4712-8371-dd079e17ea73",
-      "username": "john.doe@example.com",
-      "email": "john.doe@example.com",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "John",
-      "lastName": "Doe",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Pa55w0rd"
-        }
-      ],
-      "realmRoles": [
-        "user"
-      ]
-    },
-    {
       "id": "viktor-karasev-id",
       "username": "viktor.karasev@stankoff.ru",
       "email": "viktor.karasev@stankoff.ru",
@@ -600,7 +564,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "Pa55w0rd"
+          "value": "ma8Bsc4xwNv72ndb652kjdhw72Hd"
         }
       ],
       "realmRoles": [
@@ -622,7 +586,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "Pa55w0rd"
+          "value": "ma8Bsc4xwNv72ndb652kjdhw72Hd"
         }
       ],
       "realmRoles": [
@@ -644,7 +608,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "Pa55w0rd"
+          "value": "ma8Bsc4xwNv72ndb652kjdhw72Hd"
         }
       ],
       "realmRoles": [
