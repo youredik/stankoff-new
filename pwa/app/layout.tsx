@@ -11,22 +11,22 @@ import {Providers} from "./providers";
 import {auth} from "./auth";
 
 export const metadata: Metadata = {
-  title: 'Welcome to API Platform!',
+  title: 'Админ панель Stankoff.ru',
 }
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({children}: { children: ReactNode }) {
   const session = await auth();
 
   return (
     <html lang="en">
-      <body>
-        <SessionProvider session={session}>
-          <Providers>
-            <Layout>
-              {children}
-            </Layout>
-          </Providers>
-        </SessionProvider>
-      </body>
+    <body>
+    <SessionProvider session={session}>
+      <Providers>
+        <Layout>
+          {children}
+        </Layout>
+      </Providers>
+    </SessionProvider>
+    </body>
     </html>
   );
 };
