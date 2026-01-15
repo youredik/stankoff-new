@@ -46,7 +46,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['SupportTicket:write'],
     ],
-    collectDenormalizationErrors: true,
+//    collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER")'
 )]
 #[ApiFilter(SupportTicketAccessFilter::class)]
@@ -97,7 +97,7 @@ class SupportTicket
     public ?string $processInstanceKey = null;
 
     #[ApiProperty(readableLink: false, types: ['https://schema.org/author'])]
-    #[Groups(['SupportTicket:read', 'SupportTicket:write'])]
+    #[Groups(['SupportTicket:read'])]
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
     #[ORM\ManyToOne(targetEntity: User::class, fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: true)]

@@ -546,7 +546,8 @@
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
-        "admin"
+        "user",
+        "support_manager"
       ],
       "clientRoles": {},
       "notBefore": 0,
