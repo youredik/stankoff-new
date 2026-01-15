@@ -11,7 +11,7 @@ import {
   Typography
 } from '@mui/material';
 import {useNotify, useShowContext} from 'react-admin';
-import {getStatuses, getClosingReasons, changeStatus} from '../../services/supportTicketService';
+import {changeStatus, getClosingReasons, getStatuses} from '../../services/supportTicketService';
 
 interface StatusOption {
   id: string;
@@ -27,7 +27,6 @@ interface ClosingReasonOption {
 export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => void }) => {
   const {record, refetch} = useShowContext();
   const notify = useNotify();
-  // const {data: session} = useSession();
   const [status, setStatus] = useState('');
   const [comment, setComment] = useState('');
   const [closingReason, setClosingReason] = useState('');
@@ -69,25 +68,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
 
     try {
       const ticketId = record?.id?.split('/').pop();
-      const {data: session} = useSession();
-      const token = session?.accessToken;
-      const response = await fetch(`/api/support-tickets/${ticketId}/change-status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          status,
-          comment,
-          closingReason: status === 'completed' ? closingReason : undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to change status');
-      }
+      await changeStatus(ticketId, {status: status, comment: comment, closingReason: closingReason});
 
       notify('Статус успешно изменен', {type: 'success'});
       setStatus('');
