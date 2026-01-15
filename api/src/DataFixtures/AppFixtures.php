@@ -15,7 +15,7 @@ use Faker\Factory;
 
 final class AppFixtures extends Fixture
 {
-    private const RUSSIAN_COMMENTS = [
+    private const array COMMENTS = [
         'Клиент сообщил о проблеме с запуском станка. Станок не включается после нажатия кнопки питания.',
         'Проведена первичная диагностика. Обнаружена неисправность в системе электропитания.',
         'Начинаем работу над заявкой. Специалист выедет на объект для осмотра оборудования.',
@@ -170,7 +170,7 @@ final class AppFixtures extends Fixture
         \DateTime $date,
     ): void {
         $comment = new SupportTicketComment();
-        $comment->comment = $faker->randomElement(self::RUSSIAN_COMMENTS);
+        $comment->comment = $faker->randomElement(self::COMMENTS);
         $comment->status = $status;
         $comment->closingReason = $closingReason;
         $comment->createdAt = \DateTimeImmutable::createFromMutable($date);
