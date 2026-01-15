@@ -1,4 +1,4 @@
-import {Datagrid, FunctionField, List, NumberField, TextField, TopToolbar} from 'react-admin';
+import {Datagrid, FunctionField, List, NumberField, TextField, TopToolbar, NumberInput, Filter} from 'react-admin';
 import {ExportButton} from "ra-ui-materialui";
 import {Box, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
@@ -11,6 +11,12 @@ const ListActions = () => (
   </TopToolbar>
 );
 
+const TicketFilters = () => (
+  <Filter>
+    <NumberInput label="ID заказа" source="orderId" alwaysOn/>
+  </Filter>
+);
+
 const Empty = () => (
   <Box textAlign="center" m={1}>
     <Typography variant="h4" paragraph>
@@ -20,7 +26,7 @@ const Empty = () => (
 );
 
 export const SupportTicketList = () => (
-  <List sort={{field: 'createdAt', order: 'DESC'}} actions={<ListActions/>} empty={<Empty/>}>
+  <List sort={{field: 'createdAt', order: 'DESC'}} actions={<ListActions/>} filters={<TicketFilters/>} empty={<Empty/>}>
     <Datagrid
       bulkActionButtons={false}
     >
