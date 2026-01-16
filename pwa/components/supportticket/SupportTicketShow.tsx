@@ -136,6 +136,7 @@ const SupportTicketShowContent = () => {
       <TextField source="subject" label="Причина обращения"/>
       <TextField source="description" label="Цель обращения"/>
       <TextField source="authorName" label="Автор заявки"/>
+      <TextField source="userName" label="Ответственный"/>
       <FunctionField
         label="Создана"
         render={(record: any) => (

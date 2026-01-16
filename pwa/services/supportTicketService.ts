@@ -25,7 +25,7 @@ export const changeStatus = async (ticketId: string, data: {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to change status');
+    throw new Error(errorData.error || errorData.message || 'Failed to change status');
   }
 
   return response.json();

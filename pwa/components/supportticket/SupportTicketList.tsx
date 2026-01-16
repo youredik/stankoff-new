@@ -36,7 +36,6 @@ export const SupportTicketList = () => (
         render={(record: any) => <StatusChip status={record?.currentStatus || ''}
                                              statusValue={record?.currentStatusValue || ''}/>}
       />
-      <TextField source="authorName" label="Автор"/>
       <FunctionField
         label="Создано"
         render={(record: any) => (
@@ -45,6 +44,8 @@ export const SupportTicketList = () => (
           </Tooltip>
         )}
       />
+      <TextField source="userName" label="Ответственный"/>
+      <TextField source="authorName" label="Автор"/>
       <NumberField source="orderId" label="ID заказа"/>
     </Datagrid>
   </List>

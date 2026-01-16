@@ -9,6 +9,7 @@ use App\Entity\SupportTicketComment;
 use App\Entity\User;
 use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
+use App\Repository\SupportTicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -25,6 +26,7 @@ final class SupportTicketController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ValidatorInterface $validator,
+        private readonly SupportTicketRepository $supportTicketRepository,
     ) {
     }
 
@@ -110,6 +112,13 @@ final class SupportTicketController extends AbstractController
         if ($user instanceof User) {
             $supportTicket->user = $user;
             $this->entityManager->flush();
+        }
+
+        // Validate that user can only have one ticket in progress
+        if ($newStatus === SupportTicketStatus::IN_PROGRESS && $user instanceof User) {
+            if ($this->supportTicketRepository->hasUserTicketInProgress($user, $supportTicket->getId())) {
+                return $this->json(['error' => 'У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.'], 400);
+            }
         }
 
         // Create comment
