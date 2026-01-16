@@ -22,6 +22,22 @@ class SupportTicketRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, SupportTicket::class);
     }
+
+    public function hasUserTicketInProgress(\Symfony\Component\Security\Core\User\UserInterface $user, ?int $excludeTicketId = null): bool
+    {
+        $tickets = $this->findBy(['user' => $user]);
+
+        foreach ($tickets as $ticket) {
+            if ($excludeTicketId !== null && $ticket->getId() === $excludeTicketId) {
+                continue;
+            }
+            if ($ticket->getCurrentStatusValue() === \App\Enum\SupportTicketStatus::IN_PROGRESS->value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 //
 //    public function save(SupportTicket $entity, bool $flush = false): void
 //    {

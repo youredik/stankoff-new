@@ -78,7 +78,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
       refetch();
       onStatusChanged?.();
     } catch (err: any) {
-      notify(`Ошибка: ${err.message}`, {type: 'error'});
+      notify(err.message, {type: 'error'});
     } finally {
       setLoading(false);
     }
