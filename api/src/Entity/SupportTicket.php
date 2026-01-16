@@ -136,6 +136,21 @@ class SupportTicket
         return $this->comments->first()->status->value;
     }
 
+    #[Groups(['SupportTicket:read',])]
+    public function getCurrentClosingReason(): ?string
+    {
+        if ($this->comments->isEmpty()) {
+            return null;
+        }
+
+        $latestComment = $this->comments->first();
+        if ($latestComment->status === SupportTicketStatus::COMPLETED) {
+            return $latestComment->closingReason?->getDisplayName();
+        }
+
+        return null;
+    }
+
     public function getId(): int
     {
         return $this->id;

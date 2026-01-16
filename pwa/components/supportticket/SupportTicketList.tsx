@@ -36,6 +36,7 @@ export const SupportTicketList = () => (
         render={(record: any) => <StatusChip status={record?.currentStatus || ''}
                                              statusValue={record?.currentStatusValue || ''}/>}
       />
+      <TextField source="currentClosingReason" label="Причина закрытия"/>
       <FunctionField
         label="Создано"
         render={(record: any) => (
