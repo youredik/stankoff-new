@@ -8,10 +8,9 @@ use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use App\Entity\SupportTicket;
-use App\Enum\SupportTicketStatus;
 use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final class SupportTicketAccessFilter extends AbstractFilter
@@ -27,13 +26,25 @@ final class SupportTicketAccessFilter extends AbstractFilter
         return [];
     }
 
-    protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
-    {
+    protected function filterProperty(
+        string $property,
+        $value,
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        ?Operation $operation = null,
+        array $context = [],
+    ): void {
         // This filter is always applied, no property needed
     }
 
-    public function apply(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
-    {
+    public function apply(
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        ?Operation $operation = null,
+        array $context = [],
+    ): void {
         if (SupportTicket::class !== $resourceClass) {
             return;
         }
@@ -59,8 +70,8 @@ final class SupportTicketAccessFilter extends AbstractFilter
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->orX(
                     \sprintf('u.id = :%s', $userParam),
-                    \sprintf('%s.comments IS EMPTY', $alias) // NEW tickets have no comments
-                )
+                    \sprintf('%s.comments IS EMPTY', $alias), // NEW tickets have no comments
+                ),
             );
             $queryBuilder->setParameter($userParam, $user->getId());
             return;

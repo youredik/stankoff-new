@@ -8,15 +8,16 @@ use ApiPlatform\Doctrine\Common\Filter\SearchFilterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
-use App\Doctrine\Orm\Filter\SupportTicketAccessFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Doctrine\Orm\Filter\SupportTicketAccessFilter;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
 use App\State\Processor\SupportTicketCreateProcessor;
+use App\State\SupportTicketDataProvider;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -33,6 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             paginationClientItemsPerPage: true,
             order: ['createdAt' => 'DESC'],
+            provider: SupportTicketDataProvider::class,
         ),
         new Post(
             processor: SupportTicketCreateProcessor::class,
@@ -74,6 +76,7 @@ class SupportTicket
     #[ApiProperty(example: 'Иван Иванов')]
     #[Assert\NotBlank(allowNull: false)]
     #[ORM\Column(type: Types::STRING, length: 255)]
+    #[ApiFilter(OrderFilter::class)]
     #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
     public string $authorName;
 
@@ -99,6 +102,7 @@ class SupportTicket
     #[ApiProperty(readableLink: false, types: ['https://schema.org/author'])]
     #[Groups(['SupportTicket:read'])]
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
+    #[ApiFilter(OrderFilter::class)]
     #[ORM\ManyToOne(targetEntity: User::class, fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: true)]
     public ?UserInterface $user = null;
@@ -126,6 +130,7 @@ class SupportTicket
         return $this->comments->first()->status->getDisplayName();
     }
 
+    #[ApiFilter(OrderFilter::class)]
     #[Groups(['SupportTicket:read',])]
     public function getCurrentStatusValue(): string
     {
