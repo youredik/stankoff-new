@@ -20,10 +20,15 @@ final readonly class SupportTicketCommentCreateProcessor implements ProcessorInt
         private EntityManagerInterface $entityManager,
         private Security $security,
         private SupportTicketRepository $supportTicketRepository,
-    ) {}
+    ) {
+    }
 
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): SupportTicketComment
-    {
+    public function process(
+        mixed $data,
+        Operation $operation,
+        array $uriVariables = [],
+        array $context = [],
+    ): SupportTicketComment {
         assert($data instanceof SupportTicketComment);
 
         $data->createdAt = new \DateTimeImmutable();
@@ -37,7 +42,9 @@ final readonly class SupportTicketCommentCreateProcessor implements ProcessorInt
         // Validate that user can only have one ticket in progress
         if ($data->status === SupportTicketStatus::IN_PROGRESS && $user instanceof User) {
             if ($this->supportTicketRepository->hasUserTicketInProgress($user, $data->supportTicket->getId())) {
-                throw new BadRequestHttpException('У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.');
+                throw new BadRequestHttpException(
+                    'У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.',
+                );
             }
         }
 

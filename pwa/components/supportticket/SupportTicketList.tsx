@@ -1,4 +1,4 @@
-import {Datagrid, FunctionField, List, NumberField, TextField, TopToolbar, NumberInput, Filter} from 'react-admin';
+import {Datagrid, Filter, FunctionField, List, NumberField, NumberInput, TextField, TopToolbar} from 'react-admin';
 import {ExportButton} from "ra-ui-materialui";
 import {Box, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
@@ -30,13 +30,15 @@ export const SupportTicketList = () => (
     <Datagrid
       bulkActionButtons={false}
     >
-      <TextField source="subject" label="Цель обращения"/>
+      <TextField source="subject" label="Цель обращения" sortable/>
       <FunctionField
         label="Статус"
         render={(record: any) => <StatusChip status={record?.currentStatus || ''}
                                              statusValue={record?.currentStatusValue || ''}/>}
+        sortBy="currentStatusValue"
+        sortable
       />
-      <TextField source="currentClosingReason" label="Причина закрытия"/>
+      <TextField source="currentClosingReason" label="Причина закрытия" sortable={false}/>
       <FunctionField
         label="Создано"
         render={(record: any) => (
@@ -44,10 +46,12 @@ export const SupportTicketList = () => (
             <span>{formatDistanceToNow(new Date(record.createdAt), {addSuffix: true, locale: ru})}</span>
           </Tooltip>
         )}
+        sortBy="createdAt"
+        sortable
       />
-      <TextField source="userName" label="Ответственный"/>
-      <TextField source="authorName" label="Автор"/>
-      <NumberField source="orderId" label="ID заказа"/>
+      <TextField source="userName" label="Ответственный" sortBy="user.name" sortable/>
+      <TextField source="authorName" label="Автор" sortable/>
+      <NumberField source="orderId" label="ID заказа" sortable={false}/>
     </Datagrid>
   </List>
 );
