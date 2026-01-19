@@ -12,7 +12,8 @@ import {
 } from '@mui/material';
 import {Close, CloudUpload, Delete, Download, Image, VideoFile} from '@mui/icons-material';
 import {useCreate, useDelete, useGetList} from 'react-admin';
-import {useSession} from 'next-auth/react';
+import {getSession, useSession} from 'next-auth/react';
+import {type Session} from '../../app/auth';
 import {authenticatedFetch} from '../../utils/authenticatedFetch';
 
 interface MediaFile {
@@ -24,6 +25,13 @@ interface MediaFile {
   createdAt: string;
   downloadUrl: string;
   thumbnailUrl?: string;
+}
+
+interface UploadingFile {
+  file: File;
+  progress: number;
+  status: 'uploading' | 'done' | 'error';
+  previewUrl?: string;
 }
 
 interface MediaUploadProps {
@@ -99,8 +107,38 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
   const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
 
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+
   const [create] = useCreate();
   const [deleteOne] = useDelete();
+
+  // Clean up object URLs on unmount
+  React.useEffect(() => {
+    return () => {
+      uploadingFiles.forEach(file => {
+        if (file.previewUrl) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+    };
+  }, []);
+
+  // Clear completed uploads after a delay
+  React.useEffect(() => {
+    if (uploadingFiles.length > 0 && uploadingFiles.every(f => f.status !== 'uploading')) {
+      const timer = setTimeout(() => {
+        setUploadingFiles(prev => {
+          prev.forEach(file => {
+            if (file.previewUrl) {
+              URL.revokeObjectURL(file.previewUrl);
+            }
+          });
+          return [];
+        });
+      }, 2000); // 2 seconds delay
+      return () => clearTimeout(timer);
+    }
+  }, [uploadingFiles]);
 
   const {data: mediaFiles, isLoading, refetch} = useGetList(
     'support_ticket_media',
@@ -120,54 +158,75 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     setDragOver(false);
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
 
     const files = Array.from(e.dataTransfer.files);
     if (files.length === 0) return;
 
-    await uploadFiles(files);
+    startUploads(files);
   }, [ticketId]);
 
-  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    await uploadFiles(files);
+    startUploads(files);
   }, [ticketId]);
 
-  const uploadFiles = async (files: File[]) => {
-    setUploading(true);
-    setError(null);
-    setUploadProgress(0);
+  const startUploads = useCallback((files: File[]) => {
+    const newUploadingFiles: UploadingFile[] = files.map(file => ({
+      file,
+      progress: 0,
+      status: 'uploading' as const,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+    }));
+    setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
 
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const formData = new FormData();
-        formData.append('file', file);
+    // Start uploading each file
+    newUploadingFiles.forEach((uploadingFile, index) => {
+      uploadSingleFile(uploadingFile, index + uploadingFiles.length);
+    });
+  }, [uploadingFiles.length]);
 
-        await create(
-          `support_tickets/${ticketId}/media`,
-          {
-            data: formData,
-          }
-        );
-
-        setUploadProgress(((i + 1) / files.length) * 100);
-      }
-
-      refetch();
-      onMediaChange?.();
-    } catch (err) {
-      setError('Ошибка при загрузке файлов');
-      console.error('Upload error:', err);
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
+  const uploadSingleFile = useCallback(async (uploadingFile: UploadingFile, index: number) => {
+    const session = await getSession() as Session | null;
+    if (!session?.accessToken) {
+      setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'error'} : f));
+      return;
     }
-  };
+
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('file', uploadingFile.file);
+
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        const progress = (event.loaded / event.total) * 100;
+        setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, progress} : f));
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status === 201) {
+        setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'done', progress: 100} : f));
+        refetch();
+        onMediaChange?.();
+      } else {
+        setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'error'} : f));
+      }
+    });
+
+    xhr.addEventListener('error', () => {
+      setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'error'} : f));
+    });
+
+    xhr.open('POST', `/support_tickets/${ticketId}/media`);
+    xhr.setRequestHeader('Authorization', `Bearer ${session.accessToken}`);
+    xhr.send(formData);
+  }, [ticketId, refetch, onMediaChange]);
+
 
   const handleDelete = async (mediaId: number) => {
     try {
@@ -268,7 +327,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           try {
             const response = await fetch(media.downloadUrl, {
               headers: {
-                'Authorization': `Bearer ${session.accessToken}`,
+                'Authorization': `Bearer ${(session as Session).accessToken}`,
               },
             });
             if (response.ok) {
@@ -384,21 +443,71 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
             Поддерживаются изображения и видео
           </Typography>
         </Box>
-
-        {uploading && (
-          <Box sx={{mt: 2}}>
-            <LinearProgress variant="determinate" value={uploadProgress}/>
-            <Typography variant="body2" color="textSecondary" sx={{mt: 1}}>
-              Загрузка... {Math.round(uploadProgress)}%
-            </Typography>
-          </Box>
-        )}
       </Paper>
 
       {error && (
         <Alert severity="error" sx={{mb: 2}}>
           {error}
         </Alert>
+      )}
+
+      {/* Uploading Files */}
+      {uploadingFiles.length > 0 && (
+        <Box sx={{mb: 2}}>
+          <Typography variant="subtitle1" gutterBottom>
+            Загружаемые файлы
+          </Typography>
+          <Box sx={{display: 'flex', overflowX: 'auto', gap: 2, pb: 1}}>
+            {uploadingFiles.map((uploadingFile, index) => (
+              <Paper key={index} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1, position: 'relative'}}>
+                  {uploadingFile.previewUrl ? (
+                    <img
+                      src={uploadingFile.previewUrl}
+                      alt={uploadingFile.file.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: 4,
+                        opacity: uploadingFile.status === 'done' ? 1 : 0.7,
+                      }}
+                    />
+                  ) : (
+                    <>
+                      {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary"/> : <Image color="primary"/>}
+                    </>
+                  )}
+                  {uploadingFile.status === 'uploading' && (
+                    <Box sx={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.5)', borderRadius: 1}}>
+                      <Typography variant="body2" color="white">
+                        {Math.round(uploadingFile.progress)}%
+                      </Typography>
+                    </Box>
+                  )}
+                  {uploadingFile.status === 'error' && (
+                    <Box sx={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(255,0,0,0.5)', borderRadius: 1}}>
+                      <Typography variant="body2" color="white">
+                        Ошибка
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                <Box sx={{textAlign: 'center', mb: 1}}>
+                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                    {uploadingFile.file.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {formatFileSize(uploadingFile.file.size)}
+                  </Typography>
+                </Box>
+                {uploadingFile.status === 'uploading' && (
+                  <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
+                )}
+              </Paper>
+            ))}
+          </Box>
+        </Box>
       )}
 
       {/* Media Files List */}
