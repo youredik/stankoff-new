@@ -470,7 +470,10 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     <ThumbnailImage
                       src={media.thumbnailUrl}
                       alt={media.originalName}
-                      onClick={() => handlePreview(media)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePreview(media);
+                      }}
                     />
                   ) : (
                     <>
@@ -490,10 +493,16 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                 </Box>
 
                 <Box sx={{display: 'flex', gap: 1}}>
-                  <IconButton onClick={() => handleDownload(media)} size="small">
+                  <IconButton onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(media);
+                  }} size="small">
                     <Download/>
                   </IconButton>
-                  <IconButton onClick={() => handleDeleteClick(media)} size="small" color="error">
+                  <IconButton onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteClick(media);
+                  }} size="small" color="error">
                     <Delete/>
                   </IconButton>
                 </Box>
@@ -513,6 +522,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                         borderRadius: 4,
                         opacity: uploadingFile.status === 'done' ? 1 : 0.7,
                       }}
+                      onClick={(e) => e.stopPropagation()}
                     />
                   ) : (
                     <>
