@@ -11,11 +11,16 @@ import {
   Paper,
   Typography
 } from '@mui/material';
-import {Close, CloudUpload, Delete, Download, Image, VideoFile} from '@mui/icons-material';
+import {CloudUpload, Delete, Download, Image, VideoFile} from '@mui/icons-material';
 import {useCreate, useDelete, useGetList} from 'react-admin';
 import {getSession, useSession} from 'next-auth/react';
 import {type Session} from '../../app/auth';
 import {authenticatedFetch} from '../../utils/authenticatedFetch';
+import Lightbox, { type Slide } from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+import Video from "yet-another-react-lightbox/plugins/video";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 interface MediaFile {
   id: number;
@@ -108,11 +113,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [previewLoading, setPreviewLoading] = useState(false);
+  const [slides, setSlides] = useState<Slide[]>([]);
 
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 
@@ -293,16 +298,87 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   };
 
   const handlePreview = useCallback((media: MediaFile) => {
-    setSelectedMedia(media);
-    setPreviewLoading(true);
-    setDialogOpen(false);
-  }, []);
+    if (!mediaFiles) return;
+    const index = mediaFiles.findIndex(m => m.id === media.id);
+    if (index === -1) return;
+    setCurrentIndex(index);
+    setSlides(mediaFiles.map(m => ({ type: isVideo(m.mimeType) ? 'video' : 'image' } as Slide)));
 
-  const handleCloseDialog = useCallback(() => {
-    setDialogOpen(false);
-    setSelectedMedia(null);
-    setPreviewLoading(false);
-  }, []);
+    // For videos, open lightbox immediately and load video sources
+    if (isVideo(media.mimeType)) {
+      setLightboxOpen(true);
+      // Load video src
+      authenticatedFetch(media.downloadUrl)
+        .then(response => {
+          if (response.ok) {
+            return response.blob();
+          }
+          throw new Error('Failed to fetch video');
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          setSlides(prev => {
+            const newS = [...prev];
+            newS[index] = { type: 'video', sources: [{ src: url, type: media.mimeType }] } as Slide;
+            return newS;
+          });
+        })
+        .catch(e => {
+          console.error('Failed to load video:', e);
+        });
+    } else {
+      // For images, load thumbnails first for quick view
+      mediaFiles.forEach(async (m, i) => {
+        if (m.thumbnailUrl) {
+          try {
+            const response = await authenticatedFetch(m.thumbnailUrl);
+            if (response.ok) {
+              const blob = await response.blob();
+              const thumbUrl = URL.createObjectURL(blob);
+              setSlides(prev => {
+                const newS = [...prev];
+                newS[i] = { type: 'image', src: thumbUrl } as Slide;
+                return newS;
+              });
+              if (i === index) {
+                setLightboxOpen(true);
+              }
+            }
+          } catch (e) {
+            console.error('Failed to load thumbnail:', e);
+          }
+        }
+      });
+    }
+
+    // Then load originals in background for all
+    mediaFiles.forEach(async (m, i) => {
+      if (i === index && isVideo(m.mimeType)) return; // Already loaded for current video
+      try {
+        const response = await authenticatedFetch(m.downloadUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          setSlides(prev => {
+            const newS = [...prev];
+            // Revoke thumbnail URL if different
+            if ('src' in newS[i] && newS[i].src && newS[i].src !== url) {
+              URL.revokeObjectURL(newS[i].src!);
+            }
+            if (isVideo(m.mimeType)) {
+              newS[i] = { type: 'video', sources: [{ src: url, type: m.mimeType }] } as Slide;
+            } else {
+              newS[i] = { type: 'image', src: url } as Slide;
+            }
+            return newS;
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load media:', e);
+      }
+    });
+  }, [mediaFiles]);
+
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -315,142 +391,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const isImage = (mimeType: string) => mimeType.startsWith('image/');
   const isVideo = (mimeType: string) => mimeType.startsWith('video/');
 
-  const FullMediaViewer = React.memo(({media, onClose, open, onLoaded}: {
-      media: MediaFile | null;
-      onClose: () => void;
-      open: boolean;
-      onLoaded: () => void;
-    }) => {
-      if (!media) return null;
-      const {data: session, status} = useSession();
-      const [mediaSrc, setMediaSrc] = useState<string | null>(null);
-      const [loading, setLoading] = useState(true);
-      const [loaded, setLoaded] = useState(false);
-      const [hasError, setHasError] = useState(false);
-      const loadingRef = useRef(false);
-      const attemptedLoadRef = useRef(false);
-      const [isVisible, setIsVisible] = useState(true);
-
-      React.useEffect(() => {
-        const handleVisibilityChange = () => {
-          setIsVisible(!document.hidden);
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => {
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
-      }, []);
-
-      React.useEffect(() => {
-        if (!media) return;
-        setLoaded(false);
-        setLoading(true);
-        setMediaSrc(null);
-        setHasError(false);
-        loadingRef.current = false;
-        attemptedLoadRef.current = false;
-      }, [media?.id]);
-
-      React.useEffect(() => {
-        return () => {
-          if (mediaSrc) {
-            URL.revokeObjectURL(mediaSrc);
-          }
-        };
-      }, [mediaSrc]);
-
-      React.useEffect(() => {
-        if (loaded || loadingRef.current || attemptedLoadRef.current || !isVisible) return;
-
-        loadingRef.current = true;
-        setLoading(true);
-
-        const loadMedia = async () => {
-          attemptedLoadRef.current = true;
-          if (status !== 'authenticated' || !session) {
-            setHasError(true);
-            setLoading(false);
-            loadingRef.current = false;
-            return;
-          }
-          try {
-            const response = await fetch(media.downloadUrl, {
-              headers: {
-                'Authorization': `Bearer ${(session as Session).accessToken}`,
-              },
-            });
-            if (response.ok) {
-              const blob = await response.blob();
-              const objectUrl = URL.createObjectURL(blob);
-              setMediaSrc(objectUrl);
-              setLoaded(true);
-              onLoaded();
-            } else {
-              setHasError(true);
-            }
-          } catch (error) {
-            console.error('Failed to load media:', error);
-            setHasError(true);
-          } finally {
-            setLoading(false);
-            loadingRef.current = false;
-          }
-        };
-
-        loadMedia();
-      }, [media?.downloadUrl, loaded, isVisible, status, session]);
-
-      return (
-        <Dialog open={open} onClose={onClose} maxWidth={false} sx={{ '& .MuiDialog-paper': { maxHeight: '90vh', maxWidth: '90vw' } }}>
-          <DialogTitle>
-            {media.originalName}
-            <IconButton
-              aria-label="close"
-              onClick={onClose}
-              sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-              }}
-            >
-              <Close/>
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1 }}>
-            {loading ? (
-              <Typography>Загрузка...</Typography>
-            ) : mediaSrc ? (
-              isImage(media.mimeType) ? (
-                <img
-                  src={mediaSrc}
-                  alt={media.originalName}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '70vh',
-                    objectFit: 'contain',
-                    display: 'block'
-                  }}
-                />
-              ) : isVideo(media.mimeType) ? (
-                <video
-                  controls
-                  src={mediaSrc}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '70vh',
-                    display: 'block'
-                  }}
-                />
-              ) : null
-            ) : (
-              <Typography>Не удалось загрузить медиа</Typography>
-            )}
-          </DialogContent>
-        </Dialog>
-      );
-    }
-  );
 
   return (
     <Box>
@@ -681,7 +621,27 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         </Typography>
       )}
 
-      <FullMediaViewer media={selectedMedia} onClose={handleCloseDialog} open={dialogOpen} onLoaded={() => { setPreviewLoading(false); setDialogOpen(true); }} />
+      <Lightbox
+        open={lightboxOpen}
+        close={() => {
+          setLightboxOpen(false);
+          // Revoke URLs
+          slides.forEach(slide => {
+            if (slide.type === 'image' && 'src' in slide && slide.src) {
+              URL.revokeObjectURL(slide.src);
+            }
+            if (slide.type === 'video' && 'sources' in slide && slide.sources) {
+              slide.sources.forEach((source: { src: string }) => {
+                URL.revokeObjectURL(source.src);
+              });
+            }
+          });
+          setSlides([]);
+        }}
+        slides={slides}
+        index={currentIndex}
+        plugins={[Fullscreen, Video, Zoom]}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel}>

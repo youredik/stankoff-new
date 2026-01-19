@@ -41,6 +41,7 @@
     "sharp": "^0.34.5",
     "slugify": "^1.6.6",
     "tailwindcss": "^4.1.18",
+    "yet-another-react-lightbox": "^3.28.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {
