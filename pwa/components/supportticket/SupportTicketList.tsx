@@ -30,6 +30,12 @@ export const SupportTicketList = () => (
     <Datagrid
       bulkActionButtons={false}
     >
+      <FunctionField
+        label="#"
+        render={(record: any) => record?.id?.split('/').pop() || ''}
+        sortBy="id"
+        sortable
+      />
       <TextField source="subject" label="Цель обращения" sortable/>
       <FunctionField
         label="Статус"
