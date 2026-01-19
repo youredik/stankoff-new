@@ -239,7 +239,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const handleDeleteConfirm = async () => {
     if (!fileToDelete) return;
     try {
-      await deleteOne('support_ticket_media', {id: fileToDelete.id});
+      await deleteOne(`support_tickets/${ticketId}/media`, {id: fileToDelete.id});
       refetch();
       onMediaChange?.();
     } catch (err) {
