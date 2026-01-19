@@ -40,7 +40,11 @@ interface MediaUploadProps {
   onMediaChange?: () => void;
 }
 
-const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.MouseEvent) => void }> = ({src, alt, onClick}) => {
+const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.MouseEvent) => void }> = ({
+                                                                                                          src,
+                                                                                                          alt,
+                                                                                                          onClick
+                                                                                                        }) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -112,6 +116,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<MediaFile | null>(null);
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
 
   const [create] = useCreate();
   const [deleteOne] = useDelete();
@@ -238,6 +243,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
   const handleDeleteConfirm = async () => {
     if (!fileToDelete) return;
+    setDeletingIds(prev => new Set(prev).add(fileToDelete.id));
     try {
       await deleteOne(`support_tickets/${ticketId}/media`, {id: fileToDelete.id});
       refetch();
@@ -246,6 +252,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       setError('Ошибка при удалении файла');
       console.error('Delete error:', err);
     } finally {
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fileToDelete.id);
+        return newSet;
+      });
       setDeleteConfirmOpen(false);
       setFileToDelete(null);
     }
@@ -299,15 +310,19 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const isImage = (mimeType: string) => mimeType.startsWith('image/');
   const isVideo = (mimeType: string) => mimeType.startsWith('video/');
 
-  const FullMediaViewer = React.memo(({media, onClose, open}: { media: MediaFile | null; onClose: () => void; open: boolean }) => {
-    if (!media) return null;
-    const {data: session, status} = useSession();
-    const [mediaSrc, setMediaSrc] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [loaded, setLoaded] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const loadingRef = useRef(false);
-    const attemptedLoadRef = useRef(false);
+  const FullMediaViewer = React.memo(({media, onClose, open}: {
+      media: MediaFile | null;
+      onClose: () => void;
+      open: boolean
+    }) => {
+      if (!media) return null;
+      const {data: session, status} = useSession();
+      const [mediaSrc, setMediaSrc] = useState<string | null>(null);
+      const [loading, setLoading] = useState(true);
+      const [loaded, setLoaded] = useState(false);
+      const [hasError, setHasError] = useState(false);
+      const loadingRef = useRef(false);
+      const attemptedLoadRef = useRef(false);
 
       React.useEffect(() => {
         if (!media) return;
@@ -422,7 +437,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Медиа файлы
+        Фото и видео ({(mediaFiles?.length || 0) + uploadingFiles.length})
       </Typography>
 
 
@@ -458,104 +473,168 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         />
         {(mediaFiles && mediaFiles.length > 0) || uploadingFiles.length > 0 ? (
           <>
-            <Typography variant="subtitle1" gutterBottom>
-              Файлы ({(mediaFiles?.length || 0) + uploadingFiles.length})
-            </Typography>
 
             <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
               {mediaFiles && mediaFiles.map((media: MediaFile) => (
-              <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
-                  {media.thumbnailUrl ? (
-                    <ThumbnailImage
-                      src={media.thumbnailUrl}
-                      alt={media.originalName}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePreview(media);
-                      }}
-                    />
-                  ) : (
-                    <>
-                      {isImage(media.mimeType) && <Image color="primary"/>}
-                      {isVideo(media.mimeType) && <VideoFile color="primary"/>}
-                    </>
+                <Paper key={media.id} sx={{
+                  p: 2,
+                  minWidth: 250,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative'
+                }}>
+                  {deletingIds.has(media.id) && (
+                    <Box sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      bgcolor: 'rgba(255, 255, 255, 0.8)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 1,
+                      borderRadius: 1
+                    }}>
+                      <Typography variant="body2" color="textSecondary">
+                        Удаление...
+                      </Typography>
+                    </Box>
                   )}
-                </Box>
+                  <Box sx={{
+                    width: 200,
+                    height: 200,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 2,
+                    mb: 1
+                  }}>
+                    {media.thumbnailUrl ? (
+                      <ThumbnailImage
+                        src={media.thumbnailUrl}
+                        alt={media.originalName}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePreview(media);
+                        }}
+                      />
+                    ) : (
+                      <>
+                        {isImage(media.mimeType) && <Image color="primary"/>}
+                        {isVideo(media.mimeType) && <VideoFile color="primary"/>}
+                      </>
+                    )}
+                  </Box>
 
-                <Box sx={{textAlign: 'center', mb: 1}}>
-                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
-                    {media.originalName}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
-                  </Typography>
-                </Box>
+                  <Box sx={{textAlign: 'center', mb: 1}}>
+                    <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                      {media.originalName}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
+                    </Typography>
+                  </Box>
 
-                <Box sx={{display: 'flex', gap: 1}}>
-                  <IconButton onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownload(media);
-                  }} size="small">
-                    <Download/>
-                  </IconButton>
-                  <IconButton onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteClick(media);
-                  }} size="small" color="error">
-                    <Delete/>
-                  </IconButton>
-                </Box>
-              </Paper>
-            ))}
-            {uploadingFiles.map((uploadingFile, index) => (
-              <Paper key={`uploading-${index}`} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1, position: 'relative'}}>
-                  {uploadingFile.previewUrl ? (
-                    <img
-                      src={uploadingFile.previewUrl}
-                      alt={uploadingFile.file.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        borderRadius: 4,
-                        opacity: uploadingFile.status === 'done' ? 1 : 0.7,
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <>
-                      {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary"/> : <Image color="primary"/>}
-                    </>
-                  )}
+                  <Box sx={{display: 'flex', gap: 1}}>
+                    <IconButton onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload(media);
+                    }} size="small">
+                      <Download/>
+                    </IconButton>
+                    <IconButton onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(media);
+                    }} size="small" color="error">
+                      <Delete/>
+                    </IconButton>
+                  </Box>
+                </Paper>
+              ))}
+              {uploadingFiles.map((uploadingFile, index) => (
+                <Paper key={`uploading-${index}`}
+                       sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                  <Box sx={{
+                    width: 200,
+                    height: 200,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 2,
+                    mb: 1,
+                    position: 'relative'
+                  }}>
+                    {uploadingFile.previewUrl ? (
+                      <img
+                        src={uploadingFile.previewUrl}
+                        alt={uploadingFile.file.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          borderRadius: 4,
+                          opacity: uploadingFile.status === 'done' ? 1 : 0.7,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <>
+                        {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary"/> :
+                          <Image color="primary"/>}
+                      </>
+                    )}
+                    {uploadingFile.status === 'uploading' && (
+                      <Box sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        borderRadius: 1
+                      }}>
+                        <Typography variant="body2" color="white">
+                          {Math.round(uploadingFile.progress)}%
+                        </Typography>
+                      </Box>
+                    )}
+                    {uploadingFile.status === 'error' && (
+                      <Box sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(255,0,0,0.5)',
+                        borderRadius: 1
+                      }}>
+                        <Typography variant="body2" color="white">
+                          Ошибка
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                  <Box sx={{textAlign: 'center', mb: 1}}>
+                    <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                      {uploadingFile.file.name}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {formatFileSize(uploadingFile.file.size)}
+                    </Typography>
+                  </Box>
                   {uploadingFile.status === 'uploading' && (
-                    <Box sx={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.5)', borderRadius: 1}}>
-                      <Typography variant="body2" color="white">
-                        {Math.round(uploadingFile.progress)}%
-                      </Typography>
-                    </Box>
+                    <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
                   )}
-                  {uploadingFile.status === 'error' && (
-                    <Box sx={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(255,0,0,0.5)', borderRadius: 1}}>
-                      <Typography variant="body2" color="white">
-                        Ошибка
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-                <Box sx={{textAlign: 'center', mb: 1}}>
-                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
-                    {uploadingFile.file.name}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {formatFileSize(uploadingFile.file.size)}
-                  </Typography>
-                </Box>
-                {uploadingFile.status === 'uploading' && (
-                  <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
-                )}
-              </Paper>
+                </Paper>
               ))}
             </Box>
           </>
