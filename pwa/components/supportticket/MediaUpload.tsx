@@ -113,9 +113,8 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const [deleteOne] = useDelete();
 
   const {data: mediaFiles, isLoading, refetch} = useGetList(
-    'support_ticket_media',
+    `support_tickets/${ticketId}/media`,
     {
-      filter: {supportTicket: `/api/support_tickets/${ticketId}`},
       sort: {field: 'createdAt', order: 'ASC'},
     }
   );
