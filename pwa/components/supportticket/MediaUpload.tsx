@@ -457,7 +457,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           <Typography variant="subtitle1" gutterBottom>
             Загружаемые файлы
           </Typography>
-          <Box sx={{display: 'flex', overflowX: 'auto', gap: 2, pb: 1}}>
+          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
             {uploadingFiles.map((uploadingFile, index) => (
               <Paper key={index} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1, position: 'relative'}}>
@@ -517,7 +517,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
             Загруженные файлы ({mediaFiles.length})
           </Typography>
 
-          <Box sx={{display: 'flex', overflowX: 'auto', gap: 2, pb: 1}}>
+          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
             {mediaFiles.map((media: MediaFile) => (
               <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
