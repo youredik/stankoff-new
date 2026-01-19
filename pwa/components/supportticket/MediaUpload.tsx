@@ -410,7 +410,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
           {mediaFiles.map((media: MediaFile) => (
             <Paper key={media.id} sx={{p: 2, mb: 1, display: 'flex', alignItems: 'center'}}>
-              <Box sx={{mr: 2, width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <Box sx={{mr: 2, width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2}}>
                 {media.thumbnailUrl ? (
                   <ThumbnailImage
                     src={media.thumbnailUrl}

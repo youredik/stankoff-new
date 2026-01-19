@@ -36,13 +36,32 @@ class ThumbnailService
             throw new \RuntimeException('Failed to create image resource');
         }
 
-        // Calculate thumbnail dimensions
-        $ratio = min($maxWidth / $width, $maxHeight / $height);
-        $newWidth = (int) ($width * $ratio);
-        $newHeight = (int) ($height * $ratio);
+        // Calculate square crop dimensions
+        $minSide = min($width, $height);
+        $cropX = (int) (($width - $minSide) / 2);
+        $cropY = (int) (($height - $minSide) / 2);
 
-        // Create thumbnail
-        $thumbnail = imagecreatetruecolor($newWidth, $newHeight);
+        // Create square cropped image
+        $croppedImage = imagecreatetruecolor($minSide, $minSide);
+        if (!$croppedImage) {
+            throw new \RuntimeException('Failed to create cropped image');
+        }
+
+        // Preserve transparency for PNG
+        if ($mimeType === 'image/png') {
+            imagealphablending($croppedImage, false);
+            imagesavealpha($croppedImage, true);
+            $transparent = imagecolorallocatealpha($croppedImage, 255, 255, 255, 127);
+            imagefill($croppedImage, 0, 0, $transparent);
+        }
+
+        // Crop to square
+        if (!imagecopy($croppedImage, $sourceImage, 0, 0, $cropX, $cropY, $minSide, $minSide)) {
+            throw new \RuntimeException('Failed to crop image');
+        }
+
+        // Create final thumbnail
+        $thumbnail = imagecreatetruecolor($maxWidth, $maxHeight);
         if (!$thumbnail) {
             throw new \RuntimeException('Failed to create thumbnail');
         }
@@ -55,8 +74,8 @@ class ThumbnailService
             imagefill($thumbnail, 0, 0, $transparent);
         }
 
-        // Resize
-        if (!imagecopyresampled($thumbnail, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height)) {
+        // Resize cropped image to 200x200
+        if (!imagecopyresampled($thumbnail, $croppedImage, 0, 0, 0, 0, $maxWidth, $maxHeight, $minSide, $minSide)) {
             throw new \RuntimeException('Failed to resize image');
         }
 
@@ -71,6 +90,7 @@ class ThumbnailService
 
         // Clean up
         imagedestroy($sourceImage);
+        imagedestroy($croppedImage);
         imagedestroy($thumbnail);
 
         if (!$result) {
