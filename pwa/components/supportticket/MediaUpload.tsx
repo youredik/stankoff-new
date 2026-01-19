@@ -2,6 +2,7 @@ import React, {useCallback, useRef, useState} from 'react';
 import {
   Alert,
   Box,
+  Button,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -108,6 +109,9 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
 
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
+
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<MediaFile | null>(null);
 
   const [create] = useCreate();
   const [deleteOne] = useDelete();
@@ -227,15 +231,29 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   }, [ticketId, refetch, onMediaChange]);
 
 
-  const handleDelete = async (mediaId: number) => {
+  const handleDeleteClick = (media: MediaFile) => {
+    setFileToDelete(media);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!fileToDelete) return;
     try {
-      await deleteOne('support_ticket_media', {id: mediaId});
+      await deleteOne('support_ticket_media', {id: fileToDelete.id});
       refetch();
       onMediaChange?.();
     } catch (err) {
       setError('Ошибка при удалении файла');
       console.error('Delete error:', err);
+    } finally {
+      setDeleteConfirmOpen(false);
+      setFileToDelete(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setFileToDelete(null);
   };
 
   const handleDownload = async (media: MediaFile) => {
@@ -475,7 +493,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                   <IconButton onClick={() => handleDownload(media)} size="small">
                     <Download/>
                   </IconButton>
-                  <IconButton onClick={() => handleDelete(media.id)} size="small" color="error">
+                  <IconButton onClick={() => handleDeleteClick(media)} size="small" color="error">
                     <Delete/>
                   </IconButton>
                 </Box>
@@ -551,6 +569,22 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       )}
 
       <FullMediaViewer media={selectedMedia} onClose={handleCloseDialog} open={dialogOpen}/>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel}>
+        <DialogTitle>Подтверждение удаления</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Вы уверены, что хотите удалить файл "{fileToDelete?.originalName}"? Это действие нельзя отменить.
+          </Typography>
+        </DialogContent>
+        <Box sx={{display: 'flex', justifyContent: 'flex-end', p: 2, gap: 1}}>
+          <Button onClick={handleDeleteCancel}>Отмена</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Удалить
+          </Button>
+        </Box>
+      </Dialog>
     </Box>
   );
 };
