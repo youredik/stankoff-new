@@ -40,7 +40,7 @@ interface MediaUploadProps {
   onMediaChange?: () => void;
 }
 
-const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: () => void }> = ({src, alt, onClick}) => {
+const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.MouseEvent) => void }> = ({src, alt, onClick}) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -93,7 +93,7 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: () => void }
         borderRadius: 4,
         cursor: 'pointer'
       }}
-      onClick={onClick}
+      onClick={(e) => onClick(e)}
     />
   );
 };
