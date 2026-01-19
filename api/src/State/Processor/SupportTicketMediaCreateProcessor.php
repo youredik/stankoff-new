@@ -50,6 +50,10 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
             throw new BadRequestHttpException('No file uploaded');
         }
 
+        if (!$uploadedFile->isValid()) {
+            throw new BadRequestHttpException('File upload failed: ' . $uploadedFile->getError());
+        }
+
         // Validate file type
         $allowedMimeTypes = [
             'image/jpeg',

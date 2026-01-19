@@ -35,6 +35,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/support_tickets/{supportTicket}/media',
+            inputFormats: ['multipart' => ['multipart/form-data']],
             uriVariables: [
                 'supportTicket' => new Link(
                     fromProperty: 'supportTicket',
@@ -43,9 +44,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                     toClass: SupportTicketMedia::class,
                 ),
             ],
-            processor: SupportTicketMediaCreateProcessor::class,
+            read: false,
             deserialize: false,
-            inputFormats: ['multipart' => ['multipart/form-data']],
+            processor: SupportTicketMediaCreateProcessor::class,
         ),
         new Get(),
         new Delete(
