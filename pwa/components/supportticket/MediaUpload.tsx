@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   Alert,
   Box,
@@ -13,10 +13,10 @@ import {
 } from '@mui/material';
 import {CloudUpload, Delete, Download, Image, VideoFile} from '@mui/icons-material';
 import {useCreate, useDelete, useGetList} from 'react-admin';
-import {getSession, useSession} from 'next-auth/react';
+import {getSession} from 'next-auth/react';
 import {type Session} from '../../app/auth';
 import {authenticatedFetch} from '../../utils/authenticatedFetch';
-import Lightbox, { type Slide } from "yet-another-react-lightbox";
+import Lightbox, {type Slide} from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Video from "yet-another-react-lightbox/plugins/video";
@@ -302,7 +302,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     const index = mediaFiles.findIndex(m => m.id === media.id);
     if (index === -1) return;
     setCurrentIndex(index);
-    setSlides(mediaFiles.map(m => ({ type: isVideo(m.mimeType) ? 'video' : 'image' } as Slide)));
+    setSlides(mediaFiles.map(m => ({type: isVideo(m.mimeType) ? 'video' : 'image'} as Slide)));
 
     // For videos, open lightbox immediately and load video sources
     if (isVideo(media.mimeType)) {
@@ -315,11 +315,60 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           }
           throw new Error('Failed to fetch video');
         })
-        .then(blob => {
+        .then(async blob => {
           const url = URL.createObjectURL(blob);
+          // Get video dimensions
+          const video = document.createElement('video');
+          video.src = url;
+          await new Promise((resolve) => {
+            video.onloadedmetadata = resolve;
+          });
+          const width = video.videoWidth;
+          const height = video.videoHeight;
+          video.remove();
+
+          let posterUrl: string | undefined;
+          if (media.thumbnailUrl) {
+            try {
+              const thumbResponse = await authenticatedFetch(media.thumbnailUrl);
+              if (thumbResponse.ok) {
+                const thumbBlob = await thumbResponse.blob();
+                const thumbUrl = URL.createObjectURL(thumbBlob);
+                const img = document.createElement('img');
+                img.src = thumbUrl;
+                await new Promise((resolve) => {
+                  img.onload = resolve;
+                });
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  // Scale thumbnail to fit video dimensions
+                  const scale = Math.min(width / img.width, height / img.height);
+                  const scaledWidth = img.width * scale;
+                  const scaledHeight = img.height * scale;
+                  const x = (width - scaledWidth) / 2;
+                  const y = (height - scaledHeight) / 2;
+                  ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                  posterUrl = canvas.toDataURL();
+                }
+                URL.revokeObjectURL(thumbUrl);
+              }
+            } catch (e) {
+              console.error('Failed to load video poster:', e);
+            }
+          }
+
           setSlides(prev => {
             const newS = [...prev];
-            newS[index] = { type: 'video', sources: [{ src: url, type: media.mimeType }] } as Slide;
+            newS[index] = {
+              type: 'video',
+              sources: [{src: url, type: media.mimeType}],
+              poster: posterUrl,
+              width,
+              height
+            } as Slide;
             return newS;
           });
         })
@@ -337,7 +386,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
               const thumbUrl = URL.createObjectURL(blob);
               setSlides(prev => {
                 const newS = [...prev];
-                newS[i] = { type: 'image', src: thumbUrl } as Slide;
+                newS[i] = {type: 'image', src: thumbUrl} as Slide;
                 return newS;
               });
               if (i === index) {
@@ -359,6 +408,51 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         if (response.ok) {
           const blob = await response.blob();
           const url = URL.createObjectURL(blob);
+          let posterUrl: string | undefined;
+          let width: number | undefined;
+          let height: number | undefined;
+          if (isVideo(m.mimeType)) {
+            if (m.thumbnailUrl) {
+              try {
+                const thumbResponse = await authenticatedFetch(m.thumbnailUrl);
+                if (thumbResponse.ok) {
+                  const thumbBlob = await thumbResponse.blob();
+                  const thumbUrl = URL.createObjectURL(thumbBlob);
+                  const img = document.createElement('img');
+                  img.src = thumbUrl;
+                  await new Promise((resolve) => {
+                    img.onload = resolve;
+                  });
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width!;
+                  canvas.height = height!;
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) {
+                    // Scale thumbnail to fit video dimensions
+                    const scale = Math.min(width! / img.width, height! / img.height);
+                    const scaledWidth = img.width * scale;
+                    const scaledHeight = img.height * scale;
+                    const x = (width! - scaledWidth) / 2;
+                    const y = (height! - scaledHeight) / 2;
+                    ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                    posterUrl = canvas.toDataURL();
+                  }
+                  URL.revokeObjectURL(thumbUrl);
+                }
+              } catch (e) {
+                console.error('Failed to load video poster:', e);
+              }
+            }
+            // Get video dimensions
+            const video = document.createElement('video');
+            video.src = url;
+            await new Promise((resolve) => {
+              video.onloadedmetadata = resolve;
+            });
+            width = video.videoWidth;
+            height = video.videoHeight;
+            video.remove();
+          }
           setSlides(prev => {
             const newS = [...prev];
             // Revoke thumbnail URL if different
@@ -366,9 +460,15 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
               URL.revokeObjectURL(newS[i].src!);
             }
             if (isVideo(m.mimeType)) {
-              newS[i] = { type: 'video', sources: [{ src: url, type: m.mimeType }] } as Slide;
+              newS[i] = {
+                type: 'video',
+                sources: [{src: url, type: m.mimeType}],
+                poster: posterUrl,
+                width,
+                height
+              } as Slide;
             } else {
-              newS[i] = { type: 'image', src: url } as Slide;
+              newS[i] = {type: 'image', src: url} as Slide;
             }
             return newS;
           });
@@ -397,7 +497,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       <Typography variant="h6" gutterBottom>
         Фото и видео ({(mediaFiles?.length || 0) + uploadingFiles.length})
       </Typography>
-
 
       {error && (
         <Alert severity="error" sx={{mb: 2}}>
@@ -443,9 +542,9 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                   position: 'relative',
                   animation: deletingIds.has(media.id) ? 'pulse 1s infinite' : 'none',
                   '@keyframes pulse': {
-                    '0%': { transform: 'scale(1)' },
-                    '50%': { transform: 'scale(1.05)' },
-                    '100%': { transform: 'scale(1)' },
+                    '0%': {transform: 'scale(1)'},
+                    '50%': {transform: 'scale(1.05)'},
+                    '100%': {transform: 'scale(1)'},
                   },
                 }}>
                   {deletingIds.has(media.id) && (
@@ -634,6 +733,9 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
               slide.sources.forEach((source: { src: string }) => {
                 URL.revokeObjectURL(source.src);
               });
+              if ('poster' in slide && slide.poster) {
+                URL.revokeObjectURL(slide.poster);
+              }
             }
           });
           setSlides([]);
