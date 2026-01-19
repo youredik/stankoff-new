@@ -459,6 +459,42 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           </Typography>
 
           <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
+            {mediaFiles && mediaFiles.map((media: MediaFile) => (
+              <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
+                  {media.thumbnailUrl ? (
+                    <ThumbnailImage
+                      src={media.thumbnailUrl}
+                      alt={media.originalName}
+                      onClick={() => handlePreview(media)}
+                    />
+                  ) : (
+                    <>
+                      {isImage(media.mimeType) && <Image color="primary"/>}
+                      {isVideo(media.mimeType) && <VideoFile color="primary"/>}
+                    </>
+                  )}
+                </Box>
+
+                <Box sx={{textAlign: 'center', mb: 1}}>
+                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                    {media.originalName}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
+                  </Typography>
+                </Box>
+
+                <Box sx={{display: 'flex', gap: 1}}>
+                  <IconButton onClick={() => handleDownload(media)} size="small">
+                    <Download/>
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(media.id)} size="small" color="error">
+                    <Delete/>
+                  </IconButton>
+                </Box>
+              </Paper>
+            ))}
             {uploadingFiles.map((uploadingFile, index) => (
               <Paper key={`uploading-${index}`} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1, position: 'relative'}}>
@@ -505,42 +541,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                 {uploadingFile.status === 'uploading' && (
                   <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
                 )}
-              </Paper>
-            ))}
-            {mediaFiles && mediaFiles.map((media: MediaFile) => (
-              <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
-                  {media.thumbnailUrl ? (
-                    <ThumbnailImage
-                      src={media.thumbnailUrl}
-                      alt={media.originalName}
-                      onClick={() => handlePreview(media)}
-                    />
-                  ) : (
-                    <>
-                      {isImage(media.mimeType) && <Image color="primary"/>}
-                      {isVideo(media.mimeType) && <VideoFile color="primary"/>}
-                    </>
-                  )}
-                </Box>
-
-                <Box sx={{textAlign: 'center', mb: 1}}>
-                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
-                    {media.originalName}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
-                  </Typography>
-                </Box>
-
-                <Box sx={{display: 'flex', gap: 1}}>
-                  <IconButton onClick={() => handleDownload(media)} size="small">
-                    <Download/>
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(media.id)} size="small" color="error">
-                    <Delete/>
-                  </IconButton>
-                </Box>
               </Paper>
             ))}
           </Box>
