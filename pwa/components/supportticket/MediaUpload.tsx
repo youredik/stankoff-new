@@ -243,9 +243,12 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
   const handleDeleteConfirm = async () => {
     if (!fileToDelete) return;
-    setDeletingIds(prev => new Set(prev).add(fileToDelete.id));
+    const fileId = fileToDelete.id;
+    setDeleteConfirmOpen(false);
+    setFileToDelete(null);
+    setDeletingIds(prev => new Set(prev).add(fileId));
     try {
-      await deleteOne(`support_tickets/${ticketId}/media`, {id: fileToDelete.id});
+      await deleteOne(`support_tickets/${ticketId}/media`, {id: fileId});
       refetch();
       onMediaChange?.();
     } catch (err) {
@@ -254,11 +257,9 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     } finally {
       setDeletingIds(prev => {
         const newSet = new Set(prev);
-        newSet.delete(fileToDelete.id);
+        newSet.delete(fileId);
         return newSet;
       });
-      setDeleteConfirmOpen(false);
-      setFileToDelete(null);
     }
   };
 
@@ -482,7 +483,13 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  position: 'relative'
+                  position: 'relative',
+                  animation: deletingIds.has(media.id) ? 'pulse 1s infinite' : 'none',
+                  '@keyframes pulse': {
+                    '0%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.05)' },
+                    '100%': { transform: 'scale(1)' },
+                  },
                 }}>
                   {deletingIds.has(media.id) && (
                     <Box sx={{
