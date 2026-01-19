@@ -21,6 +21,16 @@ class SupportTicketMediaDeleteProcessor implements ProcessorInterface
         // Delete from storage
         $this->storageService->deleteFile($data->path);
 
+        // Delete thumbnail if exists
+        if ($data->thumbnailPath) {
+            try {
+                $this->storageService->deleteFile($data->thumbnailPath);
+            } catch (\Exception $e) {
+                // Log error but continue with deletion
+                error_log('Failed to delete thumbnail: ' . $e->getMessage());
+            }
+        }
+
         // Delete from database
         $this->entityManager->remove($data);
         $this->entityManager->flush();

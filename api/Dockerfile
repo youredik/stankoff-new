@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	gettext \
 	git \
 	zip \
+	libgd-dev \
+	ffmpeg \
 	&& rm -rf /var/lib/apt/lists/*
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
@@ -38,6 +40,7 @@ RUN set -eux; \
 		intl \
 		opcache \
 		zip \
+		gd \
 	;
 
 ###> recipes ###

@@ -60,7 +60,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: [
         AbstractNormalizer::GROUPS => ['SupportTicketMedia:write'],
     ],
-    security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER")'
+    security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER") or is_granted("OIDC_ADMIN")'
 )]
 #[ORM\Entity(repositoryClass: SupportTicketMediaRepository::class)]
 class SupportTicketMedia
@@ -95,6 +95,10 @@ class SupportTicketMedia
     #[Groups(['SupportTicketMedia:read'])]
     public string $path;
 
+    #[ORM\Column(type: 'string', length: 500, nullable: true)]
+    #[Groups(['SupportTicketMedia:read'])]
+    public ?string $thumbnailPath = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['SupportTicketMedia:read'])]
     public \DateTimeImmutable $createdAt;
@@ -120,4 +124,15 @@ class SupportTicketMedia
     {
         return "/api/support_tickets/{$this->supportTicket->getId()}/media/{$this->id}/download";
     }
+
+    #[Groups(['SupportTicketMedia:read'])]
+    public function getThumbnailUrl(): ?string
+    {
+        return $this->thumbnailPath ? "/api/support_tickets/{$this->supportTicket->getId()}/media/{$this->id}/thumbnail" : null;
+    }
 }
+
+
+
+
+

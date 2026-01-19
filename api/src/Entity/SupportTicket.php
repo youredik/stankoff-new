@@ -49,7 +49,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         AbstractNormalizer::GROUPS => ['SupportTicket:write'],
     ],
 //    collectDenormalizationErrors: true,
-    security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER")'
+    security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER") or is_granted("OIDC_ADMIN")'
 )]
 #[ApiFilter(SupportTicketAccessFilter::class)]
 #[ORM\Entity(repositoryClass: SupportTicketRepository::class)]

@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\SupportTicketMedia;
 use App\Repository\SupportTicketRepository;
+use App\Service\ThumbnailService;
 use App\Service\YandexObjectStorageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -21,6 +22,7 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
         private EntityManagerInterface $entityManager,
         private SupportTicketRepository $supportTicketRepository,
         private YandexObjectStorageService $storageService,
+        private ThumbnailService $thumbnailService,
     ) {
     }
 
@@ -81,6 +83,36 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
         // Upload to storage
         $this->storageService->uploadFile($path, $uploadedFile->getPathname(), $uploadedFile->getMimeType());
 
+        // Generate thumbnail if it's an image or video
+        $thumbnailPath = null;
+        if (str_starts_with($uploadedFile->getMimeType(), 'image/')) {
+            try {
+                $thumbnailFilename = 'thumb_' . $filename;
+                $thumbnailLocalPath = sys_get_temp_dir() . '/' . $thumbnailFilename;
+                $this->thumbnailService->generateImageThumbnail($uploadedFile->getPathname(), $thumbnailLocalPath);
+                $thumbnailStoragePath = "media/{$supportTicketId}/{$thumbnailFilename}";
+                $this->storageService->uploadFile($thumbnailStoragePath, $thumbnailLocalPath, 'image/jpeg');
+                $thumbnailPath = $thumbnailStoragePath;
+                unlink($thumbnailLocalPath); // Clean up temp file
+            } catch (\Exception $e) {
+                // Log error but don't fail the upload
+                error_log('Failed to generate image thumbnail: ' . $e->getMessage());
+            }
+        } elseif (str_starts_with($uploadedFile->getMimeType(), 'video/')) {
+            try {
+                $thumbnailFilename = 'thumb_' . $filename . '.jpg';
+                $thumbnailLocalPath = sys_get_temp_dir() . '/' . $thumbnailFilename;
+                $this->thumbnailService->generateVideoThumbnail($uploadedFile->getPathname(), $thumbnailLocalPath);
+                $thumbnailStoragePath = "media/{$supportTicketId}/{$thumbnailFilename}";
+                $this->storageService->uploadFile($thumbnailStoragePath, $thumbnailLocalPath, 'image/jpeg');
+                $thumbnailPath = $thumbnailStoragePath;
+                unlink($thumbnailLocalPath); // Clean up temp file
+            } catch (\Exception $e) {
+                // Log error but don't fail the upload
+                error_log('Failed to generate video thumbnail: ' . $e->getMessage());
+            }
+        }
+
         // Create media entity
         $media = new SupportTicketMedia();
         $media->filename = $filename;
@@ -88,6 +120,7 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
         $media->mimeType = $uploadedFile->getMimeType();
         $media->size = $uploadedFile->getSize();
         $media->path = $path;
+        $media->thumbnailPath = $thumbnailPath;
         $media->supportTicket = $supportTicket;
 
         $this->entityManager->persist($media);
