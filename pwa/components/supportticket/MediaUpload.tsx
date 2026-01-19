@@ -451,15 +451,16 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         </Alert>
       )}
 
-      {/* Uploading Files */}
-      {uploadingFiles.length > 0 && (
-        <Box sx={{mb: 2}}>
+      {/* Media Files List */}
+      {(mediaFiles && mediaFiles.length > 0) || uploadingFiles.length > 0 ? (
+        <Box>
           <Typography variant="subtitle1" gutterBottom>
-            Загружаемые файлы
+            Файлы ({(mediaFiles?.length || 0) + uploadingFiles.length})
           </Typography>
+
           <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
             {uploadingFiles.map((uploadingFile, index) => (
-              <Paper key={index} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              <Paper key={`uploading-${index}`} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1, position: 'relative'}}>
                   {uploadingFile.previewUrl ? (
                     <img
@@ -506,19 +507,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                 )}
               </Paper>
             ))}
-          </Box>
-        </Box>
-      )}
-
-      {/* Media Files List */}
-      {mediaFiles && mediaFiles.length > 0 && (
-        <Box>
-          <Typography variant="subtitle1" gutterBottom>
-            Загруженные файлы ({mediaFiles.length})
-          </Typography>
-
-          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
-            {mediaFiles.map((media: MediaFile) => (
+            {mediaFiles && mediaFiles.map((media: MediaFile) => (
               <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
                   {media.thumbnailUrl ? (
@@ -556,7 +545,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
             ))}
           </Box>
         </Box>
-      )}
+      ) : null}
 
       {isLoading && (
         <Typography variant="body2" color="textSecondary">
