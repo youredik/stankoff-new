@@ -112,6 +112,8 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
   const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
 
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -292,12 +294,14 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
   const handlePreview = useCallback((media: MediaFile) => {
     setSelectedMedia(media);
-    setDialogOpen(true);
+    setPreviewLoading(true);
+    setDialogOpen(false);
   }, []);
 
   const handleCloseDialog = useCallback(() => {
     setDialogOpen(false);
     setSelectedMedia(null);
+    setPreviewLoading(false);
   }, []);
 
   const formatFileSize = (bytes: number) => {
@@ -311,10 +315,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const isImage = (mimeType: string) => mimeType.startsWith('image/');
   const isVideo = (mimeType: string) => mimeType.startsWith('video/');
 
-  const FullMediaViewer = React.memo(({media, onClose, open}: {
+  const FullMediaViewer = React.memo(({media, onClose, open, onLoaded}: {
       media: MediaFile | null;
       onClose: () => void;
-      open: boolean
+      open: boolean;
+      onLoaded: () => void;
     }) => {
       if (!media) return null;
       const {data: session, status} = useSession();
@@ -324,6 +329,17 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       const [hasError, setHasError] = useState(false);
       const loadingRef = useRef(false);
       const attemptedLoadRef = useRef(false);
+      const [isVisible, setIsVisible] = useState(true);
+
+      React.useEffect(() => {
+        const handleVisibilityChange = () => {
+          setIsVisible(!document.hidden);
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+      }, []);
 
       React.useEffect(() => {
         if (!media) return;
@@ -344,7 +360,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       }, [mediaSrc]);
 
       React.useEffect(() => {
-        if (loaded || loadingRef.current || attemptedLoadRef.current) return;
+        if (loaded || loadingRef.current || attemptedLoadRef.current || !isVisible) return;
 
         loadingRef.current = true;
         setLoading(true);
@@ -368,6 +384,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
               const objectUrl = URL.createObjectURL(blob);
               setMediaSrc(objectUrl);
               setLoaded(true);
+              onLoaded();
             } else {
               setHasError(true);
             }
@@ -381,7 +398,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         };
 
         loadMedia();
-      }, [media?.downloadUrl, loaded]);
+      }, [media?.downloadUrl, loaded, isVisible, status, session]);
 
       return (
         <Dialog open={open} onClose={onClose} maxWidth={false} sx={{ '& .MuiDialog-paper': { maxHeight: '90vh', maxWidth: '90vw' } }}>
@@ -664,7 +681,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         </Typography>
       )}
 
-      <FullMediaViewer media={selectedMedia} onClose={handleCloseDialog} open={dialogOpen}/>
+      <FullMediaViewer media={selectedMedia} onClose={handleCloseDialog} open={dialogOpen} onLoaded={() => { setPreviewLoading(false); setDialogOpen(true); }} />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel}>
