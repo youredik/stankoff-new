@@ -408,42 +408,44 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
             Загруженные файлы ({mediaFiles.length})
           </Typography>
 
-          {mediaFiles.map((media: MediaFile) => (
-            <Paper key={media.id} sx={{p: 2, mb: 1, display: 'flex', alignItems: 'center'}}>
-              <Box sx={{mr: 2, width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2}}>
-                {media.thumbnailUrl ? (
-                  <ThumbnailImage
-                    src={media.thumbnailUrl}
-                    alt={media.originalName}
-                    onClick={() => handlePreview(media)}
-                  />
-                ) : (
-                  <>
-                    {isImage(media.mimeType) && <Image color="primary"/>}
-                    {isVideo(media.mimeType) && <VideoFile color="primary"/>}
-                  </>
-                )}
-              </Box>
+          <Box sx={{display: 'flex', overflowX: 'auto', gap: 2, pb: 1}}>
+            {mediaFiles.map((media: MediaFile) => (
+              <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
+                  {media.thumbnailUrl ? (
+                    <ThumbnailImage
+                      src={media.thumbnailUrl}
+                      alt={media.originalName}
+                      onClick={() => handlePreview(media)}
+                    />
+                  ) : (
+                    <>
+                      {isImage(media.mimeType) && <Image color="primary"/>}
+                      {isVideo(media.mimeType) && <VideoFile color="primary"/>}
+                    </>
+                  )}
+                </Box>
 
-              <Box sx={{flexGrow: 1}}>
-                <Typography variant="body1" noWrap>
-                  {media.originalName}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
-                </Typography>
-              </Box>
+                <Box sx={{textAlign: 'center', mb: 1}}>
+                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                    {media.originalName}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
+                  </Typography>
+                </Box>
 
-              <Box>
-                <IconButton onClick={() => handleDownload(media)} size="small">
-                  <Download/>
-                </IconButton>
-                <IconButton onClick={() => handleDelete(media.id)} size="small" color="error">
-                  <Delete/>
-                </IconButton>
-              </Box>
-            </Paper>
-          ))}
+                <Box sx={{display: 'flex', gap: 1}}>
+                  <IconButton onClick={() => handleDownload(media)} size="small">
+                    <Download/>
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(media.id)} size="small" color="error">
+                    <Delete/>
+                  </IconButton>
+                </Box>
+              </Paper>
+            ))}
+          </Box>
         </Box>
       )}
 
