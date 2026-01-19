@@ -115,9 +115,19 @@ class SupportTicket
     #[ORM\OrderBy(['createdAt' => 'DESC'])]
     public Collection $comments;
 
+    /** @var Collection<int, SupportTicketMedia> */
+    #[ORM\OneToMany(targetEntity: SupportTicketMedia::class, mappedBy: 'supportTicket', cascade: [
+        'persist',
+        'remove',
+    ])]
+    #[ORM\OrderBy(['createdAt' => 'ASC'])]
+    #[Groups(['SupportTicket:read'])]
+    public Collection $media;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
+        $this->media = new ArrayCollection();
     }
 
     #[Groups(['SupportTicket:read',])]

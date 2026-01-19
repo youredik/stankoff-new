@@ -12,6 +12,7 @@ import {ru} from "date-fns/locale";
 import React from "react";
 import {OrderInfo} from './OrderInfo';
 import {StatusChangeForm} from './StatusChangeForm';
+import {MediaUpload} from './MediaUpload';
 
 const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
   ticketId: string,
@@ -158,6 +159,10 @@ const SupportTicketShowContent = () => {
       <FunctionField
         label=""
         render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
+      />
+      <FunctionField
+        label=""
+        render={(record: any) => record?.id && <MediaUpload ticketId={record.id.split('/').pop() || ''} />}
       />
       <FunctionField
         label="Активность"
