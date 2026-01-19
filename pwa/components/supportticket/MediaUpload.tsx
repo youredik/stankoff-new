@@ -384,7 +384,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       }, [media?.downloadUrl, loaded]);
 
       return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" sx={{height: '70vh'}}>
+        <Dialog open={open} onClose={onClose} maxWidth={false} sx={{ '& .MuiDialog-paper': { maxHeight: '90vh', maxWidth: '90vw' } }}>
           <DialogTitle>
             {media.originalName}
             <IconButton
@@ -400,7 +400,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
               <Close/>
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <DialogContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1 }}>
             {loading ? (
               <Typography>Загрузка...</Typography>
             ) : mediaSrc ? (
@@ -410,7 +410,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                   alt={media.originalName}
                   style={{
                     maxWidth: '100%',
-                    maxHeight: '100%',
+                    maxHeight: '70vh',
                     objectFit: 'contain',
                     display: 'block'
                   }}
@@ -421,7 +421,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                   src={mediaSrc}
                   style={{
                     maxWidth: '100%',
-                    maxHeight: '100%',
+                    maxHeight: '70vh',
                     display: 'block'
                   }}
                 />
