@@ -407,22 +407,28 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         Медиа файлы
       </Typography>
 
-      {/* Upload Area */}
-      <Paper
+
+      {error && (
+        <Alert severity="error" sx={{mb: 2}}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Media Files List */}
+      <Box
         sx={{
-          p: 3,
-          mb: 2,
-          border: '2px dashed',
-          borderColor: dragOver ? 'primary.main' : 'grey.300',
-          backgroundColor: dragOver ? 'primary.50' : 'grey.50',
-          cursor: 'pointer',
+          minHeight: 200,
+          border: dragOver ? '2px dashed' : '2px dashed transparent',
+          borderColor: dragOver ? 'primary.main' : 'transparent',
+          backgroundColor: dragOver ? 'primary.50' : 'transparent',
           transition: 'all 0.2s ease',
-          position: 'relative',
+          p: dragOver ? 2 : 0,
+          borderRadius: 1,
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => document.getElementById('file-input')?.click()}
+        onClick={() => !dragOver && document.getElementById('file-input')?.click()}
       >
         <input
           id="file-input"
@@ -432,33 +438,14 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           style={{display: 'none'}}
           onChange={handleFileSelect}
         />
+        {(mediaFiles && mediaFiles.length > 0) || uploadingFiles.length > 0 ? (
+          <>
+            <Typography variant="subtitle1" gutterBottom>
+              Файлы ({(mediaFiles?.length || 0) + uploadingFiles.length})
+            </Typography>
 
-        <Box textAlign="center">
-          <CloudUpload sx={{fontSize: 48, color: 'grey.400', mb: 1}}/>
-          <Typography variant="body1" color="textSecondary">
-            Перетащите файлы сюда или нажмите для выбора
-          </Typography>
-          <Typography variant="body2" color="textSecondary">
-            Поддерживаются изображения и видео
-          </Typography>
-        </Box>
-      </Paper>
-
-      {error && (
-        <Alert severity="error" sx={{mb: 2}}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Media Files List */}
-      {(mediaFiles && mediaFiles.length > 0) || uploadingFiles.length > 0 ? (
-        <Box>
-          <Typography variant="subtitle1" gutterBottom>
-            Файлы ({(mediaFiles?.length || 0) + uploadingFiles.length})
-          </Typography>
-
-          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
-            {mediaFiles && mediaFiles.map((media: MediaFile) => (
+            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
+              {mediaFiles && mediaFiles.map((media: MediaFile) => (
               <Paper key={media.id} sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Box sx={{width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 2, mb: 1}}>
                   {media.thumbnailUrl ? (
@@ -541,10 +528,21 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                   <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
                 )}
               </Paper>
-            ))}
+              ))}
+            </Box>
+          </>
+        ) : (
+          <Box sx={{textAlign: 'center', py: 4}}>
+            <CloudUpload sx={{fontSize: 48, color: 'grey.400', mb: 1}}/>
+            <Typography variant="body1" color="textSecondary">
+              Перетащите файлы сюда или нажмите для выбора
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Поддерживаются изображения и видео
+            </Typography>
           </Box>
-        </Box>
-      ) : null}
+        )}
+      </Box>
 
       {isLoading && (
         <Typography variant="body2" color="textSecondary">
