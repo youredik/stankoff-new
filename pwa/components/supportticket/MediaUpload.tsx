@@ -112,6 +112,14 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const [create] = useCreate();
   const [deleteOne] = useDelete();
 
+  const {data: mediaFiles, isLoading, refetch} = useGetList(
+    'support_ticket_media',
+    {
+      filter: {supportTicket: `/api/support_tickets/${ticketId}`},
+      sort: {field: 'createdAt', order: 'ASC'},
+    }
+  );
+
   // Clean up object URLs on unmount
   React.useEffect(() => {
     return () => {
@@ -127,6 +135,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   React.useEffect(() => {
     if (uploadingFiles.length > 0 && uploadingFiles.every(f => f.status !== 'uploading')) {
       const timer = setTimeout(() => {
+        refetch();
         setUploadingFiles(prev => {
           prev.forEach(file => {
             if (file.previewUrl) {
@@ -138,15 +147,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       }, 2000); // 2 seconds delay
       return () => clearTimeout(timer);
     }
-  }, [uploadingFiles]);
-
-  const {data: mediaFiles, isLoading, refetch} = useGetList(
-    'support_ticket_media',
-    {
-      filter: {supportTicket: `/api/support_tickets/${ticketId}`},
-      sort: {field: 'createdAt', order: 'ASC'},
-    }
-  );
+  }, [uploadingFiles, refetch]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -211,7 +212,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     xhr.addEventListener('load', () => {
       if (xhr.status === 201) {
         setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'done', progress: 100} : f));
-        refetch();
         onMediaChange?.();
       } else {
         setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'error'} : f));
