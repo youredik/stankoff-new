@@ -81,7 +81,6 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
     return <Box sx={{
       width: 60,
       height: 60,
-      bgcolor: 'grey.200',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
