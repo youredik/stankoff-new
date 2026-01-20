@@ -3,6 +3,7 @@ import {
   Alert,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -84,7 +85,9 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
-    }}>...</Box>;
+    }}>
+      <CircularProgress size={30} />
+    </Box>;
   }
 
   if (!imageSrc) {
