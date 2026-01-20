@@ -78,7 +78,7 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
         // Generate unique filename
         $extension = $uploadedFile->getClientOriginalExtension();
         $filename = uniqid('media_', true) . '.' . $extension;
-        $path = "media/{$supportTicketId}/{$filename}";
+        $path = "support-ticket/media/{$supportTicketId}/{$filename}";
 
         // Upload to storage
         $this->storageService->uploadFile($path, $uploadedFile->getPathname(), $uploadedFile->getMimeType());
@@ -90,7 +90,7 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
                 $thumbnailFilename = 'thumb_' . $filename;
                 $thumbnailLocalPath = sys_get_temp_dir() . '/' . $thumbnailFilename;
                 $this->thumbnailService->generateImageThumbnail($uploadedFile->getPathname(), $thumbnailLocalPath);
-                $thumbnailStoragePath = "media/{$supportTicketId}/{$thumbnailFilename}";
+                $thumbnailStoragePath = "support-ticket/media/{$supportTicketId}/{$thumbnailFilename}";
                 $this->storageService->uploadFile($thumbnailStoragePath, $thumbnailLocalPath, 'image/jpeg');
                 $thumbnailPath = $thumbnailStoragePath;
                 unlink($thumbnailLocalPath); // Clean up temp file
