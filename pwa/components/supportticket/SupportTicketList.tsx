@@ -31,12 +31,12 @@ export const SupportTicketList = () => (
       bulkActionButtons={false}
     >
       <FunctionField
-        label="#"
+        label="Номер заявки"
         render={(record: any) => record?.id?.split('/').pop() || ''}
         sortBy="id"
         sortable
       />
-      <TextField source="subject" label="Цель обращения" sortable/>
+
       <FunctionField
         label="Статус"
         render={(record: any) => <StatusChip status={record?.currentStatus || ''}
@@ -44,9 +44,12 @@ export const SupportTicketList = () => (
         sortBy="currentStatusValue"
         sortable
       />
-      <TextField source="currentClosingReason" label="Причина закрытия" sortable={false}/>
+      <TextField source="subject" label="Тема обращения" sortable/>
+      {/*<TextField source="currentClosingReason" label="Причина закрытия" sortable={false}/>*/}
+      <TextField source="userName" label="Исполнитель" sortBy="user.name" sortable/>
+      <TextField source="authorName" label="Автор" sortable/>
       <FunctionField
-        label="Создано"
+        label="Дата создания"
         render={(record: any) => (
           <Tooltip title={new Date(record.createdAt).toLocaleString('ru-RU')}>
             <span>{formatDistanceToNow(new Date(record.createdAt), {addSuffix: true, locale: ru})}</span>
@@ -55,9 +58,7 @@ export const SupportTicketList = () => (
         sortBy="createdAt"
         sortable
       />
-      <TextField source="userName" label="Ответственный" sortBy="user.name" sortable/>
-      <TextField source="authorName" label="Автор" sortable/>
-      <NumberField source="orderId" label="ID заказа" sortable={false}/>
+      {/*<NumberField source="orderId" label="ID заказа" sortable={false}/>*/}
     </Datagrid>
   </List>
 );
