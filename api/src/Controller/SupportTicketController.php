@@ -110,9 +110,10 @@ final class SupportTicketController extends AbstractController
             $supportTicket->closedAt = new DateTimeImmutable();
         }
 
-        // Update ticket user to current user
+        // Update ticket user to current user if not already assigned
         $user = $this->getUser();
-        if ($user instanceof User) {
+        $itsMe = $supportTicket->user === $user;
+        if ($user instanceof User && $supportTicket->user === null) {
             $supportTicket->user = $user;
             $this->entityManager->flush();
         }
@@ -123,7 +124,12 @@ final class SupportTicketController extends AbstractController
                 $supportTicket->getId(),
             )) {
             return $this->json(
-                ['error' => 'У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.'],
+                [
+                    'error' => 'У '
+                        . ($itsMe ? 'вас' : 'ответственного ' . $supportTicket->getUserName())
+                        . ' уже имеется заявка в работе.'
+                        . ($itsMe ? ' Отложите действующую заявку чтобы взять новую.' : ''),
+                ],
                 400,
             );
         }
