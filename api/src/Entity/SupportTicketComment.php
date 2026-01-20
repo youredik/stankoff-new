@@ -41,9 +41,10 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             order: ['createdAt' => 'DESC'],
         ),
+        /* Создание происходит `App\Controller\SupportTicketController::changeStatus()
         new Post(
             processor: SupportTicketCommentCreateProcessor::class,
-        ),
+        ),*/
         new Get(),
     ],
     normalizationContext: [

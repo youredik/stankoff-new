@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ExpressionLanguage\Expression;
@@ -105,6 +106,8 @@ final class SupportTicketController extends AbstractController
             if (!$closingReason) {
                 throw new BadRequestHttpException('Invalid closing reason');
             }
+
+            $supportTicket->closedAt = new DateTimeImmutable();
         }
 
         // Update ticket user to current user
@@ -115,10 +118,14 @@ final class SupportTicketController extends AbstractController
         }
 
         // Validate that user can only have one ticket in progress
-        if ($newStatus === SupportTicketStatus::IN_PROGRESS && $user instanceof User) {
-            if ($this->supportTicketRepository->hasUserTicketInProgress($user, $supportTicket->getId())) {
-                return $this->json(['error' => 'У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.'], 400);
-            }
+        if ($newStatus === SupportTicketStatus::IN_PROGRESS && $user instanceof User && $this->supportTicketRepository->hasUserTicketInProgress(
+                $user,
+                $supportTicket->getId(),
+            )) {
+            return $this->json(
+                ['error' => 'У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.'],
+                400,
+            );
         }
 
         // Create comment
@@ -127,7 +134,7 @@ final class SupportTicketController extends AbstractController
         $comment->status = $newStatus;
         $comment->closingReason = $closingReason;
         $comment->supportTicket = $supportTicket;
-        $comment->createdAt = new \DateTimeImmutable();
+        $comment->createdAt = new DateTimeImmutable();
         if ($user instanceof User) {
             $comment->user = $user;
         }

@@ -58,6 +58,16 @@ export const SupportTicketList = () => (
         sortBy="createdAt"
         sortable
       />
+      <FunctionField
+        label="Дата закрытия"
+        render={(record: any) => record.closedAt ? (
+          <Tooltip title={new Date(record.closedAt).toLocaleString('ru-RU')}>
+            <span>{formatDistanceToNow(new Date(record.closedAt), {addSuffix: true, locale: ru})}</span>
+          </Tooltip>
+        ) : ''}
+        sortBy="closedAt"
+        sortable
+      />
       {/*<NumberField source="orderId" label="ID заказа" sortable={false}/>*/}
     </Datagrid>
   </List>
