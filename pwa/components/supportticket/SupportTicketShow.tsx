@@ -111,6 +111,7 @@ const SupportTicketShowContent = () => {
   const [commentsRefetchKey, setCommentsRefetchKey] = React.useState(0);
   const [users, setUsers] = React.useState<any[]>([]);
   const [isEditingUser, setIsEditingUser] = React.useState(false);
+  const [openSelect, setOpenSelect] = React.useState(false);
   const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
   const [assigning, setAssigning] = React.useState(false);
   const {record, refetch} = useShowContext();
@@ -158,6 +159,7 @@ const SupportTicketShowContent = () => {
         refetch();
         setIsEditingUser(false);
         setSelectedUserId(null);
+        setOpenSelect(false);
       } else {
         console.error('Failed to assign user');
       }
@@ -181,6 +183,8 @@ const SupportTicketShowContent = () => {
             <Box ref={selectRef} sx={{ maxWidth: 250 }}>
               <FormControl size="small" fullWidth>
                 <Select
+                  open={openSelect}
+                  onClose={() => setOpenSelect(false)}
                   value={selectedUserId || ''}
                   onChange={(e) => {
                     const userId = Number(e.target.value);
@@ -191,6 +195,7 @@ const SupportTicketShowContent = () => {
                   onBlur={() => {
                     setIsEditingUser(false);
                     setSelectedUserId(null);
+                    setOpenSelect(false);
                   }}
                   displayEmpty
                   disabled={assigning}
@@ -228,7 +233,10 @@ const SupportTicketShowContent = () => {
                   color: 'primary.main',
                   display: 'inline'
                 }}
-                onClick={() => setIsEditingUser(true)}
+                onClick={() => {
+                  setIsEditingUser(true);
+                  setOpenSelect(true);
+                }}
               >
                 {record?.userName || 'Не назначен'}
               </Typography>
