@@ -1,5 +1,5 @@
 import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useShowContext} from 'react-admin';
-import {Box, CircularProgress, Tooltip, Typography} from '@mui/material';
+import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button} from '@mui/material';
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
@@ -109,22 +109,31 @@ const SupportTicketShowContent = () => {
   const [, setClosingReasonChoices] = React.useState<any[]>([]);
   const [statusColors, setStatusColors] = React.useState<Record<string, string>>({});
   const [commentsRefetchKey, setCommentsRefetchKey] = React.useState(0);
+  const [users, setUsers] = React.useState<any[]>([]);
+  const [isEditingUser, setIsEditingUser] = React.useState(false);
+  const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
+  const [assigning, setAssigning] = React.useState(false);
+  const {record, refetch} = useShowContext();
+  const selectRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const loadData = async () => {
       try {
-        const [reasonsResponse, statusesResponse] = await Promise.all([
+        const [reasonsResponse, statusesResponse, usersResponse] = await Promise.all([
           fetch('/api/support-tickets/closing-reasons'),
-          fetch('/api/support-tickets/statuses')
+          fetch('/api/support-tickets/statuses'),
+          fetch('/api/support-tickets/assignable-users')
         ]);
         const reasons = await reasonsResponse.json();
         const statuses = await statusesResponse.json();
+        const usersData = await usersResponse.json();
         setClosingReasonChoices(reasons);
         const colorsMap = statuses.reduce((acc: Record<string, string>, status: any) => {
           acc[status.id] = status.color;
           return acc;
         }, {});
         setStatusColors(colorsMap);
+        setUsers(usersData);
       } catch (error) {
         console.error('Failed to load data:', error);
       }
@@ -132,12 +141,101 @@ const SupportTicketShowContent = () => {
     loadData();
   }, []);
 
+  const handleUserSelect = async (userId: number) => {
+    if (!record?.id) return;
+
+    setAssigning(true);
+    try {
+      const response = await fetch(`/api/support-tickets/${record.id.split('/').pop()}/assign-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({userId}),
+      });
+
+      if (response.ok) {
+        refetch();
+        setIsEditingUser(false);
+        setSelectedUserId(null);
+      } else {
+        console.error('Failed to assign user');
+      }
+    } catch (error) {
+      console.error('Error assigning user:', error);
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+
   return (
     <SimpleShowLayout>
       <TextField source="subject" label="Причина обращения"/>
       <TextField source="description" label="Цель обращения"/>
       <TextField source="authorName" label="Автор заявки"/>
-      <TextField source="userName" label="Ответственный"/>
+      <FunctionField
+        label="Ответственный"
+        render={(record: any) => (
+          isEditingUser ? (
+            <Box ref={selectRef} sx={{ maxWidth: 250 }}>
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={selectedUserId || ''}
+                  onChange={(e) => {
+                    const userId = Number(e.target.value);
+                    if (userId) {
+                      handleUserSelect(userId);
+                    }
+                  }}
+                  onBlur={() => {
+                    setIsEditingUser(false);
+                    setSelectedUserId(null);
+                  }}
+                  displayEmpty
+                  disabled={assigning}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Выберите ответственного</em>
+                  </MenuItem>
+                  {users.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          ) : record?.currentStatusValue === 'completed' ? (
+            <Typography component="span">
+              {record?.userName || 'Не назначен'}
+            </Typography>
+          ) : (
+            <Tooltip title="Нажмите чтобы сменить ответственного">
+              <Typography
+                component="span"
+                sx={{
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  textDecorationStyle: 'dashed',
+                  color: 'primary.main',
+                  display: 'inline'
+                }}
+                onClick={() => setIsEditingUser(true)}
+              >
+                {record?.userName || 'Не назначен'}
+              </Typography>
+            </Tooltip>
+          )
+        )}
+      />
       <FunctionField
         label="Создана"
         render={(record: any) => (

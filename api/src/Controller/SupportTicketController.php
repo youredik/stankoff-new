@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
+use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,6 +59,52 @@ final class SupportTicketController extends AbstractController
         );
 
         return $this->json($reasons);
+    }
+
+    #[Route('/assignable-users', name: 'api_support_ticket_assignable_users', methods: ['GET'])]
+    public function getAssignableUsers(UserRepository $userRepository): JsonResponse
+    {
+        $users = $userRepository->findAll();
+        $result = array_map(static fn(User $user) => [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+        ], $users);
+
+        return $this->json($result);
+    }
+
+    #[Route('/{id}/assign-user', name: 'api_support_ticket_assign_user', methods: ['POST'])]
+    public function assignUser(Request $request, SupportTicket $supportTicket, UserRepository $userRepository): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            throw new BadRequestHttpException('Invalid JSON');
+        }
+
+        $userId = $data['userId'] ?? null;
+        if (!$userId) {
+            throw new BadRequestHttpException('User ID is required');
+        }
+
+        $user = $userRepository->find($userId);
+        if (!$user) {
+            throw new BadRequestHttpException('User not found');
+        }
+
+        if ($supportTicket->getCurrentStatusValue() === SupportTicketStatus::COMPLETED->value) {
+            throw new BadRequestHttpException('Cannot assign user to completed ticket');
+        }
+
+        $supportTicket->user = $user;
+        $this->entityManager->flush();
+
+        return $this->json([
+            'message' => 'User assigned successfully',
+            'ticket' => [
+                'id' => $supportTicket->getId(),
+                'userName' => $supportTicket->getUserName(),
+            ],
+        ]);
     }
 
     #[IsGranted(new Expression('is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER")'))]
