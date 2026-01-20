@@ -1,20 +1,14 @@
 import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useShowContext} from 'react-admin';
-import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button} from '@mui/material';
-import Timeline from '@mui/lab/Timeline';
-import TimelineItem from '@mui/lab/TimelineItem';
-import TimelineSeparator from '@mui/lab/TimelineSeparator';
-import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineContent from '@mui/lab/TimelineContent';
-import TimelineDot from '@mui/lab/TimelineDot';
-import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
+import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
 import React from "react";
 import {OrderInfo} from './OrderInfo';
 import {StatusChangeForm} from './StatusChangeForm';
 import {MediaUpload} from './MediaUpload';
+import {StatusChip} from "./common";
 
-const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
+const CommentsList = ({ticketId, statusColors, refetchKey}: {
   ticketId: string,
   statusColors: Record<string, string>,
   refetchKey?: number
@@ -48,50 +42,38 @@ const CommentsTimeline = ({ticketId, statusColors, refetchKey}: {
 
   return (
     <Box>
-      <Timeline position="right">
-        {comments.map((comment: any, index: number) => {
-          const statusColor = statusColors[comment.status] || 'primary';
-          return (
-            <TimelineItem key={comment.id || index}>
-              <TimelineOppositeContent sx={{m: 'auto 0'}}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: `${statusColor}.main`,
-                    fontWeight: 'bold'
-                  }}
-                >
+      {comments.map((comment: any, index: number) => {
+        const statusColor = statusColors[comment.status] || 'primary';
+        return (
+          <Card key={comment.id || index} sx={{ mb: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                <Typography variant="body2" sx={{ color: `${statusColor}.main`, fontWeight: 'bold' }}>
                   {comment.statusDisplayName}
                 </Typography>
-                <Box sx={{mt: 1}}>
-                  {comment.closingReason && (
-                    <Typography variant="body2" color="secondary">
-                      {comment.closingReasonDisplayName}
-                    </Typography>
-                  )}
-                </Box>
-              </TimelineOppositeContent>
-              <TimelineSeparator>
-                <TimelineConnector/>
-                <TimelineDot/>
-                <TimelineConnector/>
-              </TimelineSeparator>
-              <TimelineContent sx={{py: '12px', px: 2}}>
-                <Box sx={{mt: 1}}>
-                  <Typography variant="body2" color="secondary">
-                    <Tooltip title={new Date(comment.createdAt).toLocaleString('ru-RU')}>
-                      <span>{formatDistanceToNow(new Date(comment.createdAt), {addSuffix: true, locale: ru})}</span>
-                    </Tooltip>
+                {comment.userName && (
+                  <Typography variant="body2" color="primary">
+                    {comment.userName}
                   </Typography>
-                </Box>
-                <Typography variant="body1" sx={{mt: 1}}>
-                  {comment.comment}
+                )}
+                <Typography variant="body2" color="secondary">
+                  <Tooltip title={new Date(comment.createdAt).toLocaleString('ru-RU')}>
+                    <span>{formatDistanceToNow(new Date(comment.createdAt), {addSuffix: true, locale: ru})}</span>
+                  </Tooltip>
                 </Typography>
-              </TimelineContent>
-            </TimelineItem>
-          );
-        })}
-      </Timeline>
+              </Box>
+              {comment.closingReason && (
+                <Typography variant="body2" color="secondary" sx={{ mb: 1 }}>
+                  Причина закрытия: {comment.closingReasonDisplayName}
+                </Typography>
+              )}
+              <Typography variant="body1">
+                {comment.comment}
+              </Typography>
+            </CardContent>
+          </Card>
+        );
+      })}
     </Box>
   );
 };
@@ -175,6 +157,11 @@ const SupportTicketShowContent = () => {
     <SimpleShowLayout>
       <TextField source="subject" label="Причина обращения"/>
       <TextField source="description" label="Цель обращения"/>
+      <FunctionField
+        label="Статус"
+        render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
+                                             color={statusColors[record?.currentStatusValue]}/>}
+      />
       <TextField source="authorName" label="Автор заявки"/>
       <FunctionField
         label="Ответственный"
@@ -252,11 +239,6 @@ const SupportTicketShowContent = () => {
           </Tooltip>
         )}
       />
-      {/*<FunctionField
-        label="Статус"
-        render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
-                                             color={statusColors[record?.currentStatusValue]}/>}
-      />*/}
       <FunctionField
         label="Информация о заказе"
         render={(record: any) => record?.orderId &&
@@ -264,16 +246,16 @@ const SupportTicketShowContent = () => {
       />
       <FunctionField
         label=""
-        render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
+        render={(record: any) => record?.id && <MediaUpload ticketId={record.id.split('/').pop() || ''} />}
       />
       <FunctionField
         label=""
-        render={(record: any) => record?.id && <MediaUpload ticketId={record.id.split('/').pop() || ''} />}
+        render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
       />
       <FunctionField
         label="Активность"
         render={(record: any) => record?.id &&
-          <CommentsTimeline
+          <CommentsList
             ticketId={record.id}
             statusColors={statusColors}
             refetchKey={commentsRefetchKey}

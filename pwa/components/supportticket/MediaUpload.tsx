@@ -13,7 +13,7 @@ import {
   Typography
 } from '@mui/material';
 import {CloudUpload, Delete, Download, Image, VideoFile} from '@mui/icons-material';
-import {useCreate, useDelete, useGetList} from 'react-admin';
+import {useDelete, useGetList} from 'react-admin';
 import {getSession} from 'next-auth/react';
 import {type Session} from '../../app/auth';
 import {authenticatedFetch} from '../../utils/authenticatedFetch';
@@ -85,7 +85,7 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
       alignItems: 'center',
       justifyContent: 'center'
     }}>
-      <CircularProgress size={30} />
+      <CircularProgress size={30}/>
     </Box>;
   }
 
@@ -111,23 +111,14 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
 
 export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange}) => {
   const [dragOver, setDragOver] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-
   const [lightboxOpen, setLightboxOpen] = useState(false);
-
   const [currentIndex, setCurrentIndex] = useState(0);
-
   const [slides, setSlides] = useState<Slide[]>([]);
-
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<MediaFile | null>(null);
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
-
-  const [create] = useCreate();
   const [deleteOne] = useDelete();
 
   const {data: mediaFiles, isLoading, refetch} = useGetList(

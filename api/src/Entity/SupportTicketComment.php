@@ -94,6 +94,7 @@ class SupportTicketComment
     #[Groups(['SupportTicketComment:read', 'SupportTicketComment:write',])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
+    #[ApiProperty(readableLink: false, writableLink: false)]
     public ?UserInterface $user = null;
 
     #[Groups(['SupportTicketComment:read',])]
@@ -106,6 +107,12 @@ class SupportTicketComment
     public function getClosingReasonDisplayName(): ?string
     {
         return $this->closingReason?->getDisplayName();
+    }
+
+    #[Groups(['SupportTicketComment:read',])]
+    public function getUserName(): ?string
+    {
+        return $this->user?->getName();
     }
 
     public function getId(): ?int
