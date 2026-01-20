@@ -155,6 +155,10 @@ const SupportTicketShowContent = () => {
 
   return (
     <SimpleShowLayout>
+      <FunctionField
+        label="Номер заявки"
+        render={(record: any) => record?.id ? record.id.split('/').pop() : ''}
+      />
       <TextField source="subject" label="Причина обращения"/>
       <TextField source="description" label="Цель обращения"/>
       <FunctionField
@@ -239,6 +243,16 @@ const SupportTicketShowContent = () => {
           </Tooltip>
         )}
       />
+      {record?.closedAt && (
+        <FunctionField
+          label="Завершено"
+          render={(record: any) => (
+            <Tooltip title={new Date(record.closedAt).toLocaleString('ru-RU')}>
+              <span>{formatDistanceToNow(new Date(record.closedAt), {addSuffix: true, locale: ru})}</span>
+            </Tooltip>
+          )}
+        />
+      )}
       <FunctionField
         label="Информация о заказе"
         render={(record: any) => record?.orderId &&
