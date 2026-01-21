@@ -7,16 +7,13 @@ namespace App\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\SupportTicket;
-use App\Entity\User;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\SecurityBundle\Security;
 
 final readonly class SupportTicketCreateProcessor implements ProcessorInterface
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private Security $security,
     ) {
     }
 
@@ -29,14 +26,6 @@ final readonly class SupportTicketCreateProcessor implements ProcessorInterface
         assert($data instanceof SupportTicket);
 
         $data->createdAt = new DateTimeImmutable();
-
-        // Assign current user if not set and user is authenticated
-        if ($data->user === null) {
-            $user = $this->security->getUser();
-            if ($user instanceof User) {
-                $data->user = $user;
-            }
-        }
 
         $this->entityManager->persist($data);
         $this->entityManager->flush();
