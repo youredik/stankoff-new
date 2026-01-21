@@ -1,5 +1,5 @@
 import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useShowContext} from 'react-admin';
-import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent} from '@mui/material';
+import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent, Divider} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
 import React from "react";
@@ -267,6 +267,9 @@ const SupportTicketShowContent = () => {
           />
         </SimpleShowLayout>
       </Box>
+
+      {/* Разделитель */}
+      <Divider orientation="vertical" flexItem />
 
       {/* Правая колонка: форма статуса и комментарии */}
       <Box sx={{ flex: 1 }}>

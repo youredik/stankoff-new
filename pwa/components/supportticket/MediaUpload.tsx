@@ -501,12 +501,12 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       <Box
         sx={{
           minHeight: 200,
-          border: dragOver ? '2px dashed' : '2px dashed transparent',
-          borderColor: dragOver ? 'primary.main' : 'transparent',
-          backgroundColor: dragOver ? 'primary.50' : 'transparent',
+          border: dragOver ? '2px dashed primary.main' : '1px solid grey.300',
+          backgroundColor: dragOver ? 'primary.50' : 'grey.50',
           transition: 'all 0.2s ease',
-          p: dragOver ? 2 : 0,
+          p: 2,
           borderRadius: 1,
+          cursor: 'pointer',
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
