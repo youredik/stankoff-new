@@ -154,128 +154,139 @@ const SupportTicketShowContent = () => {
 
 
   return (
-    <SimpleShowLayout>
-      <FunctionField
-        label="Номер заявки"
-        render={(record: any) => record?.id ? record.id.split('/').pop() : ''}
-      />
-      <TextField source="subject" label="Причина обращения"/>
-      <TextField source="description" label="Цель обращения"/>
-      <FunctionField
-        label="Статус"
-        render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
-                                             color={statusColors[record?.currentStatusValue]}/>}
-      />
-      <TextField source="authorName" label="Автор заявки"/>
-      <FunctionField
-        label="Ответственный"
-        render={(record: any) => (
-          isEditingUser ? (
-            <Box ref={selectRef} sx={{ maxWidth: 250 }}>
-              <FormControl size="small" fullWidth>
-                <Select
-                  open={openSelect}
-                  onClose={() => setOpenSelect(false)}
-                  value={selectedUserId || ''}
-                  onChange={(e) => {
-                    const userId = Number(e.target.value);
-                    if (userId) {
-                      handleUserSelect(userId);
-                    }
-                  }}
-                  onBlur={() => {
-                    setIsEditingUser(false);
-                    setSelectedUserId(null);
-                    setOpenSelect(false);
-                  }}
-                  displayEmpty
-                  disabled={assigning}
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: 200,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Выберите ответственного</em>
-                  </MenuItem>
-                  {users.map((user) => (
-                    <MenuItem key={user.id} value={user.id}>
-                      {user.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          ) : record?.currentStatusValue === 'completed' ? (
-            <Typography component="span">
-              {record?.userName || 'Не назначен'}
-            </Typography>
-          ) : (
-            <Tooltip title="Нажмите чтобы сменить ответственного">
-              <Typography
-                component="span"
-                sx={{
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  textDecorationStyle: 'dashed',
-                  color: 'primary.main',
-                  display: 'inline'
-                }}
-                onClick={() => {
-                  setIsEditingUser(true);
-                  setOpenSelect(true);
-                }}
-              >
-                {record?.userName || 'Не назначен'}
-              </Typography>
-            </Tooltip>
-          )
-        )}
-      />
-      <FunctionField
-        label="Создана"
-        render={(record: any) => (
-          <Tooltip title={new Date(record.createdAt).toLocaleString('ru-RU')}>
-            <span>{formatDistanceToNow(new Date(record.createdAt), {addSuffix: true, locale: ru})}</span>
-          </Tooltip>
-        )}
-      />
-      {record?.closedAt && (
-        <FunctionField
-          label="Завершено"
-          render={(record: any) => (
-            <Tooltip title={new Date(record.closedAt).toLocaleString('ru-RU')}>
-              <span>{formatDistanceToNow(new Date(record.closedAt), {addSuffix: true, locale: ru})}</span>
-            </Tooltip>
+    <Box sx={{ display: 'flex', gap: 4 }}>
+      {/* Левая колонка: информация о заявке */}
+      <Box sx={{ flex: 1 }}>
+        <SimpleShowLayout>
+          <FunctionField
+            label="Номер заявки"
+            render={(record: any) => record?.id ? record.id.split('/').pop() : ''}
+          />
+          <TextField source="subject" label="Причина обращения"/>
+          <TextField source="description" label="Цель обращения"/>
+          <FunctionField
+            label="Статус"
+            render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
+                                                 color={statusColors[record?.currentStatusValue]}/>}
+          />
+          <TextField source="authorName" label="Автор заявки"/>
+          <FunctionField
+            label="Ответственный"
+            render={(record: any) => (
+              isEditingUser ? (
+                <Box ref={selectRef} sx={{ maxWidth: 250 }}>
+                  <FormControl size="small" fullWidth>
+                    <Select
+                      open={openSelect}
+                      onClose={() => setOpenSelect(false)}
+                      value={selectedUserId || ''}
+                      onChange={(e) => {
+                        const userId = Number(e.target.value);
+                        if (userId) {
+                          handleUserSelect(userId);
+                        }
+                      }}
+                      onBlur={() => {
+                        setIsEditingUser(false);
+                        setSelectedUserId(null);
+                        setOpenSelect(false);
+                      }}
+                      displayEmpty
+                      disabled={assigning}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 200,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="">
+                        <em>Выберите ответственного</em>
+                      </MenuItem>
+                      {users.map((user) => (
+                        <MenuItem key={user.id} value={user.id}>
+                          {user.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              ) : record?.currentStatusValue === 'completed' ? (
+                <Typography component="span">
+                  {record?.userName || 'Не назначен'}
+                </Typography>
+              ) : (
+                <Tooltip title="Нажмите чтобы сменить ответственного">
+                  <Typography
+                    component="span"
+                    sx={{
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      textDecorationStyle: 'dashed',
+                      color: 'primary.main',
+                      display: 'inline'
+                    }}
+                    onClick={() => {
+                      setIsEditingUser(true);
+                      setOpenSelect(true);
+                    }}
+                  >
+                    {record?.userName || 'Не назначен'}
+                  </Typography>
+                </Tooltip>
+              )
+            )}
+          />
+          <FunctionField
+            label="Создана"
+            render={(record: any) => (
+              <Tooltip title={new Date(record.createdAt).toLocaleString('ru-RU')}>
+                <span>{formatDistanceToNow(new Date(record.createdAt), {addSuffix: true, locale: ru})}</span>
+              </Tooltip>
+            )}
+          />
+          {record?.closedAt && (
+            <FunctionField
+              label="Завершено"
+              render={(record: any) => (
+                <Tooltip title={new Date(record.closedAt).toLocaleString('ru-RU')}>
+                  <span>{formatDistanceToNow(new Date(record.closedAt), {addSuffix: true, locale: ru})}</span>
+                </Tooltip>
+              )}
+            />
           )}
-        />
-      )}
-      <FunctionField
-        label="Информация о заказе"
-        render={(record: any) => record?.orderId &&
-          <OrderInfo orderId={record.orderId} orderData={record.orderData}/>}
-      />
-      <FunctionField
-        label=""
-        render={(record: any) => record?.id && <MediaUpload ticketId={record.id.split('/').pop() || ''} />}
-      />
-      <FunctionField
-        label=""
-        render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
-      />
-      <FunctionField
-        label="Активность"
-        render={(record: any) => record?.id &&
-          <CommentsList
-            ticketId={record.id}
-            statusColors={statusColors}
-            refetchKey={commentsRefetchKey}
-          />}
-      />
-    </SimpleShowLayout>
+          <FunctionField
+            label="Информация о заказе"
+            render={(record: any) => record?.orderId &&
+              <OrderInfo orderId={record.orderId} orderData={record.orderData}/>}
+          />
+          <FunctionField
+            label=""
+            render={(record: any) => record?.id && <MediaUpload ticketId={record.id.split('/').pop() || ''} />}
+          />
+        </SimpleShowLayout>
+      </Box>
+
+      {/* Правая колонка: форма статуса и комментарии */}
+      <Box sx={{ flex: 1 }}>
+        <SimpleShowLayout>
+          <FunctionField
+            label=""
+            render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
+          />
+          <FunctionField
+            label="Активность"
+            render={(record: any) => record?.id &&
+              <CommentsList
+                ticketId={record.id}
+                statusColors={statusColors}
+                refetchKey={commentsRefetchKey}
+              />}
+          />
+        </SimpleShowLayout>
+      </Box>
+    </Box>
   );
 };
 
