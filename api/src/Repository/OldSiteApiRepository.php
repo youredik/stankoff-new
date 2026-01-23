@@ -14,7 +14,7 @@ class OldSiteApiRepository
     public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->baseUrl = 'https://www.stankoff.ru';
+        $this->baseUrl = 'https://workspace.stankoff.ru';
         //$this->token = $_ENV['OLD_SITE_API_TOKEN'];
         $this->token = 'snchZ2V0X2FwaV90b2tlbl90b19jaGFuZ2VNaWUK';
     }
