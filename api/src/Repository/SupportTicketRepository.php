@@ -26,17 +26,13 @@ class SupportTicketRepository extends ServiceEntityRepository
     public function hasUserTicketInProgress(\Symfony\Component\Security\Core\User\UserInterface $user, ?int $excludeTicketId = null): bool
     {
         $tickets = $this->findBy(['user' => $user]);
-        $inProgressCount = 0;
 
         foreach ($tickets as $ticket) {
             if ($excludeTicketId !== null && $ticket->getId() === $excludeTicketId) {
                 continue;
             }
             if ($ticket->getCurrentStatusValue() === \App\Enum\SupportTicketStatus::IN_PROGRESS->value) {
-                $inProgressCount++;
-                if ($inProgressCount >= 3) {
-                    return true;
-                }
+                return true;
             }
         }
 
