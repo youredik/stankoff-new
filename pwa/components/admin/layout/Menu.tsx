@@ -5,7 +5,7 @@ const CustomMenu = () => (
   <Menu>
     <Menu.Item
       to="/support_tickets"
-      primaryText="Заявки в ТП"
+      primaryText="Техническая поддержка"
       leftIcon={<SettingsIcon/>}
     />
   </Menu>

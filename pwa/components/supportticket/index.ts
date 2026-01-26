@@ -9,7 +9,7 @@ const supportTicketResourceProps = {
   hasCreate: false,
   recordRepresentation: (record: any) => record?.subject || 'Заявка',
   options: {
-    label: 'Заявки в ТП'
+    label: 'Техническая поддержка'
   },
   icon: SettingsIcon
 };

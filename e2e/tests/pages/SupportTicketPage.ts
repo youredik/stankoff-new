@@ -2,7 +2,7 @@ import { AbstractPage } from "./AbstractPage";
 
 export class SupportTicketPage extends AbstractPage {
   async navigateToSupportTickets() {
-    await this.page.getByRole('link', { name: 'Заявки в ТП' }).click();
+    await this.page.getByRole('link', { name: 'Техническая поддержка' }).click();
   }
 
   async selectFirstTicket() {
