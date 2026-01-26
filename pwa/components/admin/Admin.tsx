@@ -84,7 +84,7 @@ const AdminWithOIDC = () => {
   if (!session || session?.error === "RefreshAccessTokenError") {
     (async () => await signIn("keycloak"))();
 
-    return;
+    return <SyncLoader size={8} color="#46B6BF"/>;
   }
 
   // @ts-ignore

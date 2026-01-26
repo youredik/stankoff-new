@@ -31,6 +31,9 @@ interface Account {
 }
 
 export const { handlers: { GET, POST }, auth } = NextAuth({
+  pages: {
+    signIn: "/auth/signin",
+  },
   callbacks: {
     // @ts-ignore
     async jwt({ token, account }: { token: JWT, account: Account }): Promise<JWT> {
