@@ -72,7 +72,12 @@ export const SupportTicketList = () => (
       <FunctionField
         label="# заказа"
         render={(record: any) => record.orderId ? (
-          <a href={`https://workspace.stankoff.ru/commerce/order/view/${record.orderId}`} target="_blank" rel="noopener noreferrer">
+          <a
+            href={`https://workspace.stankoff.ru/commerce/order/view/${record.orderId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
             {record.orderId}
           </a>
         ) : ''}
