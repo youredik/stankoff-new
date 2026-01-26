@@ -165,7 +165,7 @@ final class SupportTicketController extends AbstractController
             $this->entityManager->flush();
         }
 
-        // Validate that user can only have one ticket in progress
+        // Validate that user can only have up to 3 tickets in progress
         if ($newStatus === SupportTicketStatus::IN_PROGRESS && $user instanceof User && $this->supportTicketRepository->hasUserTicketInProgress(
                 $user,
                 $supportTicket->getId(),
@@ -174,7 +174,7 @@ final class SupportTicketController extends AbstractController
                 [
                     'error' => 'У '
                         . ($itsMe ? 'вас' : 'ответственного ' . $supportTicket->getUserName())
-                        . ' уже имеется заявка в работе.'
+                        . ' уже имеется 3 заявки в работе.'
                         . ($itsMe ? ' Отложите действующую заявку чтобы взять новую.' : ''),
                 ],
                 400,
