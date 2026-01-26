@@ -69,7 +69,16 @@ export const SupportTicketList = () => (
         sortBy="closedAt"
         sortable
       />
-      {/*<NumberField source="orderId" label="ID заказа" sortable={false}/>*/}
+      <FunctionField
+        label="# заказа"
+        render={(record: any) => record.orderId ? (
+          <a href={`https://workspace.stankoff.ru/commerce/order/view/${record.orderId}`} target="_blank" rel="noopener noreferrer">
+            {record.orderId}
+          </a>
+        ) : ''}
+        sortBy="orderId"
+        sortable
+      />
     </Datagrid>
   </List>
 );
