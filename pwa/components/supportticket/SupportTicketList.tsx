@@ -44,6 +44,7 @@ export const SupportTicketList = () => (
         sortBy="currentStatusValue"
         sortable
       />
+      <TextField source="contractor" label="Контрагент" sortable/>
       <TextField source="subject" label="Тема обращения" sortable/>
       {/*<TextField source="currentClosingReason" label="Причина закрытия" sortable={false}/>*/}
       <TextField source="userName" label="Ответственный" sortBy="user.name" sortable/>

@@ -100,6 +100,11 @@ class SupportTicket
     #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
     public ?array $orderData = null;
 
+    #[ApiProperty(example: 'ООО "Рога и Копыта"')]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
+    public ?string $contractor = null;
+
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     #[Groups(groups: ['SupportTicket:read'])]
     public ?string $processInstanceKey = null;
