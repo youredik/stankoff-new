@@ -1,4 +1,4 @@
-import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useShowContext} from 'react-admin';
+import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useNotify, useShowContext} from 'react-admin';
 import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent, Divider} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
@@ -7,6 +7,7 @@ import {OrderInfo} from './OrderInfo';
 import {StatusChangeForm} from './StatusChangeForm';
 import {MediaUpload} from './MediaUpload';
 import {StatusChip} from "./common";
+import {assignUser} from '../../services/supportTicketService';
 
 const CommentsList = ({ticketId, statusColors, refetchKey}: {
   ticketId: string,
@@ -97,6 +98,7 @@ const SupportTicketShowContent = () => {
   const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
   const [assigning, setAssigning] = React.useState(false);
   const {record, refetch} = useShowContext();
+  const notify = useNotify();
   const selectRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -129,24 +131,16 @@ const SupportTicketShowContent = () => {
 
     setAssigning(true);
     try {
-      const response = await fetch(`/api/support-tickets/${record.id.split('/').pop()}/assign-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({userId}),
-      });
+      const ticketId = record.id.split('/').pop();
+      await assignUser(ticketId, userId);
 
-      if (response.ok) {
-        refetch();
-        setIsEditingUser(false);
-        setSelectedUserId(null);
-        setOpenSelect(false);
-      } else {
-        console.error('Failed to assign user');
-      }
-    } catch (error) {
-      console.error('Error assigning user:', error);
+      notify('Ответственный успешно изменен', {type: 'success'});
+      refetch();
+      setIsEditingUser(false);
+      setSelectedUserId(null);
+      setOpenSelect(false);
+    } catch (err: any) {
+      notify(err.message, {type: 'error'});
     } finally {
       setAssigning(false);
     }

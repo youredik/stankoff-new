@@ -30,3 +30,20 @@ export const changeStatus = async (ticketId: string, data: {
 
   return response.json();
 };
+
+export const assignUser = async (ticketId: string, userId: number) => {
+  const response = await authenticatedFetch(`/api/support-tickets/${ticketId}/assign-user`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({userId}),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || errorData.message || 'Failed to assign user');
+  }
+
+  return response.json();
+};

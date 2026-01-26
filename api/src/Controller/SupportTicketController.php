@@ -95,6 +95,16 @@ final class SupportTicketController extends AbstractController
             throw new BadRequestHttpException('Cannot assign user to completed ticket');
         }
 
+        // Validate that user can only have up to 3 tickets in progress
+        if ($supportTicket->getCurrentStatusValue() === SupportTicketStatus::IN_PROGRESS->value && $this->supportTicketRepository->hasUserTicketInProgress($user)) {
+            return $this->json(
+                [
+                    'error' => 'У пользователя ' . $user->getName() . ' уже имеется 3 заявки в работе.',
+                ],
+                400,
+            );
+        }
+
         $supportTicket->user = $user;
         $this->entityManager->flush();
 

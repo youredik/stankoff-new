@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {useShowContext} from 'react-admin';
+import {useNotify, useShowContext} from 'react-admin';
 import {Box, Button, FormControl, InputLabel, MenuItem, Select, Typography} from '@mui/material';
+import {assignUser} from '../../services/supportTicketService';
 
 export const UserAssignment = () => {
   const {record, refetch} = useShowContext();
+  const notify = useNotify();
   const [users, setUsers] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,22 +30,14 @@ export const UserAssignment = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/support-tickets/${record.id.split('/').pop()}/assign-user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({userId: selectedUserId}),
-      });
+      const ticketId = record.id.split('/').pop();
+      await assignUser(ticketId, selectedUserId);
 
-      if (response.ok) {
-        refetch();
-        setSelectedUserId(null);
-      } else {
-        console.error('Failed to assign user');
-      }
-    } catch (error) {
-      console.error('Error assigning user:', error);
+      notify('Ответственный успешно изменен', {type: 'success'});
+      refetch();
+      setSelectedUserId(null);
+    } catch (err: any) {
+      notify(err.message, {type: 'error'});
     } finally {
       setLoading(false);
     }
