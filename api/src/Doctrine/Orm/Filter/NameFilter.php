@@ -17,8 +17,8 @@ final class NameFilter extends AbstractFilter
     public function getDescription(string $resourceClass): array
     {
         return [
-            'name' => [
-                'property' => 'name',
+            'userName' => [
+                'property' => 'userName',
                 'type' => 'string',
                 'required' => false,
                 'strategy' => 'ipartial',
@@ -30,9 +30,16 @@ final class NameFilter extends AbstractFilter
     /**
      * @param string|null $value
      */
-    protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
-    {
-        if ('name' !== $property) {
+    protected function filterProperty(
+        string $property,
+        $value,
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        ?Operation $operation = null,
+        array $context = [],
+    ): void {
+        if ('userName' !== $property) {
             return;
         }
 
@@ -42,38 +49,42 @@ final class NameFilter extends AbstractFilter
         }
 
         $alias = $queryBuilder->getRootAliases()[0];
+        $queryBuilder->leftJoin(\sprintf('%s.user', $alias), 'u');
         $expressions = [];
-        foreach ($values as $key => $value) {
-            $parameterName = $queryNameGenerator->generateParameterName('name' . $key);
-            $queryBuilder->setParameter($parameterName, \sprintf('%%%s%%', $value));
+        foreach ($values as $key => $val) {
+            $parameterName = $queryNameGenerator->generateParameterName('user' . $key);
+            $queryBuilder->setParameter($parameterName, \sprintf('%%%s%%', $val));
             $expressions[] = $queryBuilder->expr()->orX(
-                $queryBuilder->expr()->like(\sprintf('%s.firstName', $alias), ':' . $parameterName),
-                $queryBuilder->expr()->like(\sprintf('%s.lastName', $alias), ':' . $parameterName)
+                $queryBuilder->expr()->like('u.firstName', ':' . $parameterName),
+                $queryBuilder->expr()->like('u.lastName', ':' . $parameterName),
             );
         }
 
         $queryBuilder->andWhere($queryBuilder->expr()->andX(...$expressions));
     }
 
-    /**
-     * @param string|null $value
-     */
-    private function normalizeValues($value, string $property): ?array
+    private function normalizeValues(?string $value, string $property): ?array
     {
         if (!\is_string($value) || empty(trim($value))) {
             return null;
         }
 
-        $values = explode(' ', $value);
-        foreach ($values as $key => $value) {
-            if (empty(trim($value))) {
-                unset($values[$key]);
+        $parts = explode(' ', $value);
+        foreach ($parts as $key => $part) {
+            if (empty(trim($part))) {
+                unset($parts[$key]);
             }
         }
+        $values = array_values($parts);
 
         if (empty($values)) {
             $this->getLogger()->notice('Invalid filter ignored', [
-                'exception' => new \InvalidArgumentException(\sprintf('At least one value is required, multiple values should be in "%1$s[]=firstvalue&%1$s[]=secondvalue" format', $property)),
+                'exception' => new \InvalidArgumentException(
+                    \sprintf(
+                        'At least one value is required, multiple values should be in "%1$s[]=firstvalue&%1$s[]=secondvalue" format',
+                        $property,
+                    ),
+                ),
             ]);
 
             return null;

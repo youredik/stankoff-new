@@ -58,22 +58,8 @@ final class SupportTicketAccessFilter extends AbstractFilter
 
         $alias = $queryBuilder->getRootAliases()[0];
 
-        if ($this->authorizationChecker->isGranted('OIDC_SUPPORT_MANAGER')) {
-            // Manager sees all tickets
-            return;
-        }
-
-        if ($this->authorizationChecker->isGranted('OIDC_SUPPORT_EMPLOYEE')) {
-            // Employee sees their own tickets or new tickets
-            $userParam = $queryNameGenerator->generateParameterName('user');
-            $queryBuilder->leftJoin(\sprintf('%s.user', $alias), 'u');
-            $queryBuilder->andWhere(
-                $queryBuilder->expr()->orX(
-                    \sprintf('u.id = :%s', $userParam),
-                    \sprintf('%s.comments IS EMPTY', $alias), // NEW tickets have no comments
-                ),
-            );
-            $queryBuilder->setParameter($userParam, $user->getId());
+        if ($this->authorizationChecker->isGranted('OIDC_SUPPORT_MANAGER') || $this->authorizationChecker->isGranted('OIDC_SUPPORT_EMPLOYEE')) {
+            // Manager and Employee see all tickets
             return;
         }
 

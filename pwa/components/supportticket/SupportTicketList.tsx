@@ -1,9 +1,11 @@
-import {Datagrid, Filter, FunctionField, List, NumberField, NumberInput, TextField, TopToolbar} from 'react-admin';
+import {Datagrid, Filter, FunctionField, List, NumberField, NumberInput, TextField, TopToolbar, TextInput, SelectInput, DateInput} from 'react-admin';
 import {ExportButton} from "ra-ui-materialui";
 import {Box, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {StatusChip} from './common';
+import {getStatuses} from '../../services/supportTicketService';
+import {useEffect, useState} from 'react';
 
 const ListActions = () => (
   <TopToolbar>
@@ -11,11 +13,24 @@ const ListActions = () => (
   </TopToolbar>
 );
 
-const TicketFilters = () => (
-  <Filter>
-    <NumberInput label="ID заказа" source="orderId" alwaysOn/>
-  </Filter>
-);
+const TicketFilters = () => {
+  const [statuses, setStatuses] = useState([]);
+
+  useEffect(() => {
+    getStatuses().then(setStatuses);
+  }, []);
+
+  return (
+    <Filter>
+      <NumberInput label="ID заказа" source="orderId" alwaysOn/>
+      <TextInput label="Контрагент" source="contractor" alwaysOn/>
+      <TextInput label="Ответственный" source="userName" alwaysOn/>
+      <SelectInput label="Статус" source="status" choices={statuses} alwaysOn/>
+      <DateInput label="Дата создания" source="createdAt" alwaysOn/>
+      <DateInput label="Дата закрытия" source="closedAt" alwaysOn/>
+    </Filter>
+  );
+};
 
 const Empty = () => (
   <Box textAlign="center" m={1}>
@@ -46,8 +61,7 @@ export const SupportTicketList = () => (
       />
       <TextField source="contractor" label="Контрагент" sortable/>
       <TextField source="subject" label="Тема обращения" sortable/>
-      {/*<TextField source="currentClosingReason" label="Причина закрытия" sortable={false}/>*/}
-      <TextField source="userName" label="Ответственный" sortBy="user.name" sortable/>
+      <TextField source="userName" label="Ответственный" sortBy="userName" sortable/>
       <TextField source="authorName" label="Автор" sortable/>
       <FunctionField
         label="Дата создания"

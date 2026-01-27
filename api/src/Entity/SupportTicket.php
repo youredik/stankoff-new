@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Doctrine\Common\Filter\SearchFilterInterface;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
@@ -13,6 +15,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Doctrine\Orm\Filter\NameFilter;
 use App\Doctrine\Orm\Filter\SupportTicketAccessFilter;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
@@ -51,6 +54,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 //    collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER") or is_granted("OIDC_ADMIN")'
 )]
+#[ApiFilter(NameFilter::class)]
 #[ApiFilter(SupportTicketAccessFilter::class)]
 #[ORM\Entity(repositoryClass: SupportTicketRepository::class)]
 class SupportTicket
@@ -80,13 +84,21 @@ class SupportTicket
     #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
     public string $authorName;
 
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    #[ApiFilter(SearchFilter::class, strategy: 'exact')]
+    #[Groups(['SupportTicket:read',])]
+    public ?string $status = null;
+
+
     #[ORM\Column(type: 'datetime_immutable')]
     #[ApiFilter(OrderFilter::class)]
+    #[ApiFilter(DateFilter::class)]
     #[Groups(['SupportTicket:read',])]
     public DateTimeImmutable $createdAt;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     #[ApiFilter(OrderFilter::class)]
+    #[ApiFilter(DateFilter::class)]
     #[Groups(['SupportTicket:read',])]
     public ?DateTimeImmutable $closedAt = null;
 
@@ -102,6 +114,7 @@ class SupportTicket
 
     #[ApiProperty(example: 'ООО "Рога и Копыта"')]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    #[ApiFilter(SearchFilter::class, strategy: 'i' . SearchFilterInterface::STRATEGY_PARTIAL)]
     #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
     public ?string $contractor = null;
 
@@ -150,7 +163,6 @@ class SupportTicket
         return $this->comments->first()->status->getDisplayName();
     }
 
-    #[ApiFilter(OrderFilter::class)]
     #[Groups(['SupportTicket:read',])]
     public function getCurrentStatusValue(): string
     {

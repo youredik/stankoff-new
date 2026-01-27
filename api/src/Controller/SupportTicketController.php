@@ -106,6 +106,7 @@ final class SupportTicketController extends AbstractController
         }
 
         $supportTicket->user = $user;
+        $supportTicket->status = $newStatus->value;
         $this->entityManager->flush();
 
         return $this->json([
@@ -172,6 +173,8 @@ final class SupportTicketController extends AbstractController
         $itsMe = $supportTicket->user === $user;
         if ($user instanceof User && $supportTicket->user === null) {
             $supportTicket->user = $user;
+            $supportTicket->userName = $user->getName();
+            $supportTicket->status = $supportTicket->status ?? SupportTicketStatus::NEW->value; // ensure status is set
             $this->entityManager->flush();
         }
 
