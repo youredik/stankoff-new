@@ -26,8 +26,10 @@ const TicketFilters = () => {
       <TextInput label="Контрагент" source="contractor" alwaysOn/>
       <TextInput label="Ответственный" source="userName" alwaysOn/>
       <SelectInput label="Статус" source="status" choices={statuses} alwaysOn/>
-      <DateInput label="Дата создания" source="createdAt" alwaysOn/>
-      <DateInput label="Дата закрытия" source="closedAt" alwaysOn/>
+      <DateInput label="Дата создания от" source="createdAt[after]" alwaysOn/>
+      <DateInput label="Дата создания до" source="createdAt[before]" alwaysOn/>
+      <DateInput label="Дата закрытия от" source="closedAt[after]" alwaysOn/>
+      <DateInput label="Дата закрытия до" source="closedAt[before]" alwaysOn/>
     </Filter>
   );
 };
