@@ -25,7 +25,7 @@ services:
       AUTH_URL: https://new.stankoff.ru/api/auth
       NEXT_PUBLIC_ENTRYPOINT: https://new.stankoff.ru
     healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000 || exit 1" ]
+      test: [ "CMD-SHELL", "curl http://127.0.0.1:3000 || exit 1" ]
       start_period: 5s
       interval: 5s
       timeout: 3s
