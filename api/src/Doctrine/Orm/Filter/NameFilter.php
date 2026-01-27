@@ -17,11 +17,11 @@ final class NameFilter extends AbstractFilter
     public function getDescription(string $resourceClass): array
     {
         return [
-            'userName' => [
-                'property' => 'userName',
+            'user' => [
+                'property' => 'user',
                 'type' => 'string',
                 'required' => false,
-                'strategy' => 'ipartial',
+                'strategy' => 'exact',
                 'is_collection' => false,
             ],
         ];
@@ -39,28 +39,14 @@ final class NameFilter extends AbstractFilter
         ?Operation $operation = null,
         array $context = [],
     ): void {
-        if ('userName' !== $property) {
-            return;
-        }
-
-        $values = $this->normalizeValues($value, $property);
-        if (null === $values) {
+        if ('user' !== $property || !$value) {
             return;
         }
 
         $alias = $queryBuilder->getRootAliases()[0];
-        $queryBuilder->leftJoin(\sprintf('%s.user', $alias), 'u');
-        $expressions = [];
-        foreach ($values as $key => $val) {
-            $parameterName = $queryNameGenerator->generateParameterName('user' . $key);
-            $queryBuilder->setParameter($parameterName, \sprintf('%%%s%%', strtolower($val)));
-            $expressions[] = $queryBuilder->expr()->orX(
-                $queryBuilder->expr()->like('LOWER(u.firstName)', ':' . $parameterName),
-                $queryBuilder->expr()->like('LOWER(u.lastName)', ':' . $parameterName),
-            );
-        }
-
-        $queryBuilder->andWhere($queryBuilder->expr()->andX(...$expressions));
+        $parameterName = $queryNameGenerator->generateParameterName('user');
+        $queryBuilder->setParameter($parameterName, (int) $value);
+        $queryBuilder->andWhere($queryBuilder->expr()->eq(\sprintf('%s.user', $alias), ':' . $parameterName));
     }
 
     private function normalizeValues(?string $value, string $property): ?array

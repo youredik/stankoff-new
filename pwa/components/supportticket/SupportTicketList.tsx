@@ -15,16 +15,29 @@ const ListActions = () => (
 
 const TicketFilters = () => {
   const [statuses, setStatuses] = useState([]);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    getStatuses().then(setStatuses);
+    const loadData = async () => {
+      try {
+        const [statusesResponse, usersResponse] = await Promise.all([
+          getStatuses(),
+          fetch('/api/support-tickets/assignable-users').then(res => res.json())
+        ]);
+        setStatuses(statusesResponse);
+        setUsers(usersResponse);
+      } catch (error) {
+        console.error('Failed to load filter data:', error);
+      }
+    };
+    loadData();
   }, []);
 
   return (
     <Filter>
       <NumberInput label="ID заказа" source="orderId" alwaysOn/>
       <TextInput label="Контрагент" source="contractor" alwaysOn/>
-      <TextInput label="Ответственный" source="userName" alwaysOn/>
+      <SelectInput label="Ответственный" source="user" choices={users} optionText="name" optionValue="id" alwaysOn/>
       <SelectInput label="Статус" source="status" choices={statuses} alwaysOn/>
       <DateInput label="Дата создания от" source="createdAt[after]" alwaysOn/>
       <DateInput label="Дата создания до" source="createdAt[before]" alwaysOn/>
