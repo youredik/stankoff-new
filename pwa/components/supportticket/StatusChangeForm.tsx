@@ -62,7 +62,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const requiresComment = status !== currentStatus && !(currentStatus === 'new' && status === 'in_progress');
+    const requiresComment = status !== currentStatus && !(currentStatus === 'new' && status === 'in_progress') && !(currentStatus === 'postponed' && status === 'in_progress');
     if (!status || (requiresComment && !comment.trim())) return;
 
     setLoading(true);
@@ -151,7 +151,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder={currentStatus === 'new' && status === 'new' ? "Сначала выберите статус 'В работе'" : "Опишите изменения или причину смены статуса..."}
-          required={status !== currentStatus && !(currentStatus === 'new' && status === 'in_progress')}
+          required={status !== currentStatus && !(currentStatus === 'new' && status === 'in_progress') && !(currentStatus === 'postponed' && status === 'in_progress')}
           disabled={currentStatus === 'new' && status === 'new'}
           sx={{maxWidth: 600}}
         />
@@ -177,7 +177,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
           <Button
             type="submit"
             variant="contained"
-            disabled={loading || !status || (status !== currentStatus && !(currentStatus === 'new' && status === 'in_progress') && !comment.trim())}
+            disabled={loading || !status || (status !== currentStatus && !(currentStatus === 'new' && status === 'in_progress') && !(currentStatus === 'postponed' && status === 'in_progress') && !comment.trim())}
             startIcon={loading ? <CircularProgress size={20}/> : null}
           >
             {loading ? 'Сохранение...' : 'Отправить'}
