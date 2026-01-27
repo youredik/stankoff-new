@@ -53,10 +53,10 @@ final class NameFilter extends AbstractFilter
         $expressions = [];
         foreach ($values as $key => $val) {
             $parameterName = $queryNameGenerator->generateParameterName('user' . $key);
-            $queryBuilder->setParameter($parameterName, \sprintf('%%%s%%', $val));
+            $queryBuilder->setParameter($parameterName, \sprintf('%%%s%%', strtolower($val)));
             $expressions[] = $queryBuilder->expr()->orX(
-                $queryBuilder->expr()->like('u.firstName', ':' . $parameterName),
-                $queryBuilder->expr()->like('u.lastName', ':' . $parameterName),
+                $queryBuilder->expr()->like('LOWER(u.firstName)', ':' . $parameterName),
+                $queryBuilder->expr()->like('LOWER(u.lastName)', ':' . $parameterName),
             );
         }
 
@@ -90,6 +90,6 @@ final class NameFilter extends AbstractFilter
             return null;
         }
 
-        return array_values($values);
+        return $values;
     }
 }
