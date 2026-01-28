@@ -1,4 +1,15 @@
-import {Datagrid, Filter, FunctionField, List, NumberField, NumberInput, TextField, TopToolbar, TextInput, SelectInput, DateInput} from 'react-admin';
+import {
+  Datagrid,
+  DateInput,
+  Filter,
+  FunctionField,
+  List,
+  NumberInput,
+  SelectInput,
+  TextField,
+  TextInput,
+  TopToolbar
+} from 'react-admin';
 import {ExportButton} from "ra-ui-materialui";
 import {Box, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
@@ -75,10 +86,10 @@ export const SupportTicketList = () => (
         sortBy="status"
         sortable
       />
-      <TextField source="contractor" label="Контрагент" sortable/>
-      <TextField source="subject" label="Тема обращения" sortable/>
-      <TextField source="userName" label="Ответственный" sortBy="userName" sortable/>
-      <TextField source="authorName" label="Автор" sortable/>
+      <TextField source="contractor" label="Контрагент"/>
+      <TextField source="subject" label="Тема обращения"/>
+      <TextField source="userName" label="Ответственный"/>
+      <TextField source="authorName" label="Автор"/>
       <FunctionField
         label="Дата создания"
         render={(record: any) => (
