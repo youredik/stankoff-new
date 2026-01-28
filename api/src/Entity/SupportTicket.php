@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Doctrine\Orm\Filter\IdFilter;
 use App\Doctrine\Orm\Filter\NameFilter;
 use App\Doctrine\Orm\Filter\SupportTicketAccessFilter;
 use App\Enum\SupportTicketStatus;
@@ -53,6 +54,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 //    collectDenormalizationErrors: true,
     security: 'is_granted("OIDC_SUPPORT_EMPLOYEE") or is_granted("OIDC_SUPPORT_MANAGER") or is_granted("OIDC_ADMIN")'
 )]
+#[ApiFilter(IdFilter::class)]
 #[ApiFilter(NameFilter::class)]
 #[ApiFilter(SupportTicketAccessFilter::class)]
 #[ORM\Entity(repositoryClass: SupportTicketRepository::class)]

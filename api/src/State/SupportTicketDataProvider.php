@@ -30,6 +30,12 @@ final readonly class SupportTicketDataProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         if ($operation instanceof CollectionOperationInterface) {
+            $request = $this->requestStack->getCurrentRequest();
+            if ($request instanceof Request) {
+                $queryParams = $request->query->all();
+                error_log('SupportTicketDataProvider: query params: ' . json_encode($queryParams));
+            }
+
             /** @var Collection $tickets */
             $tickets = $this->collectionProvider->provide($operation, $uriVariables, $context);
 

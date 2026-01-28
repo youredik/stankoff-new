@@ -35,7 +35,7 @@ const TicketFilters = () => {
 
   return (
     <Filter>
-      <NumberInput label="ID заказа" source="orderId" alwaysOn/>
+      <NumberInput label="Номер" source="id" alwaysOn/>
       <TextInput label="Контрагент" source="contractor" alwaysOn/>
       <SelectInput label="Ответственный" source="user" choices={users} optionText="name" optionValue="id" alwaysOn/>
       <SelectInput label="Статус" source="status" choices={statuses} alwaysOn/>
@@ -43,6 +43,7 @@ const TicketFilters = () => {
       <DateInput label="Дата создания до" source="createdAt[before]" alwaysOn/>
       <DateInput label="Дата закрытия от" source="closedAt[after]" alwaysOn/>
       <DateInput label="Дата закрытия до" source="closedAt[before]" alwaysOn/>
+      <NumberInput label="Номер заказа" source="orderId" alwaysOn/>
     </Filter>
   );
 };
