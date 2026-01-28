@@ -16,7 +16,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Doctrine\Orm\Filter\IdFilter;
 use App\Doctrine\Orm\Filter\NameFilter;
-use App\Doctrine\Orm\Filter\SupportTicketAccessFilter;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
 use App\State\Processor\SupportTicketCreateProcessor;
@@ -54,7 +53,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiFilter(IdFilter::class)]
 #[ApiFilter(NameFilter::class)]
-#[ApiFilter(SupportTicketAccessFilter::class)]
 #[ORM\Entity(repositoryClass: SupportTicketRepository::class)]
 class SupportTicket
 {
