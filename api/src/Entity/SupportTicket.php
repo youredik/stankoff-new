@@ -20,7 +20,6 @@ use App\Doctrine\Orm\Filter\SupportTicketAccessFilter;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
 use App\State\Processor\SupportTicketCreateProcessor;
-use App\State\SupportTicketDataProvider;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -37,7 +36,6 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(
             paginationClientItemsPerPage: true,
             order: ['createdAt' => 'DESC'],
-            provider: SupportTicketDataProvider::class,
         ),
         new Post(
             processor: SupportTicketCreateProcessor::class,
@@ -86,6 +84,7 @@ class SupportTicket
     public string $authorName;
 
     #[ORM\Column(type: 'string', enumType: SupportTicketStatus::class)]
+    #[ApiFilter(OrderFilter::class)]
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
     #[Groups(['SupportTicket:read',])]
     public SupportTicketStatus $status;
