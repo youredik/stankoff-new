@@ -71,8 +71,8 @@ export const SupportTicketList = () => (
       <FunctionField
         label="Статус"
         render={(record: any) => <StatusChip status={record?.currentStatus || ''}
-                                             statusValue={record?.currentStatusValue || ''}/>}
-        sortBy="currentStatusValue"
+                                             statusValue={record?.status || ''}/>}
+        sortBy="status"
         sortable
       />
       <TextField source="contractor" label="Контрагент" sortable/>

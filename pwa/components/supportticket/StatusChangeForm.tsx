@@ -34,7 +34,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
   const [closingReasonOptions, setClosingReasonOptions] = useState<ClosingReasonOption[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const currentStatus = record?.currentStatusValue;
+  const currentStatus = record?.status;
   const isCompleted = currentStatus === 'completed';
 
   // Update status when current status changes

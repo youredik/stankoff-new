@@ -85,11 +85,10 @@ class SupportTicket
     #[Groups(groups: ['SupportTicket:read', 'SupportTicket:write',])]
     public string $authorName;
 
-    #[ORM\Column(type: Types::STRING, length: 50, nullable: true)]
+    #[ORM\Column(type: 'string', enumType: SupportTicketStatus::class)]
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
     #[Groups(['SupportTicket:read',])]
-    public ?string $status = null;
-
+    public SupportTicketStatus $status;
 
     #[ORM\Column(type: 'datetime_immutable')]
     #[ApiFilter(OrderFilter::class)]
@@ -157,21 +156,7 @@ class SupportTicket
     #[Groups(['SupportTicket:read',])]
     public function getCurrentStatus(): string
     {
-        if ($this->comments->isEmpty()) {
-            return SupportTicketStatus::NEW->getDisplayName();
-        }
-
-        return $this->comments->first()->status->getDisplayName();
-    }
-
-    #[Groups(['SupportTicket:read',])]
-    public function getCurrentStatusValue(): string
-    {
-        if ($this->comments->isEmpty()) {
-            return SupportTicketStatus::NEW->value;
-        }
-
-        return $this->comments->first()->status->value;
+        return $this->status->getDisplayName();
     }
 
     #[Groups(['SupportTicket:read',])]

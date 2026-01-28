@@ -160,8 +160,8 @@ const SupportTicketShowContent = () => {
           <TextField source="description" label="Цель обращения"/>
           <FunctionField
             label="Статус"
-            render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.currentStatusValue}
-                                                 color={statusColors[record?.currentStatusValue]}/>}
+            render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.status}
+                                                 color={statusColors[record?.status]}/>}
           />
           <TextField source="authorName" label="Автор заявки"/>
           <FunctionField
@@ -206,7 +206,7 @@ const SupportTicketShowContent = () => {
                     </Select>
                   </FormControl>
                 </Box>
-              ) : record?.currentStatusValue === 'completed' ? (
+              ) : record?.status === 'completed' ? (
                 <Typography component="span">
                   {record?.userName || 'Не назначен'}
                 </Typography>

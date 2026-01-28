@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\SupportTicket;
+use App\Enum\SupportTicketStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<SupportTicket>
@@ -23,37 +25,42 @@ class SupportTicketRepository extends ServiceEntityRepository
         parent::__construct($registry, SupportTicket::class);
     }
 
-    public function hasUserTicketInProgress(\Symfony\Component\Security\Core\User\UserInterface $user, ?int $excludeTicketId = null): bool
-    {
+    public function hasUserTicketInProgress(
+        UserInterface $user,
+        ?int $excludeTicketId = null,
+    ): bool {
+        $qb = $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')           // достаточно посчитать, есть ли хотя бы один
+            ->where('t.user = :user')
+            ->andWhere('t.status = :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', SupportTicketStatus::IN_PROGRESS)
+            ->setMaxResults(1);               // оптимизация — не нужно больше 1
+
+        if ($excludeTicketId !== null) {
+            $qb
+                ->andWhere('t.id != :excludeId')
+                ->setParameter('excludeId', $excludeTicketId);
+        }
+
+        return (int)$qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /*public function hasUserTicketInProgress(
+        UserInterface $user,
+        ?int $excludeTicketId = null,
+    ): bool {
         $tickets = $this->findBy(['user' => $user]);
 
         foreach ($tickets as $ticket) {
-            if ($excludeTicketId !== null && $ticket->getId() === $excludeTicketId) {
+            if ($ticket->getId() === $excludeTicketId) {
                 continue;
             }
-            if ($ticket->getCurrentStatusValue() === \App\Enum\SupportTicketStatus::IN_PROGRESS->value) {
+            if ($ticket->status === SupportTicketStatus::IN_PROGRESS) {
                 return true;
             }
         }
 
         return false;
-    }
-//
-//    public function save(SupportTicket $entity, bool $flush = false): void
-//    {
-//        $this->getEntityManager()->persist($entity);
-//
-//        if ($flush) {
-//            $this->getEntityManager()->flush();
-//        }
-//    }
-//
-//    public function remove(SupportTicket $entity, bool $flush = false): void
-//    {
-//        $this->getEntityManager()->remove($entity);
-//
-//        if ($flush) {
-//            $this->getEntityManager()->flush();
-//        }
-//    }
+    }*/
 }

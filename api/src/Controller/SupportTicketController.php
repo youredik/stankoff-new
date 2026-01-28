@@ -37,7 +37,7 @@ final class SupportTicketController extends AbstractController
     {
         $statuses = array_map(
             static fn(SupportTicketStatus $status) => [
-                'id' => $status->value,
+                'id' => $status,
                 'name' => $status->getDisplayName(),
                 'color' => $status->getColor(),
             ],
@@ -52,7 +52,7 @@ final class SupportTicketController extends AbstractController
     {
         $reasons = array_map(
             static fn(SupportTicketClosingReason $reason) => [
-                'id' => $reason->value,
+                'id' => $reason,
                 'name' => $reason->getDisplayName(),
             ],
             SupportTicketClosingReason::cases(),
@@ -74,8 +74,11 @@ final class SupportTicketController extends AbstractController
     }
 
     #[Route('/{id}/assign-user', name: 'api_support_ticket_assign_user', methods: ['POST'])]
-    public function assignUser(Request $request, SupportTicket $supportTicket, UserRepository $userRepository): JsonResponse
-    {
+    public function assignUser(
+        Request $request,
+        SupportTicket $supportTicket,
+        UserRepository $userRepository,
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         if (!is_array($data)) {
             throw new BadRequestHttpException('Invalid JSON');
@@ -91,12 +94,14 @@ final class SupportTicketController extends AbstractController
             throw new BadRequestHttpException('User not found');
         }
 
-        if ($supportTicket->getCurrentStatusValue() === SupportTicketStatus::COMPLETED->value) {
+        if ($supportTicket->status === SupportTicketStatus::COMPLETED) {
             throw new BadRequestHttpException('Cannot assign user to completed ticket');
         }
 
         // Validate that user can only have up to 1 ticket in progress
-        if ($supportTicket->getCurrentStatusValue() === SupportTicketStatus::IN_PROGRESS->value && $this->supportTicketRepository->hasUserTicketInProgress($user)) {
+        if (
+            $supportTicket->status === SupportTicketStatus::IN_PROGRESS
+            && $this->supportTicketRepository->hasUserTicketInProgress($user)) {
             return $this->json(
                 [
                     'error' => 'У пользователя ' . $user->getName() . ' уже имеется 1 заявка в работе.',
@@ -106,7 +111,6 @@ final class SupportTicketController extends AbstractController
         }
 
         $supportTicket->user = $user;
-        $supportTicket->status = $newStatus->value;
         $this->entityManager->flush();
 
         return $this->json([
@@ -122,7 +126,7 @@ final class SupportTicketController extends AbstractController
     #[Route('/{id}/change-status', name: 'api_support_ticket_change_status', methods: ['POST'])]
     public function changeStatus(Request $request, SupportTicket $supportTicket): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         if (!is_array($data)) {
             throw new BadRequestHttpException('Invalid JSON');
         }
@@ -140,18 +144,18 @@ final class SupportTicketController extends AbstractController
             throw new BadRequestHttpException('Invalid status');
         }
 
-        $currentStatus = $supportTicket->getCurrentStatusValue();
+        $currentStatus = $supportTicket->status;
 
         // Validation rules
         if ($newStatus === SupportTicketStatus::NEW) {
             throw new BadRequestHttpException('Cannot change status to NEW');
         }
 
-        if (($currentStatus === SupportTicketStatus::NEW->value) && $newStatus !== SupportTicketStatus::IN_PROGRESS) {
+        if (($currentStatus === SupportTicketStatus::NEW) && $newStatus !== SupportTicketStatus::IN_PROGRESS) {
             throw new BadRequestHttpException('From NEW, can only change to IN_PROGRESS');
         }
 
-        if ($currentStatus === SupportTicketStatus::COMPLETED->value) {
+        if ($currentStatus === SupportTicketStatus::COMPLETED) {
             throw new BadRequestHttpException('Cannot change status from COMPLETED');
         }
 
@@ -168,21 +172,19 @@ final class SupportTicketController extends AbstractController
             $supportTicket->closedAt = new DateTimeImmutable();
         }
 
-        // Update ticket user to current user if not already assigned
         $user = $this->getUser();
-        $itsMe = $supportTicket->user === $user;
+
         if ($user instanceof User && $supportTicket->user === null) {
             $supportTicket->user = $user;
-            $supportTicket->userName = $user->getName();
-            $supportTicket->status = $supportTicket->status ?? SupportTicketStatus::NEW->value; // ensure status is set
             $this->entityManager->flush();
         }
 
-        // Validate that user can only have up to 1 ticket in progress
-        if ($newStatus === SupportTicketStatus::IN_PROGRESS && $user instanceof User && $this->supportTicketRepository->hasUserTicketInProgress(
-                $user,
-                $supportTicket->getId(),
-            )) {
+        if (
+            $newStatus === SupportTicketStatus::IN_PROGRESS
+            && $this->supportTicketRepository->hasUserTicketInProgress($supportTicket->user, $supportTicket->getId())
+        ) {
+            $itsMe = $supportTicket->user === $user;
+
             return $this->json(
                 [
                     'error' => 'У '
@@ -194,7 +196,8 @@ final class SupportTicketController extends AbstractController
             );
         }
 
-        // Create comment
+        $supportTicket->status = $newStatus;
+
         $comment = new SupportTicketComment();
         $comment->comment = $commentText;
         $comment->status = $newStatus;
@@ -217,8 +220,8 @@ final class SupportTicketController extends AbstractController
             'message' => 'Status changed successfully',
             'ticket' => [
                 'id' => $supportTicket->getId(),
-                'currentStatus' => $supportTicket->getCurrentStatus(),
-                'currentStatusValue' => $supportTicket->getCurrentStatusValue(),
+                'currentStatus' => $supportTicket->status->getDisplayName(),
+                'currentStatusValue' => $supportTicket->status,
                 'userName' => $supportTicket->getUserName(),
             ],
         ]);

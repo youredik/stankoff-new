@@ -88,8 +88,8 @@ final readonly class SupportTicketDataProvider implements ProviderInterface
                 'postponed' => 3,
                 'completed' => 4,
             ];
-            $aStatus = $statusOrder[$a->getCurrentStatusValue()] ?? 999;
-            $bStatus = $statusOrder[$b->getCurrentStatusValue()] ?? 999;
+            $aStatus = $statusOrder[$a->status->value] ?? 999;
+            $bStatus = $statusOrder[$b->status->value] ?? 999;
 
             if ($direction === 'ASC') {
                 return $aStatus <=> $bStatus;

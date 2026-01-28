@@ -13,7 +13,6 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
-use ApiPlatform\Metadata\Post;
 use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
 use App\State\Processor\SupportTicketCommentCreateProcessor;
@@ -41,10 +40,12 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             order: ['createdAt' => 'DESC'],
         ),
-        /* Создание происходит `App\Controller\SupportTicketController::changeStatus()
-        new Post(
-            processor: SupportTicketCommentCreateProcessor::class,
-        ),*/
+        /**
+         * Создание происходит `App\Controller\SupportTicketController::changeStatus()
+         * new Post(
+         *    processor: SupportTicketCommentCreateProcessor::class,
+         * ),
+         */
         new Get(),
     ],
     normalizationContext: [
@@ -67,7 +68,6 @@ class SupportTicketComment
 
     #[Groups(['SupportTicketComment:read', 'SupportTicketComment:write',])]
     #[ORM\Column(type: "text")]
-//    #[Assert\NotBlank]
     public string $comment;
 
     #[Groups(['SupportTicketComment:read', 'SupportTicketComment:write',])]
