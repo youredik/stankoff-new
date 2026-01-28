@@ -8,3 +8,12 @@ export const lightTheme = createTheme({
     fontFamily: 'Roboto, sans-serif',
   },
 });
+
+export const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+  typography: {
+    fontFamily: 'Roboto, sans-serif',
+  },
+});

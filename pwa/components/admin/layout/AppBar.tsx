@@ -8,9 +8,9 @@ const CustomAppBar = () => (
         <Logout/>
       </UserMenu>
     }
-    sx={{
-      backgroundColor: '#32c5d2',
-    }}
+    sx={(theme) => ({
+      backgroundColor: theme.palette.mode === 'dark' ? '#333' : '#32c5d2',
+    })}
   >
     <TitlePortal/>
   </AppBar>
