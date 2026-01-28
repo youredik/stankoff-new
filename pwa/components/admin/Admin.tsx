@@ -13,6 +13,7 @@ import Layout from "./layout/Layout";
 import {ENTRYPOINT} from "../../config/entrypoint";
 import i18nProvider from "./i18nProvider";
 import supportTicketResourceProps from "../supportticket";
+import {lightTheme} from "./theme";
 
 const apiDocumentationParser = (session: Session) => async () => {
   try {
@@ -60,6 +61,7 @@ const AdminWithDataProvider = ({session, children,}: {
       entrypoint={window.origin}
       i18nProvider={i18nProvider}
       layout={Layout}
+      theme={lightTheme}
     >
       {!!children && children}
     </HydraAdmin>
