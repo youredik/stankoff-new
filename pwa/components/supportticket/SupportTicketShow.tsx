@@ -1,4 +1,4 @@
-import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useNotify, useShowContext} from 'react-admin';
+import {Show, TopToolbar, useGetList, useNotify, useShowContext} from 'react-admin';
 import {Autocomplete, Box, Button, Card, CardContent, CircularProgress, Divider, Popover, Tab, Tabs, TextField as MuiTextField, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
@@ -78,6 +78,37 @@ const CommentsList = ({ticketId, statusColors, refetchKey}: {
     </Box>
   );
 };
+
+const SectionCard = ({title, children}: { title: string; children: React.ReactNode }) => (
+  <Card variant="outlined" sx={{mb: 2}}>
+    <CardContent>
+      <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 2}}>
+        {title}
+      </Typography>
+      {children}
+    </CardContent>
+  </Card>
+);
+
+const FieldRow = ({label, children}: { label: string; children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: 'grid',
+      gridTemplateColumns: {xs: '1fr', sm: '160px 1fr'},
+      gap: 1,
+      alignItems: 'start',
+      mb: 1.5,
+      '&:last-of-type': { mb: 0 },
+    }}
+  >
+    <Typography variant="body2" color="text.secondary">
+      {label}
+    </Typography>
+    <Box>
+      {children}
+    </Box>
+  </Box>
+);
 
 const SupportTicketActions = () => {
   return <TopToolbar/>;
@@ -190,164 +221,175 @@ const SupportTicketShowContent = () => {
 
 
   return (
-    <Box sx={{ display: 'flex', gap: 4 }}>
+    <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
       {/* Левая колонка: информация о заявке */}
-      <Box sx={{ flex: 1 }}>
-        <SimpleShowLayout>
-          <FunctionField
-            label="Номер заявки"
-            render={(record: any) => record?.id ? record.id.split('/').pop() : ''}
-          />
-          <TextField source="subject" label="Причина обращения"/>
-          <TextField source="description" label="Цель обращения"/>
-          <FunctionField
-            label="Статус"
-            render={(record: any) => <StatusChip status={record?.currentStatus} statusValue={record?.status}
-                                                 color={statusColors[record?.status]}/>}
-          />
-          <TextField source="authorName" label="Автор заявки"/>
-          <FunctionField
-            label="Ответственный"
-            render={(record: any) => (
-              <>
-                {record?.status === 'completed' ? (
-                  <Typography component="span">
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <SectionCard title="Основное">
+          <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 2}}>
+            <Box>
+              <Typography variant="h6">
+                Заявка #{record?.id ? record.id.split('/').pop() : '—'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {record?.subject || 'Без темы'}
+              </Typography>
+            </Box>
+            <StatusChip
+              status={record?.currentStatus}
+              statusValue={record?.status}
+              color={statusColors[record?.status]}
+            />
+          </Box>
+          <FieldRow label="Причина обращения">
+            <Typography variant="body1">{record?.subject || '—'}</Typography>
+          </FieldRow>
+          <FieldRow label="Цель обращения">
+            <Typography variant="body1">{record?.description || '—'}</Typography>
+          </FieldRow>
+          <FieldRow label="Автор заявки">
+            <Typography variant="body1">{record?.authorName || '—'}</Typography>
+          </FieldRow>
+          <FieldRow label="Ответственный">
+            <>
+              {record?.status === 'completed' ? (
+                <Typography component="span">
+                  {record?.userName || 'Не назначен'}
+                </Typography>
+              ) : (
+                <Tooltip title="Нажмите чтобы сменить ответственного">
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={handleAssignOpen}
+                    sx={{
+                      textTransform: 'none',
+                      px: 0,
+                      minWidth: 0,
+                      textDecoration: 'underline',
+                      textDecorationStyle: 'dashed',
+                    }}
+                  >
                     {record?.userName || 'Не назначен'}
+                  </Button>
+                </Tooltip>
+              )}
+              <Popover
+                open={Boolean(assignAnchorEl)}
+                anchorEl={assignAnchorEl}
+                onClose={handleAssignClose}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                transformOrigin={{vertical: 'top', horizontal: 'left'}}
+              >
+                <Box sx={{p: 2, width: 320}}>
+                  <Typography variant="subtitle2" sx={{mb: 1}}>
+                    Сменить ответственного
                   </Typography>
-                ) : (
-                  <Tooltip title="Нажмите чтобы сменить ответственного">
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={handleAssignOpen}
-                      sx={{
-                        textTransform: 'none',
-                        px: 0,
-                        minWidth: 0,
-                        textDecoration: 'underline',
-                        textDecorationStyle: 'dashed',
-                      }}
-                    >
-                      {record?.userName || 'Не назначен'}
-                    </Button>
-                  </Tooltip>
-                )}
-                <Popover
-                  open={Boolean(assignAnchorEl)}
-                  anchorEl={assignAnchorEl}
-                  onClose={handleAssignClose}
-                  anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                  transformOrigin={{vertical: 'top', horizontal: 'left'}}
-                >
-                  <Box sx={{p: 2, width: 320}}>
-                    <Typography variant="subtitle2" sx={{mb: 1}}>
-                      Сменить ответственного
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
-                      Текущий: {record?.userName || 'Не назначен'}
-                    </Typography>
-                    <Autocomplete
-                      options={users}
-                      getOptionLabel={(option) => option?.name || ''}
-                      value={users.find((user) => user.id === selectedUserId) || null}
-                      onChange={(_, value) => setSelectedUserId(value?.id ?? null)}
-                      renderInput={(params) => (
-                        <MuiTextField
-                          {...params}
-                          size="small"
-                          placeholder="Выберите сотрудника"
-                        />
-                      )}
-                      isOptionEqualToValue={(option, value) => option.id === value.id}
-                      disabled={assigning}
-                    />
-                    <Box sx={{display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2}}>
-                      <Button size="small" onClick={handleAssignClose} disabled={assigning}>
-                        Отмена
-                      </Button>
-                      <Button
+                  <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                    Текущий: {record?.userName || 'Не назначен'}
+                  </Typography>
+                  <Autocomplete
+                    options={users}
+                    getOptionLabel={(option) => option?.name || ''}
+                    value={users.find((user) => user.id === selectedUserId) || null}
+                    onChange={(_, value) => setSelectedUserId(value?.id ?? null)}
+                    renderInput={(params) => (
+                      <MuiTextField
+                        {...params}
                         size="small"
-                        variant="contained"
-                        onClick={handleAssignConfirm}
-                        disabled={!selectedUserId || assigning}
-                      >
-                        {assigning ? 'Назначение...' : 'Назначить'}
-                      </Button>
-                    </Box>
+                        placeholder="Выберите сотрудника"
+                      />
+                    )}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    disabled={assigning}
+                  />
+                  <Box sx={{display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2}}>
+                    <Button size="small" onClick={handleAssignClose} disabled={assigning}>
+                      Отмена
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleAssignConfirm}
+                      disabled={!selectedUserId || assigning}
+                    >
+                      {assigning ? 'Назначение...' : 'Назначить'}
+                    </Button>
                   </Box>
-                </Popover>
-              </>
-            )}
-          />
-          <FunctionField
-            label="Создана"
-            render={(record: any) => (
+                </Box>
+              </Popover>
+            </>
+          </FieldRow>
+          <FieldRow label="Создана">
+            {record?.createdAt ? (
               <Tooltip title={new Date(record.createdAt).toLocaleString('ru-RU')}>
                 <span>{formatDistanceToNow(new Date(record.createdAt), {addSuffix: true, locale: ru})}</span>
               </Tooltip>
+            ) : (
+              '—'
             )}
-          />
+          </FieldRow>
           {record?.closedAt && (
-            <FunctionField
-              label="Завершено"
-              render={(record: any) => (
-                <Tooltip title={new Date(record.closedAt).toLocaleString('ru-RU')}>
-                  <span>{formatDistanceToNow(new Date(record.closedAt), {addSuffix: true, locale: ru})}</span>
-                </Tooltip>
-              )}
-            />
+            <FieldRow label="Завершено">
+              <Tooltip title={new Date(record.closedAt).toLocaleString('ru-RU')}>
+                <span>{formatDistanceToNow(new Date(record.closedAt), {addSuffix: true, locale: ru})}</span>
+              </Tooltip>
+            </FieldRow>
           )}
-          <FunctionField
-            label="Информация о заказе"
-            render={(record: any) => record?.orderId &&
-              <OrderInfo orderId={record.orderId} orderData={record.orderData}/>}
-          />
-          <FunctionField
-            label=""
-            render={(record: any) => record?.id && <MediaUpload ticketId={record.id.split('/').pop() || ''} />}
-          />
-        </SimpleShowLayout>
+        </SectionCard>
+        <SectionCard title="Заказ и контакты">
+          {record?.orderId ? (
+            <OrderInfo orderId={record.orderId} orderData={record.orderData}/>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Нет данных о заказе.
+            </Typography>
+          )}
+        </SectionCard>
+        <SectionCard title="Файлы">
+          {record?.id ? <MediaUpload ticketId={record.id.split('/').pop() || ''} /> : null}
+        </SectionCard>
       </Box>
 
       {/* Разделитель */}
       <Divider orientation="vertical" flexItem />
 
       {/* Правая колонка: активности */}
-      <Box sx={{ flex: 1 }}>
-        <SimpleShowLayout>
-          <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
-            <Tab label="Активность" />
-            <Tab label="Мессенджер" />
-            <Tab label="Телефония" />
-          </Tabs>
-          {activeTab === 0 && (
-            <>
-              <FunctionField
-                label=""
-                render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
-              />
-              <FunctionField
-                label="Активность"
-                render={(record: any) => record?.id &&
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 2}}>
+              Активности
+            </Typography>
+            <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
+              <Tab label="Активности" />
+              <Tab label="Мессенджер" />
+              <Tab label="Телефония" />
+            </Tabs>
+            {activeTab === 0 && (
+              <Box sx={{pt: 2}}>
+                <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>
+                <Divider sx={{my: 2}} />
+                {record?.id ? (
                   <CommentsList
                     ticketId={record.id}
                     statusColors={statusColors}
                     refetchKey={commentsRefetchKey}
-                  />}
-              />
-            </>
-          )}
-          {activeTab === 1 && (
-            <Box sx={{ pt: 2 }}>
-              <Typography color="text.secondary">На стадии разработки</Typography>
-            </Box>
-          )}
-          {activeTab === 2 && (
-            <Box sx={{ pt: 2 }}>
-              <Typography color="text.secondary">На стадии разработки</Typography>
-            </Box>
-          )}
-        </SimpleShowLayout>
+                  />
+                ) : null}
+              </Box>
+            )}
+            {activeTab === 1 && (
+              <Box sx={{ pt: 2 }}>
+                <Typography color="text.secondary">На стадии разработки</Typography>
+              </Box>
+            )}
+            {activeTab === 2 && (
+              <Box sx={{ pt: 2 }}>
+                <Typography color="text.secondary">На стадии разработки</Typography>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
       </Box>
     </Box>
   );
