@@ -157,6 +157,7 @@ const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
   const {data: session, status} = useSession();
   const [isRedirecting, setIsRedirecting] = React.useState(false);
+  const [redirectCountdown, setRedirectCountdown] = React.useState(2);
 
   if (status === "loading") {
     return <SyncLoader size={8} color="#46B6BF"/>;
@@ -164,10 +165,22 @@ const AdminWithOIDC = () => {
 
   // @ts-ignore
   if (!session || session?.error === "RefreshAccessTokenError") {
-    if (!isRedirecting) {
+    React.useEffect(() => {
+      if (isRedirecting) {
+        return;
+      }
       setIsRedirecting(true);
-      void signIn("keycloak");
-    }
+      const countdownTimer = setInterval(() => {
+        setRedirectCountdown((prev) => Math.max(prev - 1, 0));
+      }, 1000);
+      const redirectTimer = setTimeout(() => {
+        void signIn("keycloak", {callbackUrl: window.location.href});
+      }, 2000);
+      return () => {
+        clearInterval(countdownTimer);
+        clearTimeout(redirectTimer);
+      };
+    }, [isRedirecting]);
 
     return (
       <Box sx={{textAlign: 'center', mt: 6}}>
@@ -175,9 +188,9 @@ const AdminWithOIDC = () => {
           Сессия истекла
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
-          Перенаправляем на страницу входа…
+          Перенаправляем на страницу входа через {redirectCountdown} сек…
         </Typography>
-        <Button variant="contained" onClick={() => signIn("keycloak")}>
+        <Button variant="contained" onClick={() => signIn("keycloak", {callbackUrl: window.location.href})}>
           Войти снова
         </Button>
       </Box>
