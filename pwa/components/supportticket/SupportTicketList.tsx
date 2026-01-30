@@ -147,7 +147,7 @@ const SupportTicketListView = () => {
 
   return (
     <Box>
-      <Box sx={{mt: 3}}>
+      <Box sx={{mt: 3, mb: 2}}>
         {/*<Typography variant="h5">Заявки</Typography>
         <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
           Список обращений в поддержку
