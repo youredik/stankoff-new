@@ -5,6 +5,7 @@ import React from "react";
 import {signIn, useSession} from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import {fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser,} from "@api-platform/admin";
+import type { DataProvider, GetListParams, GetListResult } from "react-admin";
 import {parseHydraDocumentation} from "@api-platform/api-doc-parser";
 
 import {type Session} from "../../app/auth";
@@ -121,9 +122,9 @@ const AdminWithDataProvider = ({session, children,}: {
       }),
     apiDocumentationParser: apiDocumentationParser(session),
   });
-  const dataProvider = {
+  const dataProvider: DataProvider = {
     ...baseProvider,
-    getList: (resource, params) => {
+    getList: (resource: string, params: GetListParams): Promise<GetListResult> => {
       const filter = normalizeDateFilters(params.filter);
       return baseProvider.getList(resource, {...params, filter});
     },
