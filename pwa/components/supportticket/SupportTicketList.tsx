@@ -47,7 +47,7 @@ const TicketFilters = () => {
   return (
     <Filter>
       <NumberInput label="# заявки" source="id" alwaysOn sx={{maxWidth: 100}}/>
-      <TextInput label="Контрагент" source="contractor" alwaysOn/>
+      <TextInput label="Контрагент" source="contractor" alwaysOn sx={{maxWidth: 150}}/>
       <SelectInput label="Ответственный" source="user" choices={users} optionText="name" optionValue="id" alwaysOn/>
       <SelectInput label="Статус" source="status" choices={statuses} alwaysOn/>
       <DateInput label="Дата создания" source="createdAt" alwaysOn/>

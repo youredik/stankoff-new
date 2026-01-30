@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Doctrine\Orm\Filter\IdFilter;
 use App\Doctrine\Orm\Filter\NameFilter;
+use App\Doctrine\Orm\Filter\SupportTicketStatusOrderFilter;
 use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
 use App\State\Processor\SupportTicketCreateProcessor;
@@ -53,6 +54,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiFilter(IdFilter::class)]
 #[ApiFilter(NameFilter::class)]
+#[ApiFilter(SupportTicketStatusOrderFilter::class)]
 #[ORM\Entity(repositoryClass: SupportTicketRepository::class)]
 class SupportTicket
 {
@@ -82,7 +84,6 @@ class SupportTicket
     public string $authorName;
 
     #[ORM\Column(type: 'string', enumType: SupportTicketStatus::class)]
-    #[ApiFilter(OrderFilter::class)]
     #[ApiFilter(SearchFilter::class, strategy: 'exact')]
     #[Groups(['SupportTicket:read',])]
     public SupportTicketStatus $status;
