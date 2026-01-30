@@ -100,6 +100,27 @@ const SupportTicketShowContent = () => {
   const {record, refetch} = useShowContext();
   const notify = useNotify();
 
+  const currentUserId = React.useMemo(() => {
+    const userValue = (record as any)?.user;
+    if (!userValue) {
+      return null;
+    }
+    if (typeof userValue === 'string') {
+      const idPart = userValue.split('/').pop();
+      return idPart ? Number(idPart) : null;
+    }
+    if (typeof userValue === 'object') {
+      if (typeof userValue.id === 'number') {
+        return userValue.id;
+      }
+      if (typeof userValue['@id'] === 'string') {
+        const idPart = userValue['@id'].split('/').pop();
+        return idPart ? Number(idPart) : null;
+      }
+    }
+    return null;
+  }, [record]);
+
   React.useEffect(() => {
     const loadData = async () => {
       try {
@@ -149,7 +170,7 @@ const SupportTicketShowContent = () => {
       return;
     }
     setAssignAnchorEl(event.currentTarget);
-    setSelectedUserId(null);
+    setSelectedUserId(currentUserId);
   };
 
   const handleAssignClose = () => {
@@ -221,6 +242,9 @@ const SupportTicketShowContent = () => {
                   <Box sx={{p: 2, width: 320}}>
                     <Typography variant="subtitle2" sx={{mb: 1}}>
                       Сменить ответственного
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                      Текущий: {record?.userName || 'Не назначен'}
                     </Typography>
                     <Autocomplete
                       options={users}
