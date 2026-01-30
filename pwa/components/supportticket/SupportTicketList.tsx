@@ -4,7 +4,6 @@ import {
   FilterForm,
   FunctionField,
   ListBase,
-  NumberInput,
   Pagination,
   SelectInput,
   TextField,
@@ -27,7 +26,7 @@ const Empty = () => (
   </Box>
 );
 
-const StatusSummary = () => {
+const StatusSummary = ({onSelect}: { onSelect: (value: string | null) => void }) => {
   const {total} = useListContext();
   const commonParams = {pagination: {page: 1, perPage: 1}, sort: {field: 'id', order: 'DESC' as const}};
   const {total: newTotal, isLoading: newLoading} = useGetList('support_tickets', {
@@ -49,11 +48,37 @@ const StatusSummary = () => {
 
   return (
     <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
-      <Chip label={`Все: ${total ?? '—'}`}/>
-      <Chip label={`Новые: ${newLoading ? '—' : newTotal ?? 0}`}/>
-      <Chip label={`В работе: ${inProgressLoading ? '—' : inProgressTotal ?? 0}`}/>
-      <Chip label={`Отложено: ${postponedLoading ? '—' : postponedTotal ?? 0}`}/>
-      <Chip label={`Завершено: ${completedLoading ? '—' : completedTotal ?? 0}`}/>
+      <Chip
+        label={`Все: ${total ?? '—'}`}
+        clickable
+        onClick={() => onSelect(null)}
+        color="default"
+        variant="outlined"
+      />
+      <Chip
+        label={`Новые: ${newLoading ? '—' : newTotal ?? 0}`}
+        clickable
+        onClick={() => onSelect('new')}
+        color="info"
+      />
+      <Chip
+        label={`В работе: ${inProgressLoading ? '—' : inProgressTotal ?? 0}`}
+        clickable
+        onClick={() => onSelect('in_progress')}
+        color="warning"
+      />
+      <Chip
+        label={`Отложено: ${postponedLoading ? '—' : postponedTotal ?? 0}`}
+        clickable
+        onClick={() => onSelect('postponed')}
+        color="secondary"
+      />
+      <Chip
+        label={`Завершено: ${completedLoading ? '—' : completedTotal ?? 0}`}
+        clickable
+        onClick={() => onSelect('completed')}
+        color="success"
+      />
     </Box>
   );
 };
@@ -75,7 +100,7 @@ const countActiveFilters = (values: Record<string, unknown>) =>
 const SupportTicketListView = () => {
   const [statuses, setStatuses] = useState([]);
   const [users, setUsers] = useState([]);
-  const {isLoading, total, error, filterValues} = useListContext();
+  const {isLoading, total, error, filterValues, setFilters} = useListContext();
 
   useEffect(() => {
     const loadData = async () => {
@@ -122,7 +147,23 @@ const SupportTicketListView = () => {
 
   return (
     <Box>
-      <StatusSummary/>
+      <Box sx={{mt: 3}}>
+        {/*<Typography variant="h5">Заявки</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+          Список обращений в поддержку
+        </Typography>*/}
+        <StatusSummary
+          onSelect={(value) => {
+            const next = {...filterValues};
+            if (value) {
+              next.status = value;
+            } else {
+              delete (next as any).status;
+            }
+            setFilters(next, null);
+          }}
+        />
+      </Box>
       <Box
         sx={{
           '& .RaFilterForm-root': {

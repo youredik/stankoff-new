@@ -1,5 +1,5 @@
 
-import { Box, CircularProgress } from '@mui/material';
+import {Box, CircularProgress, Typography} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getSession } from 'next-auth/react';
 
@@ -53,48 +53,88 @@ export const OrderInfo = ({ orderId, orderData }: { orderId: string, orderData: 
 
   const orderItems = orderInfo?.items || [];
 
+  const FieldRow = ({label, children}: {label: string; children: React.ReactNode}) => (
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {xs: '1fr', sm: '160px 1fr'},
+        gap: 1,
+        alignItems: 'start',
+        mb: 1.5,
+        '&:last-of-type': { mb: 0 },
+      }}
+    >
+      <Typography variant="body2" color="text.secondary">
+        {label}
+      </Typography>
+      <Box>{children}</Box>
+    </Box>
+  );
+
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
-        <strong>Номер заказа:</strong> <a href={`https://workspace.stankoff.ru/commerce/order/view/${orderInfo.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline' }}>#{orderInfo.id}</a><br />
-        <strong>Ответственный менеджер:</strong> {orderInfo.manager}<br />
-        <strong>Контрагент:</strong> {orderInfo.counterparty_name}<br />
+        <FieldRow label="Номер заказа">
+          <a
+            href={`https://workspace.stankoff.ru/commerce/order/view/${orderInfo.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#1976d2', textDecoration: 'underline' }}
+          >
+            #{orderInfo.id}
+          </a>
+        </FieldRow>
+        <FieldRow label="Ответственный">
+          <Typography variant="body1">{orderInfo.manager || '—'}</Typography>
+        </FieldRow>
+        <FieldRow label="Контрагент">
+          <Typography variant="body1">{orderInfo.counterparty_name || '—'}</Typography>
+        </FieldRow>
         {orderInfo.counterparty_inn && orderInfo.counterparty_inn !== "0" && (
-          <>
-            <strong>ИНН:</strong> {orderInfo.counterparty_inn}<br />
-          </>
+          <FieldRow label="ИНН">
+            <Typography variant="body1">{orderInfo.counterparty_inn}</Typography>
+          </FieldRow>
         )}
         {orderInfo.counterparty_kpp && orderInfo.counterparty_kpp !== "0" && (
-          <>
-            <strong>КПП:</strong> {orderInfo.counterparty_kpp}<br />
-          </>
+          <FieldRow label="КПП">
+            <Typography variant="body1">{orderInfo.counterparty_kpp}</Typography>
+          </FieldRow>
         )}
         {orderData.contactName && (
-          <>
-            <strong>Контактное лицо:</strong> {orderData.contactName}<br />
-          </>
+          <FieldRow label="Контактное лицо">
+            <Typography variant="body1">{orderData.contactName}</Typography>
+          </FieldRow>
         )}
         {orderData.contactPhone && (
-          <>
-            <strong>Телефон:</strong> {orderData.contactPhone}<br />
-          </>
+          <FieldRow label="Телефон">
+            <Typography variant="body1">{orderData.contactPhone}</Typography>
+          </FieldRow>
         )}
         {orderData.contactEmail && (
-          <>
-            <strong>Email:</strong> {orderData.contactEmail}<br />
-          </>
+          <FieldRow label="Email">
+            <Typography variant="body1">{orderData.contactEmail}</Typography>
+          </FieldRow>
         )}
       </Box>
-      <strong>Выбранные товары:</strong>
+
+      <Typography variant="subtitle2" sx={{fontWeight: 600, mb: 1}}>
+        Выбранные товары
+      </Typography>
       {orderData.selectedItems.map((id: string) => {
         const itemId = parseInt(id.split('_')[0]);
         const item = orderItems.find((i: any) => i.id == itemId);
         return item ? (
           <Box key={id} sx={{ ml: 2, mb: 1 }}>
-            {item.name} (Кол-во: {parseInt(item.quantity)}, Сумма: {item.sum})
+            <Typography variant="body2">
+              {item.name} (Кол-во: {parseInt(item.quantity)}, Сумма: {item.sum})
+            </Typography>
           </Box>
         ) : (
-          <Box key={id} sx={{ ml: 2 }}>Товар ID {id} не найден</Box>
+          <Box key={id} sx={{ ml: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Товар ID {id} не найден
+            </Typography>
+          </Box>
         );
       })}
     </Box>
