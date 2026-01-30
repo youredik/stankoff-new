@@ -20,7 +20,18 @@ final class Version20260128073755 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE support_ticket ALTER status TYPE VARCHAR(255)');
+        $this->addSql('ALTER TABLE support_ticket ADD status VARCHAR(255) DEFAULT NULL');
+        $this->addSql("
+            UPDATE support_ticket st
+            SET status = COALESCE((
+                SELECT stc.status
+                FROM support_ticket_comment stc
+                WHERE stc.support_ticket_id = st.id
+                ORDER BY stc.created_at DESC
+                LIMIT 1
+            ), 'new')
+            WHERE st.status IS NULL
+        ");
         $this->addSql('ALTER TABLE support_ticket ALTER status SET NOT NULL');
     }
 
