@@ -25,6 +25,8 @@ export const StatusChip = ({status, statusValue, color}: { status: string, statu
       variant="filled"
       sx={{
         fontSize: '0.75rem',
+        fontWeight: 600,
+        px: 0.5,
       }}
     />
   );
