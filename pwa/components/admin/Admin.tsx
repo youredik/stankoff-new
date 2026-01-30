@@ -2,6 +2,7 @@
 
 import Head from "next/head";
 import React from "react";
+import {Box, Button, Typography} from "@mui/material";
 import {signIn, useSession} from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
 import {fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser,} from "@api-platform/admin";
@@ -155,6 +156,7 @@ const AdminWithDataProviderAndResources = ({session}: { session: Session }) => (
 const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
   const {data: session, status} = useSession();
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
 
   if (status === "loading") {
     return <SyncLoader size={8} color="#46B6BF"/>;
@@ -162,9 +164,24 @@ const AdminWithOIDC = () => {
 
   // @ts-ignore
   if (!session || session?.error === "RefreshAccessTokenError") {
-    (async () => await signIn("keycloak"))();
+    if (!isRedirecting) {
+      setIsRedirecting(true);
+      void signIn("keycloak");
+    }
 
-    return <SyncLoader size={8} color="#46B6BF"/>;
+    return (
+      <Box sx={{textAlign: 'center', mt: 6}}>
+        <Typography variant="h6" sx={{mb: 1}}>
+          Сессия истекла
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
+          Перенаправляем на страницу входа…
+        </Typography>
+        <Button variant="contained" onClick={() => signIn("keycloak")}>
+          Войти снова
+        </Button>
+      </Box>
+    );
   }
 
   // @ts-ignore

@@ -30,6 +30,8 @@ interface Account {
   refresh_token: string
 }
 
+const REFRESH_BUFFER_SECONDS = 30;
+
 export const { handlers: { GET, POST }, auth } = NextAuth({
   pages: {
     signIn: "/auth/signin",
@@ -46,12 +48,15 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
           expiresAt: Math.floor(Date.now() / 1000 + account.expires_in),
           refreshToken: account.refresh_token,
         };
-      } else if (Date.now() < token.expiresAt * 1000) {
+      } else if (Date.now() < (token.expiresAt - REFRESH_BUFFER_SECONDS) * 1000) {
         // If the access token has not expired yet, return it
         return token;
       } else {
         // If the access token has expired, try to refresh it
         try {
+          if (!token.refreshToken) {
+            throw new Error('Missing refresh token');
+          }
           const response = await fetch(`${NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL}/protocol/openid-connect/token`, {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
@@ -66,6 +71,11 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
 
           if (!response.ok) throw tokens;
 
+          const expiresIn = Number((tokens as any).expires_in ?? 0);
+          if (!expiresIn) {
+            throw new Error('Invalid expires_in from refresh response');
+          }
+
           return {
             ...token, // Keep the previous token properties
             // @ts-ignore
@@ -73,7 +83,7 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
             // @ts-ignore
             idToken: tokens.id_token,
             // @ts-ignore
-            expiresAt: Math.floor(Date.now() / 1000 + tokens.expires_at),
+            expiresAt: Math.floor(Date.now() / 1000 + expiresIn),
             // Fall back to old refresh token, but note that
             // many providers may only allow using a refresh token once.
             refreshToken: tokens.refresh_token ?? token.refreshToken,
@@ -121,14 +131,13 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
       // also, discovery doesn't seem to work properly: https://github.com/nextauthjs/next-auth/pull/9718
       // wellKnown: `${OIDC_SERVER_URL}/.well-known/openid-configuration`,
       token: `${NEXT_PUBLIC_OIDC_SERVER_URL_INTERNAL}/protocol/openid-connect/token`,
-      userinfo: `${NEXT_PUBLIC_OIDC_SERVER_URL}/protocol/openid-connect/token`,
+      userinfo: `${NEXT_PUBLIC_OIDC_SERVER_URL}/protocol/openid-connect/userinfo`,
       authorization: {
         url: `${NEXT_PUBLIC_OIDC_SERVER_URL}/protocol/openid-connect/auth`,
         // https://authjs.dev/guides/basics/refresh-token-rotation#jwt-strategy
         params: {
           access_type: "offline",
           scope: "openid profile email",
-          prompt: "consent",
         },
       },
     }),
