@@ -250,9 +250,6 @@ const SupportTicketShowContent = () => {
               <Typography variant="h6">
                 Заявка #{record?.id ? record.id.split('/').pop() : '—'}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {record?.subject || 'Без темы'}
-              </Typography>
             </Box>
             <StatusChip
               status={record?.currentStatus}
