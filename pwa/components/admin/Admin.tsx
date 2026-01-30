@@ -15,6 +15,75 @@ import i18nProvider from "./i18nProvider";
 import supportTicketResourceProps from "../supportticket";
 import {lightTheme} from "./theme";
 
+const toDateOnly = (value: unknown): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "string") {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      return value;
+    }
+
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString().slice(0, 10);
+    }
+  }
+
+  return null;
+};
+
+const addDays = (dateOnly: string, days: number): string | null => {
+  const base = new Date(`${dateOnly}T00:00:00Z`);
+  if (Number.isNaN(base.getTime())) {
+    return null;
+  }
+
+  base.setUTCDate(base.getUTCDate() + days);
+  return base.toISOString().slice(0, 10);
+};
+
+const applyDateFilter = (filter: Record<string, unknown>, field: string) => {
+  const hasRange = Object.keys(filter).some((key) => key.startsWith(`${field}[`));
+  if (hasRange) {
+    return filter;
+  }
+
+  const dateOnly = toDateOnly(filter[field]);
+  if (!dateOnly) {
+    return filter;
+  }
+
+  const nextDay = addDays(dateOnly, 1);
+  if (!nextDay) {
+    return filter;
+  }
+
+  const updated = {...filter};
+  delete updated[field];
+  updated[`${field}[after]`] = dateOnly;
+  updated[`${field}[strictly_before]`] = nextDay;
+
+  return updated;
+};
+
+const normalizeDateFilters = (filter: Record<string, unknown> | undefined) => {
+  if (!filter) {
+    return filter;
+  }
+
+  let updated = {...filter};
+  updated = applyDateFilter(updated, "createdAt");
+  updated = applyDateFilter(updated, "closedAt");
+
+  return updated;
+};
+
 const apiDocumentationParser = (session: Session) => async () => {
   try {
     return await parseHydraDocumentation(ENTRYPOINT, {
@@ -41,7 +110,7 @@ const AdminWithDataProvider = ({session, children,}: {
   session: Session;
   children?: React.ReactNode | undefined;
 }) => {
-  const dataProvider = hydraDataProvider({
+  const baseProvider = hydraDataProvider({
     entrypoint: ENTRYPOINT,
     httpClient: (url: URL, options = {}) =>
       fetchHydra(url, {
@@ -52,6 +121,13 @@ const AdminWithDataProvider = ({session, children,}: {
       }),
     apiDocumentationParser: apiDocumentationParser(session),
   });
+  const dataProvider = {
+    ...baseProvider,
+    getList: (resource, params) => {
+      const filter = normalizeDateFilters(params.filter);
+      return baseProvider.getList(resource, {...params, filter});
+    },
+  };
 
   return (
     <HydraAdmin

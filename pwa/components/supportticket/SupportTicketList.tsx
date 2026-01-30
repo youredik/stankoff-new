@@ -46,15 +46,13 @@ const TicketFilters = () => {
 
   return (
     <Filter>
-      <NumberInput label="Номер" source="id" alwaysOn/>
+      <NumberInput label="# заявки" source="id" alwaysOn sx={{maxWidth: 100}}/>
       <TextInput label="Контрагент" source="contractor" alwaysOn/>
       <SelectInput label="Ответственный" source="user" choices={users} optionText="name" optionValue="id" alwaysOn/>
       <SelectInput label="Статус" source="status" choices={statuses} alwaysOn/>
-      <DateInput label="Дата создания от" source="createdAt[after]" alwaysOn/>
-      <DateInput label="Дата создания до" source="createdAt[before]" alwaysOn/>
-      <DateInput label="Дата закрытия от" source="closedAt[after]" alwaysOn/>
-      <DateInput label="Дата закрытия до" source="closedAt[before]" alwaysOn/>
-      <NumberInput label="Номер заказа" source="orderId" alwaysOn/>
+      <DateInput label="Дата создания" source="createdAt" alwaysOn/>
+      <DateInput label="Дата закрытия" source="closedAt" alwaysOn/>
+      <NumberInput label="# заказа" source="orderId" alwaysOn sx={{maxWidth: 100}}/>
     </Filter>
   );
 };
