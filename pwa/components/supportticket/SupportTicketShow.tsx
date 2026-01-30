@@ -378,7 +378,7 @@ const SupportTicketShowContent = () => {
         <Card variant="outlined">
           <CardContent>
             <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
-              <Tab label="Активности"/>
+              <Tab label="Активность"/>
               <Tab label="Мессенджер"/>
               <Tab label="Телефония"/>
             </Tabs>
