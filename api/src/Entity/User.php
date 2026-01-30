@@ -25,25 +25,15 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
     types: ['https://schema.org/Person'],
     operations: [
         new GetCollection(
-            uriTemplate: '/admin/users{._format}',
             paginationClientItemsPerPage: true,
-            security: 'is_granted("OIDC_ADMIN")',
-            filters: ['app.filter.user.admin.name'],
-            itemUriTemplate: '/admin/users/{id}{._format}',
         ),
-        new Get(
-            uriTemplate: '/admin/users/{id}{._format}',
-            security: 'is_granted("OIDC_ADMIN")',
-        ),
-        new Get(
-            uriTemplate: '/users/{id}{._format}',
-            security: 'object === user',
-        ),
+        new Get(),
     ],
     normalizationContext: [
         AbstractNormalizer::GROUPS => ['User:read'],
         AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
-    ]
+    ],
+    security: 'is_granted("OIDC_SUPPORT_MANAGER") or is_granted("OIDC_ADMIN")'
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -59,6 +49,7 @@ class User implements UserInterface
      * @see https://schema.org/email
      */
     #[ORM\Column(unique: true)]
+    #[Groups(groups: ['User:read'])]
     public string $email;
 
     /**
@@ -106,6 +97,6 @@ class User implements UserInterface
     #[Groups(groups: ['User:read'])]
     public function getName(): string
     {
-        return trim(\sprintf('%s %s', $this->firstName, $this->lastName));
+        return trim(sprintf('%s %s', $this->firstName, $this->lastName));
     }
 }

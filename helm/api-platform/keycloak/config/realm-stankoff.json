@@ -623,6 +623,25 @@
       "groups": [
         "/Technical Support Department"
       ]
+    },
+    {
+      "id": "admin-user-id",
+      "username": "admin@stankoff.ru",
+      "email": "admin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Stankoff",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMeAdminPassword"
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ],
+      "groups": []
     }
   ],
   "scopeMappings": [

@@ -16,6 +16,7 @@ import Layout from "./layout/Layout";
 import {ENTRYPOINT} from "../../config/entrypoint";
 import i18nProvider from "./i18nProvider";
 import supportTicketResourceProps from "../supportticket";
+import userResourceProps from "../user";
 import {lightTheme} from "./theme";
 
 const toDateOnly = (value: unknown): string | null => {
@@ -249,6 +250,7 @@ const AdminWithDataProvider = ({session, children,}: {
 const AdminWithDataProviderAndResources = ({session}: { session: Session }) => (
   <AdminWithDataProvider session={session}>
     <ResourceGuesser name="support_tickets" {...supportTicketResourceProps} />
+    <ResourceGuesser name="users" {...userResourceProps} />
   </AdminWithDataProvider>
 );
 
