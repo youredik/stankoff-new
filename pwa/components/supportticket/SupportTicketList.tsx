@@ -9,28 +9,15 @@ import {
   SelectInput,
   TextField,
   TextInput,
-  TopToolbar,
   useGetList,
   useListContext
 } from 'react-admin';
-import {Alert, Box, Card, CardContent, Chip, Tooltip, Typography} from '@mui/material';
+import {Alert, Box, Chip, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {StatusChip} from './common';
 import {getStatuses} from '../../services/supportTicketService';
 import {useEffect, useState} from 'react';
-
-const ListActions = ({
-  activeFiltersCount,
-}: {
-  activeFiltersCount: number;
-}) => (
-  <TopToolbar sx={{gap: 1, minHeight: 'auto', p: 0}}>
-    {activeFiltersCount > 0 && (
-      <Chip size="small" label={`Фильтров: ${activeFiltersCount}`} />
-    )}
-  </TopToolbar>
-);
 
 const Empty = () => (
   <Box textAlign="center" m={1}>
@@ -43,18 +30,30 @@ const Empty = () => (
 const StatusSummary = () => {
   const {total} = useListContext();
   const commonParams = {pagination: {page: 1, perPage: 1}, sort: {field: 'id', order: 'DESC' as const}};
-  const {total: newTotal, isLoading: newLoading} = useGetList('support_tickets', {...commonParams, filter: {status: 'new'}});
-  const {total: inProgressTotal, isLoading: inProgressLoading} = useGetList('support_tickets', {...commonParams, filter: {status: 'in_progress'}});
-  const {total: postponedTotal, isLoading: postponedLoading} = useGetList('support_tickets', {...commonParams, filter: {status: 'postponed'}});
-  const {total: completedTotal, isLoading: completedLoading} = useGetList('support_tickets', {...commonParams, filter: {status: 'completed'}});
+  const {total: newTotal, isLoading: newLoading} = useGetList('support_tickets', {
+    ...commonParams,
+    filter: {status: 'new'}
+  });
+  const {total: inProgressTotal, isLoading: inProgressLoading} = useGetList('support_tickets', {
+    ...commonParams,
+    filter: {status: 'in_progress'}
+  });
+  const {total: postponedTotal, isLoading: postponedLoading} = useGetList('support_tickets', {
+    ...commonParams,
+    filter: {status: 'postponed'}
+  });
+  const {total: completedTotal, isLoading: completedLoading} = useGetList('support_tickets', {
+    ...commonParams,
+    filter: {status: 'completed'}
+  });
 
   return (
     <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
-      <Chip label={`Все: ${total ?? '—'}`} />
-      <Chip label={`Новые: ${newLoading ? '—' : newTotal ?? 0}`} />
-      <Chip label={`В работе: ${inProgressLoading ? '—' : inProgressTotal ?? 0}`} />
-      <Chip label={`Отложено: ${postponedLoading ? '—' : postponedTotal ?? 0}`} />
-      <Chip label={`Завершено: ${completedLoading ? '—' : completedTotal ?? 0}`} />
+      <Chip label={`Все: ${total ?? '—'}`}/>
+      <Chip label={`Новые: ${newLoading ? '—' : newTotal ?? 0}`}/>
+      <Chip label={`В работе: ${inProgressLoading ? '—' : inProgressTotal ?? 0}`}/>
+      <Chip label={`Отложено: ${postponedLoading ? '—' : postponedTotal ?? 0}`}/>
+      <Chip label={`Завершено: ${completedLoading ? '—' : completedTotal ?? 0}`}/>
     </Box>
   );
 };
@@ -97,7 +96,8 @@ const SupportTicketListView = () => {
   const filters = [
     <NumberInput key="id" label="# заявки" source="id" alwaysOn sx={{maxWidth: 100}}/>,
     <TextInput key="contractor" label="Контрагент" source="contractor" alwaysOn sx={{maxWidth: 150}}/>,
-    <SelectInput key="user" label="Ответственный" source="user" choices={users} optionText="name" optionValue="id" alwaysOn/>,
+    <SelectInput key="user" label="Ответственный" source="user" choices={users} optionText="name" optionValue="id"
+                 alwaysOn/>,
     <SelectInput key="status" label="Статус" source="status" choices={statuses} alwaysOn sx={{maxWidth: 220}}/>,
     <DateInput key="createdAt" label="Дата создания" source="createdAt" alwaysOn/>,
     <DateInput key="closedAt" label="Дата закрытия" source="closedAt" alwaysOn/>,
@@ -106,37 +106,34 @@ const SupportTicketListView = () => {
 
   return (
     <Box>
-      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 2}}>
-        <ListActions activeFiltersCount={countActiveFilters(filterValues)} />
+      <StatusSummary/>
+      <Box
+        sx={{
+          '& .RaFilterForm-root': {
+            display: 'grid',
+            gap: 16,
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: '1fr 1fr',
+              md: 'repeat(4, minmax(160px, 1fr))'
+            },
+            alignItems: 'end',
+          },
+          '& .RaFilterForm-filterFormInput': {
+            margin: 0,
+            minWidth: 0,
+          },
+        }}
+      >
+        <FilterForm filters={filters}/>
       </Box>
-      <StatusSummary />
-          <Box
-            sx={{
-              '& .RaFilterForm-root': {
-                display: 'grid',
-                gap: 16,
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: '1fr 1fr',
-                  md: 'repeat(4, minmax(160px, 1fr))'
-                },
-                alignItems: 'end',
-              },
-              '& .RaFilterForm-filterFormInput': {
-                margin: 0,
-                minWidth: 0,
-              },
-            }}
-          >
-            <FilterForm filters={filters} />
-          </Box>
       {error ? (
         <Alert severity="error" sx={{mb: 2}}>
           Не удалось загрузить список заявок. Попробуйте обновить страницу.
         </Alert>
       ) : null}
       {!isLoading && (total ?? 0) === 0 ? (
-        <Empty />
+        <Empty/>
       ) : (
         <>
           <Datagrid
@@ -152,15 +149,15 @@ const SupportTicketListView = () => {
               '& .MuiTableCell-root': {
                 overflow: 'hidden'
               },
-              '& .column-id': { width: 110 },
-              '& .column-status': { width: 140 },
-              '& .column-contractor': { minWidth: 200 },
-              '& .column-subject': { minWidth: 240, maxWidth: 360 },
-              '& .column-userName': { minWidth: 160 },
-              '& .column-authorName': { minWidth: 160 },
-              '& .column-createdAt': { minWidth: 160 },
-              '& .column-closedAt': { minWidth: 160 },
-              '& .column-orderId': { width: 120 },
+              '& .column-id': {width: 110},
+              '& .column-status': {width: 140},
+              '& .column-contractor': {minWidth: 200},
+              '& .column-subject': {minWidth: 240, maxWidth: 360},
+              '& .column-userName': {minWidth: 160},
+              '& .column-authorName': {minWidth: 160},
+              '& .column-createdAt': {minWidth: 160},
+              '& .column-closedAt': {minWidth: 160},
+              '& .column-orderId': {width: 120},
             }}
           >
             <FunctionField
@@ -231,14 +228,14 @@ const SupportTicketListView = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  style={{ color: '#1976d2', textDecoration: 'underline' }}
+                  style={{color: '#1976d2', textDecoration: 'underline'}}
                 >
                   {record.orderId}
                 </a>
               ) : ''}
             />
           </Datagrid>
-          <Pagination />
+          <Pagination/>
         </>
       )}
     </Box>
@@ -247,6 +244,6 @@ const SupportTicketListView = () => {
 
 export const SupportTicketList = () => (
   <ListBase sort={{field: 'createdAt', order: 'DESC'}} perPage={15}>
-    <SupportTicketListView />
+    <SupportTicketListView/>
   </ListBase>
 );
