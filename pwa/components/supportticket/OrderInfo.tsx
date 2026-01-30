@@ -56,7 +56,7 @@ export const OrderInfo = ({ orderId, orderData }: { orderId: string, orderData: 
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
-        <strong>Номер заказа:</strong> <a href={`https://workspace.stankoff.ru/commerce/order/view/${orderInfo.id}`} target="_blank" rel="noopener noreferrer">#{orderInfo.id}</a><br />
+        <strong>Номер заказа:</strong> <a href={`https://workspace.stankoff.ru/commerce/order/view/${orderInfo.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline' }}>#{orderInfo.id}</a><br />
         <strong>Ответственный менеджер:</strong> {orderInfo.manager}<br />
         <strong>Контрагент:</strong> {orderInfo.counterparty_name}<br />
         {orderInfo.counterparty_inn && orderInfo.counterparty_inn !== "0" && (

@@ -116,6 +116,7 @@ export const SupportTicketList = () => (
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
+            style={{ color: '#1976d2', textDecoration: 'underline' }}
           >
             {record.orderId}
           </a>
