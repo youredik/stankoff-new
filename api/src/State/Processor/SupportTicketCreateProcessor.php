@@ -27,7 +27,7 @@ final readonly class SupportTicketCreateProcessor implements ProcessorInterface
         assert($data instanceof SupportTicket);
 
         $data->createdAt = new DateTimeImmutable();
-        $data->status = SupportTicketStatus::NEW->value;
+        $data->status = SupportTicketStatus::NEW;
 
         $this->entityManager->persist($data);
         $this->entityManager->flush();
