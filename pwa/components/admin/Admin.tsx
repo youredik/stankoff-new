@@ -5,9 +5,9 @@ import React from "react";
 import {Box, Button, Typography} from "@mui/material";
 import {signIn, useSession} from "next-auth/react";
 import SyncLoader from "react-spinners/SyncLoader";
+import type {ApiPlatformAdminDataProvider, ApiPlatformAdminGetListParams} from "@api-platform/admin";
 import {fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser,} from "@api-platform/admin";
-import type { ApiPlatformAdminDataProvider, ApiPlatformAdminGetListParams } from "@api-platform/admin";
-import type { GetListResult } from "react-admin";
+import type {GetListResult} from "react-admin";
 import {parseHydraDocumentation} from "@api-platform/api-doc-parser";
 
 import {type Session} from "../../app/auth";
@@ -255,32 +255,36 @@ const AdminWithDataProviderAndResources = ({session}: { session: Session }) => (
 const AdminWithOIDC = () => {
   // Can't use next-auth/middleware because of https://github.com/nextauthjs/next-auth/discussions/7488
   const {data: session, status} = useSession();
+  const sessionData = session as Session | null;
   const [isRedirecting, setIsRedirecting] = React.useState(false);
   const [redirectCountdown, setRedirectCountdown] = React.useState(2);
+
+  const needsAuthRedirect = !sessionData || sessionData?.error === "RefreshAccessTokenError";
+
+  React.useEffect(() => {
+    if (!needsAuthRedirect || isRedirecting || status === "loading") {
+      return;
+    }
+
+    setIsRedirecting(true);
+    const countdownTimer = setInterval(() => {
+      setRedirectCountdown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    const redirectTimer = setTimeout(() => {
+      void signIn("keycloak", {callbackUrl: window.location.href});
+    }, 2000);
+    return () => {
+      clearInterval(countdownTimer);
+      clearTimeout(redirectTimer);
+    };
+  }, [isRedirecting, needsAuthRedirect, status]);
 
   if (status === "loading") {
     return <SyncLoader size={8} color="#46B6BF"/>;
   }
 
   // @ts-ignore
-  if (!session || session?.error === "RefreshAccessTokenError") {
-    React.useEffect(() => {
-      if (isRedirecting) {
-        return;
-      }
-      setIsRedirecting(true);
-      const countdownTimer = setInterval(() => {
-        setRedirectCountdown((prev) => Math.max(prev - 1, 0));
-      }, 1000);
-      const redirectTimer = setTimeout(() => {
-        void signIn("keycloak", {callbackUrl: window.location.href});
-      }, 2000);
-      return () => {
-        clearInterval(countdownTimer);
-        clearTimeout(redirectTimer);
-      };
-    }, [isRedirecting]);
-
+  if (needsAuthRedirect) {
     return (
       <Box sx={{textAlign: 'center', mt: 6}}>
         <Typography variant="h6" sx={{mb: 1}}>
@@ -297,7 +301,7 @@ const AdminWithOIDC = () => {
   }
 
   // @ts-ignore
-  return <AdminWithDataProviderAndResources session={session}/>;
+  return <AdminWithDataProviderAndResources session={sessionData}/>;
 };
 
 const Admin = () => (
