@@ -499,15 +499,18 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
       {/* Media Files List */}
       <Box
-        sx={{
+        sx={(theme) => ({
           minHeight: 200,
-          border: dragOver ? '2px dashed primary.main' : '1px solid grey.300',
-          backgroundColor: dragOver ? 'primary.50' : 'grey.50',
+          border: dragOver ? '2px dashed' : '1px solid',
+          borderColor: dragOver ? theme.palette.primary.main : theme.palette.divider,
+          backgroundColor: dragOver
+            ? (theme.palette.mode === 'dark' ? 'rgba(25, 118, 210, 0.15)' : 'primary.50')
+            : (theme.palette.mode === 'dark' ? theme.palette.grey[900] : 'grey.50'),
           transition: 'all 0.2s ease',
           p: 2,
           borderRadius: 1,
           cursor: 'pointer',
-        }}
+        })}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
