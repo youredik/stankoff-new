@@ -68,11 +68,9 @@ const fetchBlobUrl = async (url: string) => {
   return URL.createObjectURL(blob);
 };
 
-const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.MouseEvent) => void }> = ({
-  src,
-  alt,
-  onClick
-}) => {
+const ThumbnailImage: React.FC<{
+  src: string; alt: string; onClick: (e: React.MouseEvent) => void
+}> = ({src, alt, onClick}) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -110,13 +108,13 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
           justifyContent: 'center'
         }}
       >
-        <CircularProgress size={30} />
+        <CircularProgress size={30}/>
       </Box>
     );
   }
 
   if (!imageSrc) {
-    return <Image color="primary" />;
+    return <Image color="primary"/>;
   }
 
   return (
@@ -399,15 +397,16 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
       setLightboxOpen(true);
 
-      mediaFiles.forEach(async (m, i) => {
-        if (i === index) return;
+      for (const m of mediaFiles) {
+        const i = mediaFiles.indexOf(m);
+        if (i === index) continue;
         try {
           const nextPrepared = isVideo(m.mimeType)
             ? await buildVideoSlide(m)
             : await buildImageSlide(m);
           if (previewRequestRef.current !== requestId) {
             nextPrepared.urls.forEach((url) => URL.revokeObjectURL(url));
-            return;
+            continue;
           }
           setSlides(prev => {
             if (prev[i] && ('src' in prev[i] || 'sources' in prev[i])) {
@@ -420,7 +419,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         } catch (e) {
           console.error('Failed to load media:', e);
         }
-      });
+      }
     } catch (e) {
       console.error('Failed to load media:', e);
     } finally {
@@ -538,7 +537,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                           e.stopPropagation();
                           handlePreview(media);
                         }}>
-                          <Image color="primary" />
+                          <Image color="primary"/>
                         </IconButton>
                       )}
                       {isVideo(media.mimeType) && (
@@ -546,7 +545,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                           e.stopPropagation();
                           handlePreview(media);
                         }}>
-                          <VideoFile color="primary" />
+                          <VideoFile color="primary"/>
                         </IconButton>
                       )}
                     </>
@@ -610,8 +609,8 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     />
                   ) : (
                     <>
-                      {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary" /> :
-                        <Image color="primary" />}
+                      {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary"/> :
+                        <Image color="primary"/>}
                     </>
                   )}
                   {uploadingFile.status === 'uploading' && (
@@ -713,7 +712,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         plugins={[Fullscreen, Video, Zoom]}
       />
       <Backdrop open={isPreviewLoading} sx={{color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1}}>
-        <CircularProgress color="inherit" />
+        <CircularProgress color="inherit"/>
       </Backdrop>
 
       <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel}>

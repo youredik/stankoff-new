@@ -97,6 +97,11 @@ const countActiveFilters = (values: Record<string, unknown>) =>
     isEmptyValue(value) ? count : count + 1
   ), 0);
 
+const FilterTextInput = (props: any) => {
+  const {styleOverrides: _styleOverrides, ...rest} = props;
+  return <TextInput {...rest} />;
+};
+
 const SupportTicketListView = () => {
   const [statuses, setStatuses] = useState([]);
   const [users, setUsers] = useState([]);
@@ -119,7 +124,7 @@ const SupportTicketListView = () => {
   }, []);
 
   const filters = [
-    <TextInput
+    <FilterTextInput
       key="id"
       label="# заявки"
       source="id"
@@ -128,13 +133,13 @@ const SupportTicketListView = () => {
       type="text"
       inputMode="numeric"
     />,
-    <TextInput key="contractor" label="Контрагент" source="contractor" alwaysOn sx={{maxWidth: 150}}/>,
+    <FilterTextInput key="contractor" label="Контрагент" source="contractor" alwaysOn sx={{maxWidth: 150}}/>,
     <SelectInput key="user" label="Ответственный" source="user" choices={users} optionText="name" optionValue="id"
                  alwaysOn/>,
     <SelectInput key="status" label="Статус" source="status" choices={statuses} alwaysOn sx={{maxWidth: 220}}/>,
     <DateInput key="createdAt" label="Дата создания" source="createdAt" alwaysOn/>,
     <DateInput key="closedAt" label="Дата закрытия" source="closedAt" alwaysOn/>,
-    <TextInput
+    <FilterTextInput
       key="orderId"
       label="# заказа"
       source="orderId"
