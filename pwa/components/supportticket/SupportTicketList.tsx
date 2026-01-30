@@ -122,8 +122,6 @@ export const SupportTicketList = () => (
             {record.orderId}
           </a>
         ) : ''}
-        sortBy="orderId"
-        sortable
       />
     </Datagrid>
   </List>
