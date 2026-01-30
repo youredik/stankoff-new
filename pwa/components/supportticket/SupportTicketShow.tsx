@@ -165,6 +165,29 @@ const SupportTicketShowContent = () => {
     }
     return null;
   }, [record]);
+  const ticketNumericId = React.useMemo(() => {
+    if (!record?.id) {
+      return null;
+    }
+    if (typeof record.id === 'string') {
+      const idPart = record.id.split('/').pop();
+      return idPart ? Number(idPart) : null;
+    }
+    if (typeof record.id === 'number') {
+      return record.id;
+    }
+    return null;
+  }, [record]);
+  const ticketIri = React.useMemo(() => {
+    const originId = (record as any)?.originId;
+    if (typeof originId === 'string') {
+      return originId;
+    }
+    if (ticketNumericId) {
+      return `/support_tickets/${ticketNumericId}`;
+    }
+    return null;
+  }, [record, ticketNumericId]);
 
   React.useEffect(() => {
     const loadData = async () => {
@@ -192,12 +215,11 @@ const SupportTicketShowContent = () => {
   }, []);
 
   const handleUserSelect = async (userId: number) => {
-    if (!record?.id) return;
+    if (!ticketNumericId) return;
 
     setAssigning(true);
     try {
-      const ticketId = record.id.split('/').pop();
-      await assignUser(ticketId, userId);
+      await assignUser(String(ticketNumericId), userId);
 
       notify('Ответственный успешно изменен', {type: 'success'});
       refetch();
@@ -248,7 +270,7 @@ const SupportTicketShowContent = () => {
           }}>
             <Box>
               <Typography variant="h6">
-                Заявка #{record?.id ? record.id.split('/').pop() : '—'}
+                Заявка #{ticketNumericId ?? '—'}
               </Typography>
             </Box>
             <StatusChip
@@ -363,7 +385,7 @@ const SupportTicketShowContent = () => {
           )}
         </SectionCard>
         <SectionCard title="Файлы">
-          {record?.id ? <MediaUpload ticketId={record.id.split('/').pop() || ''}/> : null}
+          {ticketNumericId ? <MediaUpload ticketId={String(ticketNumericId)} /> : null}
         </SectionCard>
       </Box>
 
@@ -383,9 +405,9 @@ const SupportTicketShowContent = () => {
               <Box sx={{pt: 2}}>
                 <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>
                 <Divider sx={{my: 2}}/>
-                {record?.id ? (
+                {ticketIri ? (
                   <CommentsList
-                    ticketId={record.id}
+                    ticketId={ticketIri}
                     statusColors={statusColors}
                     refetchKey={commentsRefetchKey}
                   />

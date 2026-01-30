@@ -30,8 +30,13 @@ export const UserAssignment = () => {
 
     setLoading(true);
     try {
-      const ticketId = record.id.split('/').pop();
-      await assignUser(ticketId, selectedUserId);
+      const ticketId = typeof record.id === 'string'
+        ? record.id.split('/').pop()
+        : record.id;
+      if (!ticketId) {
+        throw new Error('Не найден ID заявки');
+      }
+      await assignUser(String(ticketId), selectedUserId);
 
       notify('Ответственный успешно изменен', {type: 'success'});
       refetch();

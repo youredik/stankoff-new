@@ -68,8 +68,13 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
     setLoading(true);
 
     try {
-      const ticketId = record?.id?.split('/').pop();
-      await changeStatus(ticketId, {status: status, comment: comment, closingReason: closingReason});
+      const ticketId = typeof record?.id === 'string'
+        ? record.id.split('/').pop()
+        : record?.id;
+      if (!ticketId) {
+        throw new Error('Не найден ID заявки');
+      }
+      await changeStatus(String(ticketId), {status: status, comment: comment, closingReason: closingReason});
 
       notify('Статус успешно изменен', {type: 'success'});
       setStatus('');

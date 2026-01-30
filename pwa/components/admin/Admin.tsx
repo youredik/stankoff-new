@@ -87,6 +87,79 @@ const normalizeDateFilters = (filter: Record<string, unknown> | undefined) => {
   return updated;
 };
 
+const normalizeSupportTicketRecord = (record: any) => {
+  if (!record) {
+    return record;
+  }
+
+  const iri =
+    typeof record['@id'] === 'string'
+      ? record['@id']
+      : (typeof record.originId === 'string' ? record.originId : record.id);
+
+  if (typeof iri === 'string') {
+    const match = iri.match(/\/support_tickets\/(\d+)/);
+    if (match) {
+      return {
+        ...record,
+        id: match[1],
+        originId: iri,
+        ['@id']: iri,
+      };
+    }
+  }
+
+  return record;
+};
+
+const toSupportTicketIri = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  if (value.startsWith('/support_tickets/')) {
+    return value;
+  }
+  return `/support_tickets/${value}`;
+};
+
+const mapSupportTicketParams = (params: any) => {
+  if (!params) {
+    return params;
+  }
+
+  const mapped = {...params};
+  if (typeof mapped.id === 'string') {
+    mapped.id = toSupportTicketIri(mapped.id) ?? mapped.id;
+  }
+  if (Array.isArray(mapped.ids)) {
+    mapped.ids = mapped.ids.map((id: any) => toSupportTicketIri(id) ?? id);
+  }
+
+  return mapped;
+};
+
+const normalizeSupportTicketResponse = (response: any) => {
+  if (!response) {
+    return response;
+  }
+
+  if (Array.isArray(response.data)) {
+    return {
+      ...response,
+      data: response.data.map(normalizeSupportTicketRecord),
+    };
+  }
+
+  if (response.data) {
+    return {
+      ...response,
+      data: normalizeSupportTicketRecord(response.data),
+    };
+  }
+
+  return response;
+};
+
 const apiDocumentationParser = (session: Session) => async () => {
   try {
     return await parseHydraDocumentation(ENTRYPOINT, {
@@ -128,8 +201,34 @@ const AdminWithDataProvider = ({session, children,}: {
     ...baseProvider,
     getList: (resource: string, params: ApiPlatformAdminGetListParams): Promise<GetListResult> => {
       const filter = normalizeDateFilters(params.filter);
-      return baseProvider.getList(resource, {...params, filter});
+      return baseProvider.getList(resource, {...params, filter}).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      ));
     },
+    getOne: (resource, params) =>
+      baseProvider.getOne(resource, resource === 'support_tickets' ? mapSupportTicketParams(params) : params).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      )),
+    getMany: (resource, params) =>
+      baseProvider.getMany(resource, resource === 'support_tickets' ? mapSupportTicketParams(params) : params).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      )),
+    getManyReference: (resource, params) =>
+      baseProvider.getManyReference(resource, resource === 'support_tickets' ? mapSupportTicketParams(params) : params).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      )),
+    update: (resource, params) =>
+      baseProvider.update(resource, resource === 'support_tickets' ? mapSupportTicketParams(params) : params).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      )),
+    create: (resource, params) =>
+      baseProvider.create(resource, params).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      )),
+    delete: (resource, params) =>
+      baseProvider.delete(resource, resource === 'support_tickets' ? mapSupportTicketParams(params) : params).then((response) => (
+        resource === 'support_tickets' ? normalizeSupportTicketResponse(response) : response
+      )),
   };
 
   return (

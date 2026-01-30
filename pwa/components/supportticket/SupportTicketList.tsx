@@ -163,7 +163,12 @@ const SupportTicketListView = () => {
             <FunctionField
               label="Номер заявки"
               source="id"
-              render={(record: any) => record?.id?.split('/').pop() || ''}
+              render={(record: any) => {
+                if (!record?.id) {
+                  return '';
+                }
+                return typeof record.id === 'string' ? record.id.split('/').pop() : record.id;
+              }}
               sortBy="id"
               sortable
             />
