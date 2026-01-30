@@ -94,14 +94,30 @@ const SupportTicketListView = () => {
   }, []);
 
   const filters = [
-    <NumberInput key="id" label="# заявки" source="id" alwaysOn sx={{maxWidth: 100}}/>,
+    <TextInput
+      key="id"
+      label="# заявки"
+      source="id"
+      alwaysOn
+      sx={{maxWidth: 100}}
+      type="text"
+      inputMode="numeric"
+    />,
     <TextInput key="contractor" label="Контрагент" source="contractor" alwaysOn sx={{maxWidth: 150}}/>,
     <SelectInput key="user" label="Ответственный" source="user" choices={users} optionText="name" optionValue="id"
                  alwaysOn/>,
     <SelectInput key="status" label="Статус" source="status" choices={statuses} alwaysOn sx={{maxWidth: 220}}/>,
     <DateInput key="createdAt" label="Дата создания" source="createdAt" alwaysOn/>,
     <DateInput key="closedAt" label="Дата закрытия" source="closedAt" alwaysOn/>,
-    <NumberInput key="orderId" label="# заказа" source="orderId" alwaysOn sx={{maxWidth: 100}}/>,
+    <TextInput
+      key="orderId"
+      label="# заказа"
+      source="orderId"
+      alwaysOn
+      sx={{maxWidth: 100}}
+      type="text"
+      inputMode="numeric"
+    />,
   ];
 
   return (
