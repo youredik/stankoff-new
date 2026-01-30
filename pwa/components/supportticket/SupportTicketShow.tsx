@@ -1,5 +1,5 @@
 import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useNotify, useShowContext} from 'react-admin';
-import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent, Divider} from '@mui/material';
+import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent, Divider, Tabs, Tab} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
 import React from "react";
@@ -97,6 +97,7 @@ const SupportTicketShowContent = () => {
   const [openSelect, setOpenSelect] = React.useState(false);
   const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
   const [assigning, setAssigning] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState(0);
   const {record, refetch} = useShowContext();
   const notify = useNotify();
   const selectRef = React.useRef<HTMLDivElement>(null);
@@ -265,22 +266,41 @@ const SupportTicketShowContent = () => {
       {/* Разделитель */}
       <Divider orientation="vertical" flexItem />
 
-      {/* Правая колонка: форма статуса и комментарии */}
+      {/* Правая колонка: активности */}
       <Box sx={{ flex: 1 }}>
         <SimpleShowLayout>
-          <FunctionField
-            label=""
-            render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
-          />
-          <FunctionField
-            label="Активность"
-            render={(record: any) => record?.id &&
-              <CommentsList
-                ticketId={record.id}
-                statusColors={statusColors}
-                refetchKey={commentsRefetchKey}
-              />}
-          />
+          <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
+            <Tab label="Активность" />
+            <Tab label="Мессенджер" />
+            <Tab label="Телефония" />
+          </Tabs>
+          {activeTab === 0 && (
+            <>
+              <FunctionField
+                label=""
+                render={() => <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>}
+              />
+              <FunctionField
+                label="Активность"
+                render={(record: any) => record?.id &&
+                  <CommentsList
+                    ticketId={record.id}
+                    statusColors={statusColors}
+                    refetchKey={commentsRefetchKey}
+                  />}
+              />
+            </>
+          )}
+          {activeTab === 1 && (
+            <Box sx={{ pt: 2 }}>
+              <Typography color="text.secondary">На стадии разработки</Typography>
+            </Box>
+          )}
+          {activeTab === 2 && (
+            <Box sx={{ pt: 2 }}>
+              <Typography color="text.secondary">На стадии разработки</Typography>
+            </Box>
+          )}
         </SimpleShowLayout>
       </Box>
     </Box>
