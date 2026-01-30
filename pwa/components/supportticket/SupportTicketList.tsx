@@ -84,10 +84,10 @@ export const SupportTicketList = () => (
         sortBy="status"
         sortable
       />
-      <TextField source="contractor" label="Контрагент"/>
-      <TextField source="subject" label="Тема обращения"/>
-      <TextField source="userName" label="Ответственный"/>
-      <TextField source="authorName" label="Автор"/>
+      <TextField source="contractor" label="Контрагент" sortable={false}/>
+      <TextField source="subject" label="Тема обращения" sortable={false}/>
+      <TextField source="userName" label="Ответственный" sortable={false}/>
+      <TextField source="authorName" label="Автор" sortable={false}/>
       <FunctionField
         label="Дата создания"
         render={(record: any) => (
@@ -110,6 +110,7 @@ export const SupportTicketList = () => (
       />
       <FunctionField
         label="# заказа"
+        sortable={false}
         render={(record: any) => record.orderId ? (
           <a
             href={`https://workspace.stankoff.ru/commerce/order/view/${record.orderId}`}
