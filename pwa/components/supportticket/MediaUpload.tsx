@@ -1,6 +1,7 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
   CircularProgress,
@@ -17,11 +18,11 @@ import {useDelete, useGetList} from 'react-admin';
 import {getSession} from 'next-auth/react';
 import {type Session} from '../../app/auth';
 import {authenticatedFetch} from '../../utils/authenticatedFetch';
-import Lightbox, {type Slide} from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
-import Video from "yet-another-react-lightbox/plugins/video";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Lightbox, {type Slide} from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
+import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
+import Video from 'yet-another-react-lightbox/plugins/video';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 
 interface MediaFile {
   id: number;
@@ -35,6 +36,7 @@ interface MediaFile {
 }
 
 interface UploadingFile {
+  id: string;
   file: File;
   progress: number;
   status: 'uploading' | 'done' | 'error';
@@ -46,15 +48,35 @@ interface MediaUploadProps {
   onMediaChange?: () => void;
 }
 
+const isImage = (mimeType: string) => mimeType.startsWith('image/');
+const isVideo = (mimeType: string) => mimeType.startsWith('video/');
+
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const fetchBlobUrl = async (url: string) => {
+  const response = await authenticatedFetch(url, {credentials: 'include'});
+  if (!response.ok) {
+    throw new Error('Failed to load media');
+  }
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+};
+
 const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.MouseEvent) => void }> = ({
-                                                                                                          src,
-                                                                                                          alt,
-                                                                                                          onClick
-                                                                                                        }) => {
+  src,
+  alt,
+  onClick
+}) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadImage = async () => {
       try {
         const response = await authenticatedFetch(src, {
@@ -78,19 +100,23 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
   }, [src]);
 
   if (loading) {
-    return <Box sx={{
-      width: 60,
-      height: 60,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
-      <CircularProgress size={30}/>
-    </Box>;
+    return (
+      <Box
+        sx={{
+          width: 60,
+          height: 60,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <CircularProgress size={30} />
+      </Box>
+    );
   }
 
   if (!imageSrc) {
-    return <Image color="primary"/>;
+    return <Image color="primary" />;
   }
 
   return (
@@ -104,7 +130,7 @@ const ThumbnailImage: React.FC<{ src: string; alt: string; onClick: (e: React.Mo
         borderRadius: 4,
         cursor: 'pointer'
       }}
-      onClick={(e) => onClick(e)}
+      onClick={onClick}
     />
   );
 };
@@ -119,17 +145,15 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<MediaFile | null>(null);
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [deleteOne] = useDelete();
+  const previewRequestRef = useRef(0);
 
-  const {data: mediaFiles, isLoading, refetch} = useGetList(
-    `support_tickets/${ticketId}/media`,
-    {
-      sort: {field: 'createdAt', order: 'ASC'},
-    }
-  );
+  const {data: mediaFiles, isLoading, refetch} = useGetList(`support_tickets/${ticketId}/media`, {
+    sort: {field: 'createdAt', order: 'ASC'},
+  });
 
-  // Clean up object URLs on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       uploadingFiles.forEach(file => {
         if (file.previewUrl) {
@@ -139,23 +163,33 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     };
   }, []);
 
-  // Clear completed uploads after a delay
-  React.useEffect(() => {
-    if (uploadingFiles.length > 0 && uploadingFiles.every(f => f.status !== 'uploading')) {
-      const timer = setTimeout(() => {
-        refetch();
-        setUploadingFiles(prev => {
-          prev.forEach(file => {
-            if (file.previewUrl) {
-              URL.revokeObjectURL(file.previewUrl);
-            }
-          });
-          return [];
-        });
-      }, 2000); // 2 seconds delay
-      return () => clearTimeout(timer);
+  useEffect(() => {
+    if (!mediaFiles || uploadingFiles.length === 0) {
+      return;
     }
-  }, [uploadingFiles, refetch]);
+
+    const uploadedNames = new Set(mediaFiles.map((media: MediaFile) => media.originalName));
+    setUploadingFiles((prev) => {
+      const remaining = prev.filter((file) => {
+        if (file.status !== 'done') {
+          return true;
+        }
+        return !uploadedNames.has(file.file.name);
+      });
+
+      if (remaining.length === prev.length) {
+        return prev;
+      }
+
+      prev.forEach((file) => {
+        if (file.previewUrl && file.status === 'done' && uploadedNames.has(file.file.name)) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+
+      return remaining;
+    });
+  }, [mediaFiles, uploadingFiles.length]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -175,25 +209,25 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     if (files.length === 0) return;
 
     startUploads(files);
-  }, [ticketId]);
+  }, []);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
     startUploads(files);
-  }, [ticketId]);
+  }, []);
 
   const startUploads = useCallback((files: File[]) => {
-    const newUploadingFiles: UploadingFile[] = files.map(file => ({
+    const newUploadingFiles: UploadingFile[] = files.map((file, index) => ({
+      id: `${Date.now()}-${index}-${file.name}`,
       file,
       progress: 0,
-      status: 'uploading' as const,
+      status: 'uploading',
       previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
     }));
     setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
 
-    // Start uploading each file
     newUploadingFiles.forEach((uploadingFile, index) => {
       uploadSingleFile(uploadingFile, index + uploadingFiles.length);
     });
@@ -221,6 +255,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       if (xhr.status === 201) {
         setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'done', progress: 100} : f));
         onMediaChange?.();
+        refetch();
       } else {
         setUploadingFiles(prev => prev.map((f, i) => i === index ? {...f, status: 'error'} : f));
       }
@@ -234,7 +269,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     xhr.setRequestHeader('Authorization', `Bearer ${session.accessToken}`);
     xhr.send(formData);
   }, [ticketId, refetch, onMediaChange]);
-
 
   const handleDeleteClick = (media: MediaFile) => {
     setFileToDelete(media);
@@ -290,205 +324,118 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     }
   };
 
-  const handlePreview = useCallback((media: MediaFile) => {
+  const buildVideoSlide = useCallback(async (media: MediaFile) => {
+    const videoUrl = await fetchBlobUrl(media.downloadUrl);
+    let posterUrl: string | undefined;
+    let width: number | undefined;
+    let height: number | undefined;
+
+    if (media.thumbnailUrl) {
+      try {
+        posterUrl = await fetchBlobUrl(media.thumbnailUrl);
+      } catch (e) {
+        console.error('Failed to load video poster:', e);
+      }
+    }
+
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    await new Promise((resolve) => {
+      video.onloadedmetadata = resolve;
+    });
+    width = video.videoWidth;
+    height = video.videoHeight;
+    video.remove();
+
+    return {
+      slide: {
+        type: 'video',
+        sources: [{src: videoUrl, type: media.mimeType}],
+        poster: posterUrl,
+        width,
+        height,
+      } as Slide,
+      urls: [videoUrl, posterUrl].filter(Boolean) as string[],
+    };
+  }, []);
+
+  const buildImageSlide = useCallback(async (media: MediaFile) => {
+    const imageUrl = await fetchBlobUrl(media.downloadUrl);
+    return {
+      slide: {type: 'image', src: imageUrl} as Slide,
+      urls: [imageUrl],
+    };
+  }, []);
+
+  const handlePreview = useCallback(async (media: MediaFile) => {
     if (!mediaFiles) return;
     const index = mediaFiles.findIndex(m => m.id === media.id);
     if (index === -1) return;
+
+    previewRequestRef.current += 1;
+    const requestId = previewRequestRef.current;
+
     setCurrentIndex(index);
-    setSlides(mediaFiles.map(m => ({type: isVideo(m.mimeType) ? 'video' : 'image'} as Slide)));
+    setIsPreviewLoading(true);
 
-    // For videos, open lightbox immediately and load video sources
-    if (isVideo(media.mimeType)) {
+    const placeholders = mediaFiles.map((m) => ({type: isVideo(m.mimeType) ? 'video' : 'image'} as Slide));
+    setSlides(placeholders);
+
+    try {
+      const prepared = isVideo(media.mimeType)
+        ? await buildVideoSlide(media)
+        : await buildImageSlide(media);
+
+      if (previewRequestRef.current !== requestId) {
+        prepared.urls.forEach((url) => URL.revokeObjectURL(url));
+        return;
+      }
+
+      setSlides(prev => {
+        const next = [...prev];
+        next[index] = prepared.slide;
+        return next;
+      });
+
       setLightboxOpen(true);
-      // Load video src
-      authenticatedFetch(media.downloadUrl)
-        .then(response => {
-          if (response.ok) {
-            return response.blob();
-          }
-          throw new Error('Failed to fetch video');
-        })
-        .then(async blob => {
-          const url = URL.createObjectURL(blob);
-          // Get video dimensions
-          const video = document.createElement('video');
-          video.src = url;
-          await new Promise((resolve) => {
-            video.onloadedmetadata = resolve;
-          });
-          const width = video.videoWidth;
-          const height = video.videoHeight;
-          video.remove();
 
-          let posterUrl: string | undefined;
-          if (media.thumbnailUrl) {
-            try {
-              const thumbResponse = await authenticatedFetch(media.thumbnailUrl);
-              if (thumbResponse.ok) {
-                const thumbBlob = await thumbResponse.blob();
-                const thumbUrl = URL.createObjectURL(thumbBlob);
-                const img = document.createElement('img');
-                img.src = thumbUrl;
-                await new Promise((resolve) => {
-                  img.onload = resolve;
-                });
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                  // Scale thumbnail to fit video dimensions
-                  const scale = Math.min(width / img.width, height / img.height);
-                  const scaledWidth = img.width * scale;
-                  const scaledHeight = img.height * scale;
-                  const x = (width - scaledWidth) / 2;
-                  const y = (height - scaledHeight) / 2;
-                  ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
-                  posterUrl = canvas.toDataURL();
-                }
-                URL.revokeObjectURL(thumbUrl);
-              }
-            } catch (e) {
-              console.error('Failed to load video poster:', e);
-            }
-          }
-
-          setSlides(prev => {
-            const newS = [...prev];
-            newS[index] = {
-              type: 'video',
-              sources: [{src: url, type: media.mimeType}],
-              poster: posterUrl,
-              width,
-              height
-            } as Slide;
-            return newS;
-          });
-        })
-        .catch(e => {
-          console.error('Failed to load video:', e);
-        });
-    } else {
-      // For images, load thumbnails first for quick view
       mediaFiles.forEach(async (m, i) => {
-        if (m.thumbnailUrl) {
-          try {
-            const response = await authenticatedFetch(m.thumbnailUrl);
-            if (response.ok) {
-              const blob = await response.blob();
-              const thumbUrl = URL.createObjectURL(blob);
-              setSlides(prev => {
-                const newS = [...prev];
-                newS[i] = {type: 'image', src: thumbUrl} as Slide;
-                return newS;
-              });
-              if (i === index) {
-                setLightboxOpen(true);
-              }
-            }
-          } catch (e) {
-            console.error('Failed to load thumbnail:', e);
+        if (i === index) return;
+        try {
+          const nextPrepared = isVideo(m.mimeType)
+            ? await buildVideoSlide(m)
+            : await buildImageSlide(m);
+          if (previewRequestRef.current !== requestId) {
+            nextPrepared.urls.forEach((url) => URL.revokeObjectURL(url));
+            return;
           }
+          setSlides(prev => {
+            if (prev[i] && ('src' in prev[i] || 'sources' in prev[i])) {
+              return prev;
+            }
+            const updated = [...prev];
+            updated[i] = nextPrepared.slide;
+            return updated;
+          });
+        } catch (e) {
+          console.error('Failed to load media:', e);
         }
       });
-    }
-
-    // Then load originals in background for all
-    mediaFiles.forEach(async (m, i) => {
-      if (i === index && isVideo(m.mimeType)) return; // Already loaded for current video
-      try {
-        const response = await authenticatedFetch(m.downloadUrl);
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
-          let posterUrl: string | undefined;
-          let width: number | undefined;
-          let height: number | undefined;
-          if (isVideo(m.mimeType)) {
-            if (m.thumbnailUrl) {
-              try {
-                const thumbResponse = await authenticatedFetch(m.thumbnailUrl);
-                if (thumbResponse.ok) {
-                  const thumbBlob = await thumbResponse.blob();
-                  const thumbUrl = URL.createObjectURL(thumbBlob);
-                  const img = document.createElement('img');
-                  img.src = thumbUrl;
-                  await new Promise((resolve) => {
-                    img.onload = resolve;
-                  });
-                  const canvas = document.createElement('canvas');
-                  canvas.width = width!;
-                  canvas.height = height!;
-                  const ctx = canvas.getContext('2d');
-                  if (ctx) {
-                    // Scale thumbnail to fit video dimensions
-                    const scale = Math.min(width! / img.width, height! / img.height);
-                    const scaledWidth = img.width * scale;
-                    const scaledHeight = img.height * scale;
-                    const x = (width! - scaledWidth) / 2;
-                    const y = (height! - scaledHeight) / 2;
-                    ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
-                    posterUrl = canvas.toDataURL();
-                  }
-                  URL.revokeObjectURL(thumbUrl);
-                }
-              } catch (e) {
-                console.error('Failed to load video poster:', e);
-              }
-            }
-            // Get video dimensions
-            const video = document.createElement('video');
-            video.src = url;
-            await new Promise((resolve) => {
-              video.onloadedmetadata = resolve;
-            });
-            width = video.videoWidth;
-            height = video.videoHeight;
-            video.remove();
-          }
-          setSlides(prev => {
-            const newS = [...prev];
-            // Revoke thumbnail URL if different
-            if ('src' in newS[i] && newS[i].src && newS[i].src !== url) {
-              URL.revokeObjectURL(newS[i].src!);
-            }
-            if (isVideo(m.mimeType)) {
-              newS[i] = {
-                type: 'video',
-                sources: [{src: url, type: m.mimeType}],
-                poster: posterUrl,
-                width,
-                height
-              } as Slide;
-            } else {
-              newS[i] = {type: 'image', src: url} as Slide;
-            }
-            return newS;
-          });
-        }
-      } catch (e) {
-        console.error('Failed to load media:', e);
+    } catch (e) {
+      console.error('Failed to load media:', e);
+    } finally {
+      if (previewRequestRef.current === requestId) {
+        setIsPreviewLoading(false);
       }
-    });
-  }, [mediaFiles]);
+    }
+  }, [mediaFiles, buildImageSlide, buildVideoSlide]);
 
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const isImage = (mimeType: string) => mimeType.startsWith('image/');
-  const isVideo = (mimeType: string) => mimeType.startsWith('video/');
-
+  const totalCount = useMemo(() => (mediaFiles?.length || 0) + uploadingFiles.length, [mediaFiles, uploadingFiles.length]);
 
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Фото и видео ({(mediaFiles?.length || 0) + uploadingFiles.length})
+        Фото и видео ({totalCount})
       </Typography>
 
       {error && (
@@ -497,7 +444,6 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         </Alert>
       )}
 
-      {/* Media Files List */}
       <Box
         sx={(theme) => ({
           minHeight: 200,
@@ -525,11 +471,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           onChange={handleFileSelect}
         />
         {(mediaFiles && mediaFiles.length > 0) || uploadingFiles.length > 0 ? (
-          <>
-
-            <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
-              {mediaFiles && mediaFiles.map((media: MediaFile) => (
-                <Paper key={media.id} sx={{
+          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 2, pb: 1}}>
+            {mediaFiles && mediaFiles.map((media: MediaFile) => (
+              <Paper
+                key={media.id}
+                sx={{
                   p: 2,
                   minWidth: 250,
                   display: 'flex',
@@ -542,9 +488,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     '50%': {transform: 'scale(1.05)'},
                     '100%': {transform: 'scale(1)'},
                   },
-                }}>
-                  {deletingIds.has(media.id) && (
-                    <Box sx={{
+                }}
+              >
+                {deletingIds.has(media.id) && (
+                  <Box
+                    sx={{
                       position: 'absolute',
                       top: 0,
                       left: 0,
@@ -556,13 +504,15 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                       justifyContent: 'center',
                       zIndex: 1,
                       borderRadius: 1
-                    }}>
-                      <Typography variant="body2" color="textSecondary">
-                        Удаление...
-                      </Typography>
-                    </Box>
-                  )}
-                  <Box sx={{
+                    }}
+                  >
+                    <Typography variant="body2" color="textSecondary">
+                      Удаление...
+                    </Typography>
+                  </Box>
+                )}
+                <Box
+                  sx={{
                     width: 200,
                     height: 200,
                     display: 'flex',
@@ -570,53 +520,71 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     justifyContent: 'center',
                     boxShadow: 2,
                     mb: 1
-                  }}>
-                    {media.thumbnailUrl ? (
-                      <ThumbnailImage
-                        src={media.thumbnailUrl}
-                        alt={media.originalName}
-                        onClick={(e) => {
+                  }}
+                >
+                  {media.thumbnailUrl ? (
+                    <ThumbnailImage
+                      src={media.thumbnailUrl}
+                      alt={media.originalName}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePreview(media);
+                      }}
+                    />
+                  ) : (
+                    <>
+                      {isImage(media.mimeType) && (
+                        <IconButton onClick={(e) => {
                           e.stopPropagation();
                           handlePreview(media);
-                        }}
-                      />
-                    ) : (
-                      <>
-                        {isImage(media.mimeType) && <Image color="primary"/>}
-                        {isVideo(media.mimeType) && <VideoFile color="primary"/>}
-                      </>
-                    )}
-                  </Box>
+                        }}>
+                          <Image color="primary" />
+                        </IconButton>
+                      )}
+                      {isVideo(media.mimeType) && (
+                        <IconButton onClick={(e) => {
+                          e.stopPropagation();
+                          handlePreview(media);
+                        }}>
+                          <VideoFile color="primary" />
+                        </IconButton>
+                      )}
+                    </>
+                  )}
+                </Box>
 
-                  <Box sx={{textAlign: 'center', mb: 1}}>
-                    <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
-                      {media.originalName}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {formatFileSize(media.size)} • {new Date(media.createdAt).toLocaleDateString('ru-RU')}
-                    </Typography>
-                  </Box>
+                <Box sx={{textAlign: 'center', mb: 1}}>
+                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                    {media.originalName}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {formatFileSize(media.size)}  {new Date(media.createdAt).toLocaleDateString('ru-RU')}
+                  </Typography>
+                </Box>
 
-                  <Box sx={{display: 'flex', gap: 1}}>
-                    <IconButton onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(media);
-                    }} size="small">
-                      <Download/>
-                    </IconButton>
-                    <IconButton onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteClick(media);
-                    }} size="small" color="error">
-                      <Delete/>
-                    </IconButton>
-                  </Box>
-                </Paper>
-              ))}
-              {uploadingFiles.map((uploadingFile, index) => (
-                <Paper key={`uploading-${index}`}
-                       sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                  <Box sx={{
+                <Box sx={{display: 'flex', gap: 1}}>
+                  <IconButton onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload(media);
+                  }} size="small">
+                    <Download/>
+                  </IconButton>
+                  <IconButton onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteClick(media);
+                  }} size="small" color="error">
+                    <Delete/>
+                  </IconButton>
+                </Box>
+              </Paper>
+            ))}
+            {uploadingFiles.map((uploadingFile, index) => (
+              <Paper
+                key={uploadingFile.id}
+                sx={{p: 2, minWidth: 250, display: 'flex', flexDirection: 'column', alignItems: 'center'}}
+              >
+                <Box
+                  sx={{
                     width: 200,
                     height: 200,
                     display: 'flex',
@@ -625,28 +593,30 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     boxShadow: 2,
                     mb: 1,
                     position: 'relative'
-                  }}>
-                    {uploadingFile.previewUrl ? (
-                      <img
-                        src={uploadingFile.previewUrl}
-                        alt={uploadingFile.file.name}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          borderRadius: 4,
-                          opacity: uploadingFile.status === 'done' ? 1 : 0.7,
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    ) : (
-                      <>
-                        {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary"/> :
-                          <Image color="primary"/>}
-                      </>
-                    )}
-                    {uploadingFile.status === 'uploading' && (
-                      <Box sx={{
+                  }}
+                >
+                  {uploadingFile.previewUrl ? (
+                    <img
+                      src={uploadingFile.previewUrl}
+                      alt={uploadingFile.file.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: 4,
+                        opacity: uploadingFile.status === 'done' ? 1 : 0.7,
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <>
+                      {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary" /> :
+                        <Image color="primary" />}
+                    </>
+                  )}
+                  {uploadingFile.status === 'uploading' && (
+                    <Box
+                      sx={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
@@ -657,14 +627,16 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                         justifyContent: 'center',
                         bgcolor: 'rgba(0,0,0,0.5)',
                         borderRadius: 1
-                      }}>
-                        <Typography variant="body2" color="white">
-                          {Math.round(uploadingFile.progress)}%
-                        </Typography>
-                      </Box>
-                    )}
-                    {uploadingFile.status === 'error' && (
-                      <Box sx={{
+                      }}
+                    >
+                      <Typography variant="body2" color="white">
+                        {Math.round(uploadingFile.progress)}%
+                      </Typography>
+                    </Box>
+                  )}
+                  {uploadingFile.status === 'error' && (
+                    <Box
+                      sx={{
                         position: 'absolute',
                         top: 0,
                         left: 0,
@@ -675,28 +647,28 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                         justifyContent: 'center',
                         bgcolor: 'rgba(255,0,0,0.5)',
                         borderRadius: 1
-                      }}>
-                        <Typography variant="body2" color="white">
-                          Ошибка
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                  <Box sx={{textAlign: 'center', mb: 1}}>
-                    <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
-                      {uploadingFile.file.name}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {formatFileSize(uploadingFile.file.size)}
-                    </Typography>
-                  </Box>
-                  {uploadingFile.status === 'uploading' && (
-                    <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
+                      }}
+                    >
+                      <Typography variant="body2" color="white">
+                        Ошибка
+                      </Typography>
+                    </Box>
                   )}
-                </Paper>
-              ))}
-            </Box>
-          </>
+                </Box>
+                <Box sx={{textAlign: 'center', mb: 1}}>
+                  <Typography variant="body1" noWrap sx={{maxWidth: 200}}>
+                    {uploadingFile.file.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {formatFileSize(uploadingFile.file.size)}
+                  </Typography>
+                </Box>
+                {uploadingFile.status === 'uploading' && (
+                  <LinearProgress variant="determinate" value={uploadingFile.progress} sx={{width: '100%'}}/>
+                )}
+              </Paper>
+            ))}
+          </Box>
         ) : (
           <Box sx={{textAlign: 'center', py: 4}}>
             <CloudUpload sx={{fontSize: 48, color: 'grey.400', mb: 1}}/>
@@ -720,7 +692,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         open={lightboxOpen}
         close={() => {
           setLightboxOpen(false);
-          // Revoke URLs
+          setIsPreviewLoading(false);
           slides.forEach(slide => {
             if (slide.type === 'image' && 'src' in slide && slide.src) {
               URL.revokeObjectURL(slide.src);
@@ -740,8 +712,10 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
         index={currentIndex}
         plugins={[Fullscreen, Video, Zoom]}
       />
+      <Backdrop open={isPreviewLoading} sx={{color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1}}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel}>
         <DialogTitle>Подтверждение удаления</DialogTitle>
         <DialogContent>
