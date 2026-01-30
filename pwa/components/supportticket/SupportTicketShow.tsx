@@ -1,5 +1,5 @@
 import {FunctionField, Show, SimpleShowLayout, TextField, TopToolbar, useGetList, useNotify, useShowContext} from 'react-admin';
-import {Box, CircularProgress, Tooltip, Typography, Select, MenuItem, FormControl, Button, Card, CardContent, Divider, Tabs, Tab} from '@mui/material';
+import {Autocomplete, Box, Button, Card, CardContent, CircularProgress, Divider, Popover, Tab, Tabs, TextField as MuiTextField, Tooltip, Typography} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
 import React from "react";
@@ -93,14 +93,12 @@ const SupportTicketShowContent = () => {
   const [statusColors, setStatusColors] = React.useState<Record<string, string>>({});
   const [commentsRefetchKey, setCommentsRefetchKey] = React.useState(0);
   const [users, setUsers] = React.useState<any[]>([]);
-  const [isEditingUser, setIsEditingUser] = React.useState(false);
-  const [openSelect, setOpenSelect] = React.useState(false);
+  const [assignAnchorEl, setAssignAnchorEl] = React.useState<HTMLElement | null>(null);
   const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
   const [assigning, setAssigning] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState(0);
   const {record, refetch} = useShowContext();
   const notify = useNotify();
-  const selectRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const loadData = async () => {
@@ -137,14 +135,36 @@ const SupportTicketShowContent = () => {
 
       notify('Ответственный успешно изменен', {type: 'success'});
       refetch();
-      setIsEditingUser(false);
       setSelectedUserId(null);
-      setOpenSelect(false);
+      setAssignAnchorEl(null);
     } catch (err: any) {
       notify(err.message, {type: 'error'});
     } finally {
       setAssigning(false);
     }
+  };
+
+  const handleAssignOpen = (event: React.MouseEvent<HTMLElement>) => {
+    if (record?.status === 'completed') {
+      return;
+    }
+    setAssignAnchorEl(event.currentTarget);
+    setSelectedUserId(null);
+  };
+
+  const handleAssignClose = () => {
+    if (assigning) {
+      return;
+    }
+    setAssignAnchorEl(null);
+    setSelectedUserId(null);
+  };
+
+  const handleAssignConfirm = async () => {
+    if (!selectedUserId) {
+      return;
+    }
+    await handleUserSelect(selectedUserId);
   };
 
 
@@ -168,69 +188,71 @@ const SupportTicketShowContent = () => {
           <FunctionField
             label="Ответственный"
             render={(record: any) => (
-              isEditingUser ? (
-                <Box ref={selectRef} sx={{ maxWidth: 250 }}>
-                  <FormControl size="small" fullWidth>
-                    <Select
-                      open={openSelect}
-                      onClose={() => setOpenSelect(false)}
-                      value={selectedUserId || ''}
-                      onChange={(e) => {
-                        const userId = Number(e.target.value);
-                        if (userId) {
-                          handleUserSelect(userId);
-                        }
-                      }}
-                      onBlur={() => {
-                        setIsEditingUser(false);
-                        setSelectedUserId(null);
-                        setOpenSelect(false);
-                      }}
-                      displayEmpty
-                      disabled={assigning}
-                      MenuProps={{
-                        PaperProps: {
-                          style: {
-                            maxHeight: 200,
-                          },
-                        },
-                      }}
-                    >
-                      <MenuItem value="">
-                        <em>Выберите ответственного</em>
-                      </MenuItem>
-                      {users.map((user) => (
-                        <MenuItem key={user.id} value={user.id}>
-                          {user.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-              ) : record?.status === 'completed' ? (
-                <Typography component="span">
-                  {record?.userName || 'Не назначен'}
-                </Typography>
-              ) : (
-                <Tooltip title="Нажмите чтобы сменить ответственного">
-                  <Typography
-                    component="span"
-                    sx={{
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      textDecorationStyle: 'dashed',
-                      color: 'primary.main',
-                      display: 'inline'
-                    }}
-                    onClick={() => {
-                      setIsEditingUser(true);
-                      setOpenSelect(true);
-                    }}
-                  >
+              <>
+                {record?.status === 'completed' ? (
+                  <Typography component="span">
                     {record?.userName || 'Не назначен'}
                   </Typography>
-                </Tooltip>
-              )
+                ) : (
+                  <Tooltip title="Нажмите чтобы сменить ответственного">
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={handleAssignOpen}
+                      sx={{
+                        textTransform: 'none',
+                        px: 0,
+                        minWidth: 0,
+                        textDecoration: 'underline',
+                        textDecorationStyle: 'dashed',
+                      }}
+                    >
+                      {record?.userName || 'Не назначен'}
+                    </Button>
+                  </Tooltip>
+                )}
+                <Popover
+                  open={Boolean(assignAnchorEl)}
+                  anchorEl={assignAnchorEl}
+                  onClose={handleAssignClose}
+                  anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                  transformOrigin={{vertical: 'top', horizontal: 'left'}}
+                >
+                  <Box sx={{p: 2, width: 320}}>
+                    <Typography variant="subtitle2" sx={{mb: 1}}>
+                      Сменить ответственного
+                    </Typography>
+                    <Autocomplete
+                      options={users}
+                      getOptionLabel={(option) => option?.name || ''}
+                      value={users.find((user) => user.id === selectedUserId) || null}
+                      onChange={(_, value) => setSelectedUserId(value?.id ?? null)}
+                      renderInput={(params) => (
+                        <MuiTextField
+                          {...params}
+                          size="small"
+                          placeholder="Выберите сотрудника"
+                        />
+                      )}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      disabled={assigning}
+                    />
+                    <Box sx={{display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2}}>
+                      <Button size="small" onClick={handleAssignClose} disabled={assigning}>
+                        Отмена
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={handleAssignConfirm}
+                        disabled={!selectedUserId || assigning}
+                      >
+                        {assigning ? 'Назначение...' : 'Назначить'}
+                      </Button>
+                    </Box>
+                  </Box>
+                </Popover>
+              </>
             )}
           />
           <FunctionField
