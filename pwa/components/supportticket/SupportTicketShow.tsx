@@ -1,5 +1,19 @@
 import {Show, TopToolbar, useGetList, useNotify, useShowContext} from 'react-admin';
-import {Autocomplete, Box, Button, Card, CardContent, CircularProgress, Divider, Popover, Tab, Tabs, TextField as MuiTextField, Tooltip, Typography} from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Divider,
+  Popover,
+  Tab,
+  Tabs,
+  TextField as MuiTextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
 import {formatDistanceToNow} from "date-fns";
 import {ru} from "date-fns/locale";
 import React from "react";
@@ -46,10 +60,10 @@ const CommentsList = ({ticketId, statusColors, refetchKey}: {
       {comments.map((comment: any, index: number) => {
         const statusColor = statusColors[comment.status] || 'primary';
         return (
-          <Card key={comment.id || index} sx={{ mb: 2 }}>
+          <Card key={comment.id || index} sx={{mb: 2}}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                <Typography variant="body2" sx={{ color: `${statusColor}.main`, fontWeight: 'bold' }}>
+              <Box sx={{display: 'flex', alignItems: 'center', gap: 2, mb: 1}}>
+                <Typography variant="body2" sx={{color: `${statusColor}.main`, fontWeight: 'bold'}}>
                   {comment.statusDisplayName}
                 </Typography>
                 {comment.userName && (
@@ -64,7 +78,7 @@ const CommentsList = ({ticketId, statusColors, refetchKey}: {
                 </Typography>
               </Box>
               {comment.closingReason && (
-                <Typography variant="body2" color="secondary" sx={{ mb: 1 }}>
+                <Typography variant="body2" color="secondary" sx={{mb: 1}}>
                   Причина закрытия: {comment.closingReasonDisplayName}
                 </Typography>
               )}
@@ -98,7 +112,7 @@ const FieldRow = ({label, children}: { label: string; children: React.ReactNode 
       gap: 1,
       alignItems: 'start',
       mb: 1.5,
-      '&:last-of-type': { mb: 0 },
+      '&:last-of-type': {mb: 0},
     }}
   >
     <Typography variant="body2" color="text.secondary">
@@ -219,13 +233,19 @@ const SupportTicketShowContent = () => {
     await handleUserSelect(selectedUserId);
   };
 
-
   return (
-    <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+    <Box sx={{display: 'flex', gap: 4, alignItems: 'flex-start'}}>
       {/* Левая колонка: информация о заявке */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <SectionCard title="Основное">
-          <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 2}}>
+      <Box sx={{flex: 1, minWidth: 0}}>
+        <SectionCard title="">
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 2,
+            mb: 2
+          }}>
             <Box>
               <Typography variant="h6">
                 Заявка #{record?.id ? record.id.split('/').pop() : '—'}
@@ -346,29 +366,26 @@ const SupportTicketShowContent = () => {
           )}
         </SectionCard>
         <SectionCard title="Файлы">
-          {record?.id ? <MediaUpload ticketId={record.id.split('/').pop() || ''} /> : null}
+          {record?.id ? <MediaUpload ticketId={record.id.split('/').pop() || ''}/> : null}
         </SectionCard>
       </Box>
 
       {/* Разделитель */}
-      <Divider orientation="vertical" flexItem />
+      <Divider orientation="vertical" flexItem/>
 
       {/* Правая колонка: активности */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{flex: 1, minWidth: 0}}>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="subtitle1" sx={{fontWeight: 600, mb: 2}}>
-              Активности
-            </Typography>
             <Tabs value={activeTab} onChange={(_, value) => setActiveTab(value)}>
-              <Tab label="Активности" />
-              <Tab label="Мессенджер" />
-              <Tab label="Телефония" />
+              <Tab label="Активности"/>
+              <Tab label="Мессенджер"/>
+              <Tab label="Телефония"/>
             </Tabs>
             {activeTab === 0 && (
               <Box sx={{pt: 2}}>
                 <StatusChangeForm onStatusChanged={() => setCommentsRefetchKey(prev => prev + 1)}/>
-                <Divider sx={{my: 2}} />
+                <Divider sx={{my: 2}}/>
                 {record?.id ? (
                   <CommentsList
                     ticketId={record.id}
@@ -379,12 +396,12 @@ const SupportTicketShowContent = () => {
               </Box>
             )}
             {activeTab === 1 && (
-              <Box sx={{ pt: 2 }}>
+              <Box sx={{pt: 2}}>
                 <Typography color="text.secondary">На стадии разработки</Typography>
               </Box>
             )}
             {activeTab === 2 && (
-              <Box sx={{ pt: 2 }}>
+              <Box sx={{pt: 2}}>
                 <Typography color="text.secondary">На стадии разработки</Typography>
               </Box>
             )}
