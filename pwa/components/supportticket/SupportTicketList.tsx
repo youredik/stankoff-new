@@ -219,6 +219,7 @@ const SupportTicketListView = () => {
               '& .column-authorName': {minWidth: 160},
               '& .column-createdAt': {minWidth: 160},
               '& .column-closedAt': {minWidth: 160},
+              '& .column-closedFor': {minWidth: 140},
               '& .column-orderId': {width: 120},
             }}
           >
@@ -284,6 +285,40 @@ const SupportTicketListView = () => {
               ) : ''}
               sortBy="closedAt"
               sortable
+            />
+            <FunctionField
+              label="Закрыто за"
+              source="closedAt" // Using closedAt as source, but rendering custom value
+              render={(record: any) => {
+                if (record.closedAt && record.createdAt) {
+                  const closedDate = new Date(record.closedAt);
+                  const createdDate = new Date(record.createdAt);
+                  const diffInMilliseconds = closedDate.getTime() - createdDate.getTime();
+                  const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+                  const minutes = Math.floor(diffInSeconds / 60);
+                  const hours = Math.floor(minutes / 60);
+                  const days = Math.floor(hours / 24);
+
+                  let result = '';
+                  if (days > 0) {
+                    result += `${days} д. `;
+                  }
+                  if (hours % 24 > 0) {
+                    result += `${hours % 24} ч. `;
+                  }
+                  if (minutes % 60 > 0) {
+                    result += `${minutes % 60} мин. `;
+                  }
+                  if (result === '' && diffInSeconds > 0) {
+                    result = `${diffInSeconds} сек.`;
+                  } else if (result === '') {
+                    result = '0 сек.';
+                  }
+                  return result.trim();
+                }
+                return '';
+              }}
+              sortable={false} // Сортировка по этому полю может быть сложной, если не будет специальной логики на бэкенде.
             />
             <FunctionField
               label="# заказа"

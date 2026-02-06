@@ -104,6 +104,16 @@ final class AppFixtures extends Fixture
                 'contactPhone' => $faker->phoneNumber(),
                 'contactEmail' => $faker->email(),
             ];
+            $statuses = [SupportTicketStatus::NEW, SupportTicketStatus::IN_PROGRESS, SupportTicketStatus::POSTPONED, SupportTicketStatus::COMPLETED];
+            $status = $faker->randomElement($statuses);
+            $ticket->status = $status;
+
+            if ($status === SupportTicketStatus::COMPLETED) {
+                // Convert DateTimeImmutable to DateTime for faker
+                $createdAtMutable = \DateTime::createFromFormat('Y-m-d H:i:s', $ticket->createdAt->format('Y-m-d H:i:s'));
+                $ticket->closedAt = \DateTimeImmutable::createFromMutable($faker->dateTimeBetween($createdAtMutable, 'now'));
+            }
+
             $ticket->processInstanceKey = $faker->optional(0.3)->uuid();
             $ticket->user = $faker->randomElement($users);
             $manager->persist($ticket);

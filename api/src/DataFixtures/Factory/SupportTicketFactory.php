@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataFixtures\Factory;
 
 use App\Entity\SupportTicket;
+use App\Enum\SupportTicketStatus;
 use App\Repository\SupportTicketRepository;
 use Zenstruck\Foundry\FactoryCollection;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
@@ -80,10 +81,14 @@ final class SupportTicketFactory extends PersistentProxyObjectFactory
             'После транспортировки станок требует повторной установки и настройки на новом месте.',
         ];
 
-        return [
+        $statuses = [SupportTicketStatus::NEW, SupportTicketStatus::IN_PROGRESS, SupportTicketStatus::POSTPONED, SupportTicketStatus::COMPLETED];
+        $status = self::faker()->randomElement($statuses);
+
+        $data = [
             'subject' => self::faker()->randomElement($subjects),
             'description' => self::faker()->randomElement($descriptions),
             'authorName' => self::faker()->name(),
+            'status' => $status,
             'createdAt' => self::faker()->dateTimeBetween('-1 year', 'now'),
             'orderId' => self::faker()->optional(0.7)->numberBetween(1000, 9999),
             'orderData' => self::faker()->optional(0.5)->passthrough([
@@ -93,6 +98,12 @@ final class SupportTicketFactory extends PersistentProxyObjectFactory
             'processInstanceKey' => self::faker()->optional(0.3)->uuid(),
             'user' => UserFactory::random(),
         ];
+
+        if ($status === SupportTicketStatus::COMPLETED) {
+            $data['closedAt'] = self::faker()->dateTimeBetween($data['createdAt'], 'now');
+        }
+
+        return $data;
     }
 
     public static function class(): string

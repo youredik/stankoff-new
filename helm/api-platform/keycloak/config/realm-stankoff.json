@@ -124,6 +124,15 @@
         "clientRole": false,
         "containerId": "64ed6e3f-772f-4255-9a58-c0eb28c3b70e",
         "attributes": {}
+      },
+      {
+        "id": "support-viewer-id",
+        "name": "support_viewer",
+        "description": "Support viewer role (read-only access)",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "64ed6e3f-772f-4255-9a58-c0eb28c3b70e",
+        "attributes": {}
       }
     ],
     "client": {
@@ -574,7 +583,8 @@
       ],
       "realmRoles": [
         "user",
-        "support_employee"
+        "support_employee",
+        "support_viewer"
       ],
       "groups": [
         "/Technical Support Department"
@@ -640,6 +650,1726 @@
       ],
       "realmRoles": [
         "admin"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-160996",
+      "username": "azat@stankoff.ru",
+      "email": "azat@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Азат",
+      "lastName": "Гатауллин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-237055",
+      "username": "azat.kalimullin@stankoff.ru",
+      "email": "azat.kalimullin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Азат",
+      "lastName": "Калимуллин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-283797",
+      "username": "aigul.sitdikova@stankoff.ru",
+      "email": "aigul.sitdikova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Айгуль",
+      "lastName": "Ситдикова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-274351",
+      "username": "aisylu@stankoff.ru",
+      "email": "aisylu@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Айсылу",
+      "lastName": "Валеева",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-205272",
+      "username": "aleksandr@stankoff.ru",
+      "email": "aleksandr@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Александр",
+      "lastName": "Плошков",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-76691",
+      "username": "alex@stankoff.ru",
+      "email": "alex@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Алексей",
+      "lastName": "Булыгин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-257928",
+      "username": "aleksei.matveev@stankoff.ru",
+      "email": "aleksei.matveev@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Алексей",
+      "lastName": "Матвеев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-645",
+      "username": "ali@stankoff.ru",
+      "email": "ali@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Али",
+      "lastName": "Шарафутдинов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-247262",
+      "username": "alina@stankoff.ru",
+      "email": "alina@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Алина",
+      "lastName": "Платонова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-295775",
+      "username": "alina.salakhova@stankoff.ru",
+      "email": "alina.salakhova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Алина",
+      "lastName": "Салахова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-179301",
+      "username": "albert.zaripov@stankoff.ru",
+      "email": "albert.zaripov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Альберт",
+      "lastName": "Зарипов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-41919",
+      "username": "albert@stankoff.ru",
+      "email": "albert@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Альберт",
+      "lastName": "Шайхуллин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-185579",
+      "username": "amir@stankoff.ru",
+      "email": "amir@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Амир",
+      "lastName": "Мифтахов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-241888",
+      "username": "anastasia.bylina@stankoff.ru",
+      "email": "anastasia.bylina@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Анастасия",
+      "lastName": "Былина",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-270301",
+      "username": "anastasia.elizarova@stankoff.ru",
+      "email": "anastasia.elizarova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Анастасия",
+      "lastName": "Елизарова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-285975",
+      "username": "anastasia.karyukhina@stankoff.ru",
+      "email": "anastasia.karyukhina@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Анастасия",
+      "lastName": "Карюхина",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-83594",
+      "username": "andrey@stankoff.ru",
+      "email": "andrey@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Андрей",
+      "lastName": "Кяшкин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-295560",
+      "username": "anna.sidorova@stankoff.ru",
+      "email": "anna.sidorova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Анна",
+      "lastName": "Сидорова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-149670",
+      "username": "anton.viktorov@stankoff.ru",
+      "email": "anton.viktorov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Антон",
+      "lastName": "Викторов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-98516",
+      "username": "agavrilenko496@gmail.com",
+      "email": "agavrilenko496@gmail.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Антон",
+      "lastName": "Гавриленко",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-282960",
+      "username": "artem.ivanov@stankoff.ru",
+      "email": "artem.ivanov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Артем",
+      "lastName": "Иванов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-99985",
+      "username": "artem@stankoff.ru",
+      "email": "artem@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Артём",
+      "lastName": "Третьяков",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-41458",
+      "username": "af@stankoff.ru",
+      "email": "af@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Артур",
+      "lastName": "Ахметзянов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-1",
+      "username": "stankoff@mail.ru",
+      "email": "stankoff@mail.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Артур",
+      "lastName": "Зиннуров",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-28722",
+      "username": "ma@stankoff.ru",
+      "email": "ma@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Артур",
+      "lastName": "Мингазов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-136406",
+      "username": "vladimir@stankoff.ru",
+      "email": "vladimir@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Владимир",
+      "lastName": "Камонин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-292462",
+      "username": "gulnaz.aglyamova@stankoff.ru",
+      "email": "gulnaz.aglyamova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Гульназ",
+      "lastName": "Аглямова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-236693",
+      "username": "damir@stankoff.ru",
+      "email": "damir@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Дамир",
+      "lastName": "Пирмамедов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-197054",
+      "username": "danil@stankoff.ru",
+      "email": "danil@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Данил",
+      "lastName": "Киряшин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-156642",
+      "username": "dinar.gataullin@stankoff.ru",
+      "email": "dinar.gataullin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Динар",
+      "lastName": "Гатауллин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-75402",
+      "username": "dinar@stankoff.ru",
+      "email": "dinar@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Динар",
+      "lastName": "Фасхутдинов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-304604",
+      "username": "dmitriy.kirillov@stankoff.ru",
+      "email": "dmitriy.kirillov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Дмитрий",
+      "lastName": "Кириллов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-307717",
+      "username": "dmitriy.kolosov@stankoff.ru",
+      "email": "dmitriy.kolosov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Дмитрий",
+      "lastName": "Колосов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-185799",
+      "username": "dmitry@stankoff.ru",
+      "email": "dmitry@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Дмитрий",
+      "lastName": "Леванов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-237360",
+      "username": "dmitriy.myslyuk@stankoff.ru",
+      "email": "dmitriy.myslyuk@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Дмитрий",
+      "lastName": "Мыслюк",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-218425",
+      "username": "dmitriy.plehov@stankoff.ru",
+      "email": "dmitriy.plehov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Дмитрий",
+      "lastName": "Плехов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-227053",
+      "username": "ekaterina.filatova@stankoff.ru",
+      "email": "ekaterina.filatova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Екатерина",
+      "lastName": "Кондратьева",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-121399",
+      "username": "katya@stankoff.ru",
+      "email": "katya@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Екатерина",
+      "lastName": "Куприянова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-264545",
+      "username": "ivan.egorov@stankoff.ru",
+      "email": "ivan.egorov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Иван",
+      "lastName": "Егоров",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-190806",
+      "username": "ivan.kuzmin@stankoff.ru",
+      "email": "ivan.kuzmin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Иван",
+      "lastName": "Кузьмин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-282050",
+      "username": "ivan.leontiev@stankoff.ru",
+      "email": "ivan.leontiev@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Иван",
+      "lastName": "Леонтьев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-287258",
+      "username": "igor.kokorev@stankoff.ru",
+      "email": "igor.kokorev@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Игорь",
+      "lastName": "Кокорев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-240846",
+      "username": "ildar.zamoltdinov@stankoff.ru",
+      "email": "ildar.zamoltdinov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ильдар",
+      "lastName": "Замолтдинов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-71766",
+      "username": "ildar@stankoff.ru",
+      "email": "ildar@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ильдар",
+      "lastName": "Низамиев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-111877",
+      "username": "ilnur@stankoff.ru",
+      "email": "ilnur@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ильнур",
+      "lastName": "Сафин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-282942",
+      "username": "ilya.dolgushin@stankoff.ru",
+      "email": "ilya.dolgushin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Илья",
+      "lastName": "Долгушин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-275444",
+      "username": "lenar@stankoff.ru",
+      "email": "lenar@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ленар",
+      "lastName": "Сайфутдинов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-260597",
+      "username": "lubov.mironova@stankoff.ru",
+      "email": "lubov.mironova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Любовь",
+      "lastName": "Миронова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-299201",
+      "username": "lyubov.saiko@stankoff.ru",
+      "email": "lyubov.saiko@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Любовь",
+      "lastName": "Сайко",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-196",
+      "username": "grachev@stankoff.ru",
+      "email": "grachev@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Максим",
+      "lastName": "Грачев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-220203",
+      "username": "maksim.grushin@stankoff.ru",
+      "email": "maksim.grushin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Максим",
+      "lastName": "Грушин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-166603",
+      "username": "km@stankoff.ru",
+      "email": "km@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Максим",
+      "lastName": "Кириллов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-280433",
+      "username": "maksim.mazhorov@stankoff.ru",
+      "email": "maksim.mazhorov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Максим",
+      "lastName": "Мажоров",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-300851",
+      "username": "maksim.nikitin@stankoff.ru",
+      "email": "maksim.nikitin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Максим",
+      "lastName": "Никитин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-35986",
+      "username": "margo@stankoff.ru",
+      "email": "margo@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Маргарита",
+      "lastName": "Якупова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-305431",
+      "username": "maria.erosh@stankoff.ru",
+      "email": "maria.erosh@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Мария",
+      "lastName": "Ерош",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-164408",
+      "username": "natalya@stankoff.ru",
+      "email": "natalya@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Наталья",
+      "lastName": "Низамова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-176423",
+      "username": "nikita@stankoff.ru",
+      "email": "nikita@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Никита",
+      "lastName": "Репейков",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-300926",
+      "username": "nikita.serov@stankoff.ru",
+      "email": "nikita.serov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Никита",
+      "lastName": "Серов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-195638",
+      "username": "nikolai@stankoff.ru",
+      "email": "nikolai@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Николай",
+      "lastName": "Васильев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-285979",
+      "username": "oksana.shigabutdinova@stankoff.ru",
+      "email": "oksana.shigabutdinova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Оксана",
+      "lastName": "Шигабутдинова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-271967",
+      "username": "oleg.pivovar@stankoff.ru",
+      "email": "oleg.pivovar@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Олег",
+      "lastName": "Пивовар",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-169310",
+      "username": "oleg@stankoff.ru",
+      "email": "oleg@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Олег",
+      "lastName": "Селезнев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-291253",
+      "username": "ravil.kamalutdinov@stankoff.ru",
+      "email": "ravil.kamalutdinov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Равиль",
+      "lastName": "Камалутдинов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-302975",
+      "username": "ramzis.khakimov@stankoff.ru",
+      "email": "ramzis.khakimov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Рамзис",
+      "lastName": "Хакимов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-122236",
+      "username": "renat@stankoff.ru",
+      "email": "renat@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ренат",
+      "lastName": "Гарифьянов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-289084",
+      "username": "robert.safiullin@stankoff.ru",
+      "email": "robert.safiullin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Роберт",
+      "lastName": "Сафиуллин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-299200",
+      "username": "roman.akhmadullin@stankoff.ru",
+      "email": "roman.akhmadullin@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Роман",
+      "lastName": "Ахмадуллин",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-280565",
+      "username": "roman.koksharov@stankoff.ru",
+      "email": "roman.koksharov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Роман",
+      "lastName": "Кокшаров",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-644",
+      "username": "ruslan.stankoff@gmail.com",
+      "email": "ruslan.stankoff@gmail.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Руслан Альфирович",
+      "lastName": "Зиннуров",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-241044",
+      "username": "rustam.gilyazev@stankoff.ru",
+      "email": "rustam.gilyazev@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Рустам",
+      "lastName": "Гилязев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-116514",
+      "username": "sevil.alieva2020@gmail.com",
+      "email": "sevil.alieva2020@gmail.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Севиль",
+      "lastName": "Алиева",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-643",
+      "username": "rsv@stankoff.ru",
+      "email": "rsv@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Сергей",
+      "lastName": "Русских",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-128058",
+      "username": "ssv@stankoff.ru",
+      "email": "ssv@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Сергей",
+      "lastName": "Шуршев",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-300840",
+      "username": "t.dotcenko@gmail.com",
+      "email": "t.dotcenko@gmail.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Тарас",
+      "lastName": "Доценко",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-307743",
+      "username": "timur.khairtdinov@stankoff.ru",
+      "email": "timur.khairtdinov@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Тимур",
+      "lastName": "Хайртдинов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-273095",
+      "username": "ulyana@stankoff.ru",
+      "email": "ulyana@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ульяна",
+      "lastName": "Попова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-156298",
+      "username": "chitra@stankoff.ru",
+      "email": "chitra@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Читра",
+      "lastName": "Тхомпира",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-162515",
+      "username": "chulpan.gallyamova@stankoff.ru",
+      "email": "chulpan.gallyamova@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Чулпан",
+      "lastName": "Галлямова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-19290",
+      "username": "chulpan@stankoff.ru",
+      "email": "chulpan@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Чулпан",
+      "lastName": "Самигуллина",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-308074",
+      "username": "youredik@gmail.com",
+      "email": "youredik@gmail.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Эдуард",
+      "lastName": "Сарваров",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-219379",
+      "username": "eduard@stankoff.ru",
+      "email": "eduard@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Эдуард",
+      "lastName": "Смирнов",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-282962",
+      "username": "elina.khazgalieva@stankoff.ru",
+      "email": "elina.khazgalieva@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Элина",
+      "lastName": "Хазгалиева",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-48502",
+      "username": "elinaakupova52@gmail.com",
+      "email": "elinaakupova52@gmail.com",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Элина",
+      "lastName": "Хатибуллина",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-250339",
+      "username": "elvira@stankoff.ru",
+      "email": "elvira@stankoff.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Эльвира",
+      "lastName": "Газимова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
+      ],
+      "groups": []
+    },
+    {
+      "id": "emp-9948",
+      "username": "yunona.salimzyanova@yandex.ru",
+      "email": "yunona.salimzyanova@yandex.ru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Юнона",
+      "lastName": "Салимзянова",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "changeMe2025!"
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "support_viewer"
       ],
       "groups": []
     }
