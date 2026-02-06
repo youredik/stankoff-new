@@ -13,7 +13,17 @@ import {
   Paper,
   Typography
 } from '@mui/material';
-import {CloudUpload, Delete, Download, Image, VideoFile, Description} from '@mui/icons-material';
+import {
+  CloudUpload,
+  Delete,
+  Download,
+  Image,
+  VideoFile,
+  Description,
+  PictureAsPdf,
+  InsertDriveFile,
+  Archive
+} from '@mui/icons-material';
 import {useDelete, useGetList} from 'react-admin';
 import {getSession} from 'next-auth/react';
 import {type Session} from '../../app/auth';
@@ -50,9 +60,27 @@ interface MediaUploadProps {
 
 const isImage = (mimeType: string) => mimeType.startsWith('image/');
 const isVideo = (mimeType: string) => mimeType.startsWith('video/');
+const isPDF = (mimeType: string) => mimeType === 'application/pdf';
+const isText = (mimeType: string) => mimeType.startsWith('text/');
+const isArchive = (mimeType: string) =>
+  mimeType === 'application/zip' ||
+  mimeType === 'application/x-rar-compressed' ||
+  mimeType === 'application/x-7z-compressed';
 const isDocument = (mimeType: string) =>
   mimeType.startsWith('application/') ||
   mimeType.startsWith('text/');
+
+const getFileIcon = (mimeType: string) => {
+  if (isImage(mimeType)) return <Image color="primary" />;
+  if (isVideo(mimeType)) return <VideoFile color="primary" />;
+  if (isPDF(mimeType)) return <PictureAsPdf color="primary" />;
+  if (isArchive(mimeType)) return <Archive color="primary" />;
+  return <Description color="primary" />;
+};
+
+const canPreview = (mimeType: string) => {
+  return isImage(mimeType) || isVideo(mimeType);
+};
 
 const formatFileSize = (bytes: number) => {
   if (bytes === 0) return '0 Bytes';
@@ -368,10 +396,16 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     };
   }, []);
 
-  const handlePreview = useCallback(async (media: MediaFile) => {
-    if (!mediaFiles || isDocument(media.mimeType)) return; // Don't preview documents
 
-    const index = mediaFiles.findIndex(m => m.id === media.id);
+
+  const handlePreview = useCallback(async (media: MediaFile) => {
+    if (!mediaFiles || !canPreview(media.mimeType)) {
+      handleDownload(media);
+      return;
+    }
+
+    const previewableFiles = mediaFiles.filter(m => canPreview(m.mimeType));
+    const index = previewableFiles.findIndex(m => m.id === media.id);
     if (index === -1) return;
 
     previewRequestRef.current += 1;
@@ -380,17 +414,19 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     setCurrentIndex(index);
     setIsPreviewLoading(true);
 
-    const placeholders = mediaFiles.map((m) =>
-      isDocument(m.mimeType) ? {type: 'document'} as Slide :
+    const placeholders = previewableFiles.map((m) =>
       isVideo(m.mimeType) ? {type: 'video'} as Slide :
       {type: 'image'} as Slide
     );
     setSlides(placeholders);
 
     try {
-      const prepared = isVideo(media.mimeType)
-        ? await buildVideoSlide(media)
-        : await buildImageSlide(media);
+      let prepared;
+      if (isVideo(media.mimeType)) {
+        prepared = await buildVideoSlide(media);
+      } else {
+        prepared = await buildImageSlide(media);
+      }
 
       if (previewRequestRef.current !== requestId) {
         prepared.urls.forEach((url) => URL.revokeObjectURL(url));
@@ -405,15 +441,17 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
 
       setLightboxOpen(true);
 
-      for (const m of mediaFiles) {
-        if (isDocument(m.mimeType)) continue; // Skip document files
-
-        const i = mediaFiles.indexOf(m);
+      for (const m of previewableFiles) {
+        const i = previewableFiles.indexOf(m);
         if (i === index) continue;
         try {
-          const nextPrepared = isVideo(m.mimeType)
-            ? await buildVideoSlide(m)
-            : await buildImageSlide(m);
+          let nextPrepared;
+          if (isVideo(m.mimeType)) {
+            nextPrepared = await buildVideoSlide(m);
+          } else {
+            nextPrepared = await buildImageSlide(m);
+          }
+
           if (previewRequestRef.current !== requestId) {
             nextPrepared.urls.forEach((url) => URL.revokeObjectURL(url));
             continue;
@@ -541,32 +579,19 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                       }}
                     />
                   ) : (
-                    <>
-                      {isImage(media.mimeType) && (
-                        <IconButton onClick={(e) => {
-                          e.stopPropagation();
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (canPreview(media.mimeType)) {
                           handlePreview(media);
-                        }}>
-                          <Image color="primary"/>
-                        </IconButton>
-                      )}
-                      {isVideo(media.mimeType) && (
-                        <IconButton onClick={(e) => {
-                          e.stopPropagation();
-                          handlePreview(media);
-                        }}>
-                          <VideoFile color="primary"/>
-                        </IconButton>
-                      )}
-                      {isDocument(media.mimeType) && (
-                        <IconButton onClick={(e) => {
-                          e.stopPropagation();
+                        } else {
                           handleDownload(media);
-                        }}>
-                          <Description color="primary"/>
-                        </IconButton>
-                      )}
-                    </>
+                        }
+                      }}
+                      size="large"
+                    >
+                      {getFileIcon(media.mimeType)}
+                    </IconButton>
                   )}
                 </Box>
 

@@ -11,7 +11,7 @@ import {
   useGetList,
   useListContext
 } from 'react-admin';
-import {Alert, Box, Chip, Tooltip, Typography} from '@mui/material';
+import {Alert, Box, Chip, Tooltip, Typography, Button} from '@mui/material';
 import {formatDistanceToNow} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {StatusChip} from './common';
@@ -169,26 +169,36 @@ const SupportTicketListView = () => {
           }}
         />
       </Box>
-      <Box
-        sx={{
-          '& .RaFilterForm-root': {
-            display: 'grid',
-            gap: 16,
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: '1fr 1fr',
-              md: 'repeat(4, minmax(160px, 1fr))'
-            },
-            alignItems: 'end',
-          },
-          '& .RaFilterForm-filterFormInput': {
-            margin: 0,
-            minWidth: 0,
-          },
-        }}
-      >
-        <FilterForm filters={filters}/>
-      </Box>
+       <Box
+         sx={{
+           '& .RaFilterForm-root': {
+             display: 'grid',
+             gap: 16,
+             gridTemplateColumns: {
+               xs: '1fr auto',
+               sm: '1fr 1fr auto',
+               md: 'repeat(4, minmax(160px, 1fr)) auto'
+             },
+             alignItems: 'end',
+           },
+           '& .RaFilterForm-filterFormInput': {
+             margin: 0,
+             minWidth: 0,
+           },
+         }}
+       >
+         <FilterForm filters={filters}/>
+         {countActiveFilters(filterValues) > 0 && (
+           <Button
+             variant="outlined"
+             onClick={() => setFilters({}, null)}
+             color="secondary"
+             sx={{mb: 1}}
+           >
+             Сбросить фильтры
+           </Button>
+         )}
+       </Box>
       {error ? (
         <Alert severity="error" sx={{mb: 2}}>
           Не удалось загрузить список заявок. Попробуйте обновить страницу.
