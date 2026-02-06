@@ -157,6 +157,12 @@ class SupportTicket
     }
 
     #[Groups(['SupportTicket:read',])]
+    public function getCurrentStatusValue(): string
+    {
+        return $this->status->value;
+    }
+
+    #[Groups(['SupportTicket:read',])]
     public function getCurrentClosingReason(): ?string
     {
         if ($this->comments->isEmpty()) {

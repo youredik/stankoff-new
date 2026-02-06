@@ -8,7 +8,12 @@ import {
   MenuItem,
   Select,
   TextField,
-  Typography
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert
 } from '@mui/material';
 import {useNotify, useShowContext} from 'react-admin';
 import {changeStatus, getClosingReasons, getStatuses} from '../../services/supportTicketService';
@@ -33,6 +38,11 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
   const [statusOptions, setStatusOptions] = useState<StatusOption[]>([]);
   const [closingReasonOptions, setClosingReasonOptions] = useState<ClosingReasonOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorDialogData, setErrorDialogData] = useState<{
+    message: string;
+    existingTicket?: { id: number; subject: string };
+  } | null>(null);
 
   const currentStatus = record?.status;
   const isCompleted = currentStatus === 'completed';
@@ -84,7 +94,62 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
       refetch();
       onStatusChanged?.();
     } catch (err: any) {
+      // Check if this is the specific error about having an existing ticket in progress
+      if (err.message.includes('уже имеется 1 заявка в работе') && (err as any).existingTicket) {
+        setErrorDialogData({
+          message: err.message,
+          existingTicket: (err as any).existingTicket
+        });
+        setErrorDialogOpen(true);
+      } else {
+        notify(err.message, {type: 'error'});
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostponeAndTakeNew = async () => {
+    if (!errorDialogData?.existingTicket) return;
+
+    setLoading(true);
+    try {
+      // First, postpone the existing ticket with automatic comment
+      await changeStatus(
+        String(errorDialogData.existingTicket.id),
+        {
+          status: 'postponed',
+          comment: 'Принял другую заявку',
+          closingReason: undefined
+        }
+      );
+
+      // Then, take the new ticket
+      const ticketId = typeof record?.id === 'string'
+        ? record.id.split('/').pop()
+        : record?.id;
+      if (!ticketId) {
+        throw new Error('Не найден ID заявки');
+      }
+      await changeStatus(String(ticketId), {
+        status: status,
+        comment: comment,
+        closingReason: closingReason
+      });
+
+      notify('Статус успешно изменен', {type: 'success'});
+      setStatus('');
+      setComment('');
+      setClosingReason('');
+      setErrorDialogOpen(false);
+      setErrorDialogData(null);
+      // Refetch the record to update the UI
+      refetch();
+      onStatusChanged?.();
+    } catch (err: any) {
       notify(err.message, {type: 'error'});
+      setErrorDialogOpen(false);
+      setErrorDialogData(null);
     } finally {
       setLoading(false);
     }
@@ -124,6 +189,54 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
 
   return (
     <Box sx={{mb: 3}}>
+      {/* Error Dialog */}
+      <Dialog
+        open={errorDialogOpen}
+        onClose={() => {
+          setErrorDialogOpen(false);
+          setErrorDialogData(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Ограничение по заявкам</DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{mb: 2}}>
+            {errorDialogData?.message}
+          </Alert>
+          {errorDialogData?.existingTicket && (
+            <Box sx={{mb: 2}}>
+              <Typography variant="body2" color="text.secondary" sx={{mb: 1}}>
+                Текущая заявка в работе:
+              </Typography>
+              <Typography variant="body1">
+                #{errorDialogData.existingTicket.id} - {errorDialogData.existingTicket.subject}
+              </Typography>
+            </Box>
+          )}
+          <Typography variant="body2" color="text.secondary">
+            При нажатии "Отложить и взять новую" текущая заявка будет автоматически отложена с комментарием "Принял другую заявку".
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setErrorDialogOpen(false);
+            setErrorDialogData(null);
+          }}>
+            Отмена
+          </Button>
+          <Button
+            onClick={handlePostponeAndTakeNew}
+            variant="contained"
+            color="primary"
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20}/> : null}
+          >
+            {loading ? 'Откладывание...' : 'Отложить и взять новую'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/*<Typography variant="h6" gutterBottom>
         Изменение статуса
       </Typography>*/}

@@ -114,47 +114,55 @@ final class SupportTicketTest extends ApiTestCase
     #[Test]
     public function asUserICanChangeTicketStatusToInProgress(): void
     {
-        $user = UserFactory::createOne();
-        $ticket = SupportTicketFactory::createOne(['user' => $user]);
+        $user = UserFactory::createOneAdmin();
+        $ticket = SupportTicketFactory::createOne(['user' => $user, 'status' => SupportTicketStatus::NEW]);
 
         $token = self::getContainer()->get(TokenGenerator::class)->generateToken([
             'email' => $user->email,
+            'realm_access' => [
+                'roles' => ['ROLE_ADMIN', 'oidc_support_employee'],
+            ],
         ]);
 
-        $this->client->request('PATCH', '/support_tickets/' . $ticket->getId() . '/change_status', [
+        $this->client->request('POST', '/api/support-tickets/' . $ticket->getId() . '/change-status', [
             'auth_bearer' => $token,
             'json' => [
-                'status' => 'IN_PROGRESS',
+                'status' => 'in_progress',
+                'comment' => 'Начинаю работу над заявкой',
             ],
         ]);
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            'status' => 'IN_PROGRESS',
+            'message' => 'Status changed successfully',
         ]);
     }
 
     #[Test]
     public function asUserICannotChangeTicketStatusToInProgressIfAnotherIsAlreadyInProgress(): void
     {
-        $user = UserFactory::createOne();
-        $ticket1 = SupportTicketFactory::createOne(['user' => $user, 'status' => 'IN_PROGRESS']);
+        $user = UserFactory::createOneAdmin();
+        $ticket1 = SupportTicketFactory::createOne(['user' => $user, 'status' => SupportTicketStatus::IN_PROGRESS]);
         $ticket2 = SupportTicketFactory::createOne(['user' => $user]);
 
         $token = self::getContainer()->get(TokenGenerator::class)->generateToken([
             'email' => $user->email,
+            'realm_access' => [
+                'roles' => ['ROLE_ADMIN', 'oidc_support_employee'],
+            ],
         ]);
 
-        $this->client->request('PATCH', '/support_tickets/' . $ticket2->getId() . '/change_status', [
+        $this->client->request('POST', '/api/support-tickets/' . $ticket2->getId() . '/change-status', [
             'auth_bearer' => $token,
             'json' => [
-                'status' => 'IN_PROGRESS',
+                'status' => 'in_progress',
+                'comment' => 'Начинаю работу над заявкой',
             ],
         ]);
 
         self::assertResponseStatusCodeSame(400);
         self::assertJsonContains([
-            'detail' => 'У вас уже имеется заявка в работе. Отложите действующую заявку чтобы взять новую.',
+            'error' => 'У вас уже имеется 1 заявка в работе. Отложите действующую заявку чтобы взять новую.',
         ]);
     }
 
@@ -162,24 +170,24 @@ final class SupportTicketTest extends ApiTestCase
     public function asAdminICanGetSupportTicketsOrderedByStatus(): void
     {
         UserFactory::createMany(5);
-        // Create tickets with different statuses via comments
-        $ticket1 = SupportTicketFactory::createOne();
+        // Create tickets with different statuses
+        $ticket1 = SupportTicketFactory::createOne(['status' => SupportTicketStatus::NEW]);
         SupportTicketCommentFactory::createOne(['supportTicket' => $ticket1, 'status' => SupportTicketStatus::NEW]);
 
-        $ticket2 = SupportTicketFactory::createOne();
+        $ticket2 = SupportTicketFactory::createOne(['status' => SupportTicketStatus::COMPLETED]);
         SupportTicketCommentFactory::createOne(['supportTicket' => $ticket2, 'status' => SupportTicketStatus::COMPLETED]);
 
-        $ticket3 = SupportTicketFactory::createOne();
+        $ticket3 = SupportTicketFactory::createOne(['status' => SupportTicketStatus::IN_PROGRESS]);
         SupportTicketCommentFactory::createOne(['supportTicket' => $ticket3, 'status' => SupportTicketStatus::IN_PROGRESS]);
 
-        $ticket4 = SupportTicketFactory::createOne();
+        $ticket4 = SupportTicketFactory::createOne(['status' => SupportTicketStatus::POSTPONED]);
         SupportTicketCommentFactory::createOne(['supportTicket' => $ticket4, 'status' => SupportTicketStatus::POSTPONED]);
 
         $token = self::getContainer()->get(TokenGenerator::class)->generateToken([
             'email' => UserFactory::createOneAdmin()->email,
         ]);
 
-        $response = $this->client->request('GET', '/support_tickets?order[currentStatusValue]=asc', ['auth_bearer' => $token]);
+        $response = $this->client->request('GET', '/support_tickets?order[status]=asc', ['auth_bearer' => $token]);
 
         self::assertResponseIsSuccessful();
         $data = $response->toArray();
