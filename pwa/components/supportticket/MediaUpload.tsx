@@ -13,7 +13,7 @@ import {
   Paper,
   Typography
 } from '@mui/material';
-import {CloudUpload, Delete, Download, Image, VideoFile} from '@mui/icons-material';
+import {CloudUpload, Delete, Download, Image, VideoFile, Description} from '@mui/icons-material';
 import {useDelete, useGetList} from 'react-admin';
 import {getSession} from 'next-auth/react';
 import {type Session} from '../../app/auth';
@@ -50,6 +50,9 @@ interface MediaUploadProps {
 
 const isImage = (mimeType: string) => mimeType.startsWith('image/');
 const isVideo = (mimeType: string) => mimeType.startsWith('video/');
+const isDocument = (mimeType: string) =>
+  mimeType.startsWith('application/') ||
+  mimeType.startsWith('text/');
 
 const formatFileSize = (bytes: number) => {
   if (bytes === 0) return '0 Bytes';
@@ -366,7 +369,8 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   }, []);
 
   const handlePreview = useCallback(async (media: MediaFile) => {
-    if (!mediaFiles) return;
+    if (!mediaFiles || isDocument(media.mimeType)) return; // Don't preview documents
+
     const index = mediaFiles.findIndex(m => m.id === media.id);
     if (index === -1) return;
 
@@ -376,7 +380,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
     setCurrentIndex(index);
     setIsPreviewLoading(true);
 
-    const placeholders = mediaFiles.map((m) => ({type: isVideo(m.mimeType) ? 'video' : 'image'} as Slide));
+    const placeholders = mediaFiles.map((m) =>
+      isDocument(m.mimeType) ? {type: 'document'} as Slide :
+      isVideo(m.mimeType) ? {type: 'video'} as Slide :
+      {type: 'image'} as Slide
+    );
     setSlides(placeholders);
 
     try {
@@ -398,6 +406,8 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
       setLightboxOpen(true);
 
       for (const m of mediaFiles) {
+        if (isDocument(m.mimeType)) continue; // Skip document files
+
         const i = mediaFiles.indexOf(m);
         if (i === index) continue;
         try {
@@ -434,7 +444,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Фото и видео ({totalCount})
+        Вложения ({totalCount})
       </Typography>
 
       {error && (
@@ -465,7 +475,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
           id="file-input"
           type="file"
           multiple
-          accept="image/*,video/*"
+          accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-rar-compressed,application/x-7z-compressed,text/plain,text/csv"
           style={{display: 'none'}}
           onChange={handleFileSelect}
         />
@@ -521,7 +531,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     mb: 1
                   }}
                 >
-                  {media.thumbnailUrl ? (
+                  {media.thumbnailUrl && (isImage(media.mimeType) || isVideo(media.mimeType)) ? (
                     <ThumbnailImage
                       src={media.thumbnailUrl}
                       alt={media.originalName}
@@ -546,6 +556,14 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                           handlePreview(media);
                         }}>
                           <VideoFile color="primary"/>
+                        </IconButton>
+                      )}
+                      {isDocument(media.mimeType) && (
+                        <IconButton onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(media);
+                        }}>
+                          <Description color="primary"/>
                         </IconButton>
                       )}
                     </>
@@ -594,7 +612,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     position: 'relative'
                   }}
                 >
-                  {uploadingFile.previewUrl ? (
+                  {uploadingFile.previewUrl && (isImage(uploadingFile.file.type) || isVideo(uploadingFile.file.type)) ? (
                     <img
                       src={uploadingFile.previewUrl}
                       alt={uploadingFile.file.name}
@@ -609,8 +627,9 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     />
                   ) : (
                     <>
-                      {uploadingFile.file.type.startsWith('video/') ? <VideoFile color="primary"/> :
-                        <Image color="primary"/>}
+                      {isImage(uploadingFile.file.type) && <Image color="primary"/>}
+                      {isVideo(uploadingFile.file.type) && <VideoFile color="primary"/>}
+                      {isDocument(uploadingFile.file.type) && <Description color="primary"/>}
                     </>
                   )}
                   {uploadingFile.status === 'uploading' && (
@@ -675,7 +694,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
               Перетащите файлы сюда или нажмите для выбора
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Поддерживаются изображения и видео
+              Поддерживаются изображения, видео и документы (PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, CSV, ZIP, RAR, 7Z)
             </Typography>
           </Box>
         )}

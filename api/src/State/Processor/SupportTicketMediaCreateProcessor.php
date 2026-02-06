@@ -58,16 +58,33 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
 
         // Validate file type
         $allowedMimeTypes = [
+            // Images
             'image/jpeg',
             'image/png',
             'image/gif',
             'image/webp',
+            // Videos
             'video/mp4',
             'video/avi',
             'video/mov',
+            // Documents
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            // Archives
+            'application/zip',
+            'application/x-rar-compressed',
+            'application/x-7z-compressed',
+            // Text files
+            'text/plain',
+            'text/csv',
         ];
         if (!in_array($uploadedFile->getMimeType(), $allowedMimeTypes)) {
-            throw new BadRequestHttpException('Invalid file type. Only images and videos are allowed.');
+            throw new BadRequestHttpException('Invalid file type. Allowed types: images, videos, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, CSV, ZIP, RAR, 7Z.');
         }
 
         // Validate file size (max 100MB)
