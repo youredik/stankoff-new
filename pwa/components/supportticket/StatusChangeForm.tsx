@@ -16,7 +16,9 @@ import {
   Alert
 } from '@mui/material';
 import {useNotify, useShowContext} from 'react-admin';
+import {getSession} from 'next-auth/react';
 import {changeStatus, getClosingReasons, getStatuses} from '../../services/supportTicketService';
+import {type Session} from '../../app/auth';
 
 interface StatusOption {
   id: string;
@@ -43,9 +45,31 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
     message: string;
     existingTicket?: { id: number; subject: string };
   } | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   const currentStatus = record?.status;
   const isCompleted = currentStatus === 'completed';
+
+  React.useEffect(() => {
+    const loadUserRoles = async () => {
+      const session = await getSession() as Session | null;
+      console.log('Session:', JSON.stringify(session, null, 2)); // Логируем полную сессию
+      if (session?.user?.roles) {
+        console.log('User roles:', JSON.stringify(session.user.roles, null, 2));
+        setUserRoles(session.user.roles);
+      } else {
+        console.log('No user roles found');
+      }
+    };
+    loadUserRoles();
+  }, []);
+
+  const canResumeCompletedTicket = userRoles.some(role =>
+    role.toLowerCase() === 'support_manager' ||
+    role.toLowerCase() === 'admin' ||
+    role.toLowerCase() === 'oidc_support_manager' ||
+    role.toLowerCase() === 'oidc_admin'
+  );
 
   // Update status when current status changes
   React.useEffect(() => {
@@ -164,7 +188,10 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
     }
 
     if (currentStatus === 'completed') {
-      return []; // No changes allowed
+      if (!canResumeCompletedTicket) {
+        return []; // No changes allowed for regular employees
+      }
+      return statusOptions.filter(s => s.id !== 'new'); // Allow all except NEW
     }
 
     // For other statuses, allow all except 'new'
@@ -177,7 +204,7 @@ export const StatusChangeForm = ({onStatusChanged}: { onStatusChanged?: () => vo
     return !availableStatuses.some(s => s.id === statusId);
   };
 
-  if (isCompleted) {
+  if (isCompleted && !canResumeCompletedTicket) {
     return (
       <Box sx={{mb: 3}}>
         <Typography variant="body2" color="text.secondary">

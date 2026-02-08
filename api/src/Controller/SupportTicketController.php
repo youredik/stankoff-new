@@ -156,7 +156,18 @@ final class SupportTicketController extends AbstractController
         }
 
         if ($currentStatus === SupportTicketStatus::COMPLETED) {
-            throw new BadRequestHttpException('Cannot change status from COMPLETED');
+            // Only managers and admins can resume completed tickets
+            if (!$this->isGranted('OIDC_SUPPORT_MANAGER') && !$this->isGranted('OIDC_ADMIN')) {
+                throw new BadRequestHttpException('Only managers and admins can resume completed tickets');
+            }
+
+            // Allow changing from COMPLETED to any status except NEW
+            if ($newStatus === SupportTicketStatus::NEW) {
+                throw new BadRequestHttpException('Cannot change status to NEW');
+            }
+
+            // Clear the closedAt time when resuming the ticket
+            $supportTicket->closedAt = null;
         }
 
         $closingReason = null;

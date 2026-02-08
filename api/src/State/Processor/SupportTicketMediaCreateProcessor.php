@@ -123,10 +123,38 @@ readonly class SupportTicketMediaCreateProcessor implements ProcessorInterface
                 $thumbnailStoragePath = "media/{$supportTicketId}/{$thumbnailFilename}";
                 $this->storageService->uploadFile($thumbnailStoragePath, $thumbnailLocalPath, 'image/jpeg');
                 $thumbnailPath = $thumbnailStoragePath;
-                unlink($thumbnailLocalPath); // Clean up temp file
+                unlink($thumbnailLocalPath);
             } catch (\Exception $e) {
-                // Log error but don't fail the upload
                 error_log('Failed to generate video thumbnail: ' . $e->getMessage());
+            }
+        } elseif ($uploadedFile->getMimeType() === 'application/pdf') {
+            try {
+                $thumbnailFilename = 'thumb_' . pathinfo($filename, PATHINFO_FILENAME) . '.jpg';
+                $thumbnailLocalPath = sys_get_temp_dir() . '/' . $thumbnailFilename;
+                $this->thumbnailService->generatePdfThumbnail($uploadedFile->getPathname(), $thumbnailLocalPath);
+                $thumbnailStoragePath = "support-ticket/media/{$supportTicketId}/{$thumbnailFilename}";
+                $this->storageService->uploadFile($thumbnailStoragePath, $thumbnailLocalPath, 'image/jpeg');
+                $thumbnailPath = $thumbnailStoragePath;
+                unlink($thumbnailLocalPath);
+            } catch (\Exception $e) {
+                error_log('Failed to generate PDF thumbnail: ' . $e->getMessage());
+            }
+        } elseif (in_array($uploadedFile->getMimeType(), [
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ], true)) {
+            try {
+                $thumbnailFilename = 'thumb_' . pathinfo($filename, PATHINFO_FILENAME) . '.jpg';
+                $thumbnailLocalPath = sys_get_temp_dir() . '/' . $thumbnailFilename;
+                $this->thumbnailService->generateOfficeThumbnail($uploadedFile->getPathname(), $thumbnailLocalPath);
+                $thumbnailStoragePath = "support-ticket/media/{$supportTicketId}/{$thumbnailFilename}";
+                $this->storageService->uploadFile($thumbnailStoragePath, $thumbnailLocalPath, 'image/jpeg');
+                $thumbnailPath = $thumbnailStoragePath;
+                unlink($thumbnailLocalPath);
+            } catch (\Exception $e) {
+                error_log('Failed to generate office document thumbnail: ' . $e->getMessage());
             }
         }
 

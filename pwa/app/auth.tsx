@@ -12,7 +12,9 @@ export interface Session extends DefaultSession {
   error?: "RefreshAccessTokenError"
   accessToken: string
   idToken: string
-  user?: User
+  user?: User & {
+    roles?: string[]
+  }
 }
 
 interface JWT {
@@ -21,6 +23,7 @@ interface JWT {
   expiresAt: number
   refreshToken: string
   error?: "RefreshAccessTokenError"
+  roles?: string[]
 }
 
 interface Account {
@@ -38,15 +41,25 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
   },
   callbacks: {
     // @ts-ignore
-    async jwt({ token, account }: { token: JWT, account: Account }): Promise<JWT> {
+    async jwt({ token, account, user }: { token: JWT, account: Account, user: any }): Promise<JWT> {
       if (account) {
-        // Save the access token and refresh token in the JWT on the initial login
+        let roles: string[] = [];
+        if (account.access_token) {
+          try {
+            const payload = JSON.parse(Buffer.from(account.access_token.split('.')[1], 'base64').toString());
+            roles = payload.realm_access?.roles || [];
+          } catch (error) {
+            console.error('Error decoding access_token', error);
+          }
+        }
+
         return {
           ...token,
           accessToken: account.access_token,
           idToken: account.id_token,
           expiresAt: Math.floor(Date.now() / 1000 + account.expires_in),
           refreshToken: account.refresh_token,
+          roles: roles,
         };
       } else if (Date.now() < (token.expiresAt - REFRESH_BUFFER_SECONDS) * 1000) {
         // If the access token has not expired yet, return it
@@ -76,17 +89,28 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
             throw new Error('Invalid expires_in from refresh response');
           }
 
+          let roles: string[] = token.roles || [];
+          if ((tokens as any).access_token) {
+            try {
+              const payload = JSON.parse(Buffer.from((tokens as any).access_token.split('.')[1], 'base64').toString());
+              roles = payload.realm_access?.roles || [];
+            } catch (error) {
+              console.error('Error decoding access_token', error);
+            }
+          }
+
           return {
             ...token, // Keep the previous token properties
             // @ts-ignore
             accessToken: tokens.access_token,
             // @ts-ignore
-            idToken: tokens.id_token,
+            idToken: (tokens as any).id_token,
             // @ts-ignore
             expiresAt: Math.floor(Date.now() / 1000 + expiresIn),
             // Fall back to old refresh token, but note that
             // many providers may only allow using a refresh token once.
-            refreshToken: tokens.refresh_token ?? token.refreshToken,
+            refreshToken: (tokens as any).refresh_token ?? token.refreshToken,
+            roles: roles,
           };
         } catch (error) {
           console.error("Error refreshing access token", error);
@@ -99,12 +123,18 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
       }
     },
     // @ts-ignore
-    async session({ session, token }: { session: Session, token: JWT }): Promise<Session> {
+    async session({ session, token }: { session: Session, token: JWT & { roles?: string[] } }): Promise<Session> {
       // Save the access token in the Session for API calls
       if (token) {
         session.accessToken = token.accessToken;
         session.idToken = token.idToken;
         session.error = token.error;
+        if (token.roles) {
+          session.user = {
+            ...session.user,
+            roles: token.roles,
+          };
+        }
       }
 
       return session;

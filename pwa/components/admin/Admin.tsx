@@ -17,6 +17,7 @@ import {ENTRYPOINT} from "../../config/entrypoint";
 import i18nProvider from "./i18nProvider";
 import supportTicketResourceProps from "../supportticket";
 import userResourceProps from "../user";
+import {Dashboard} from "../dashboard/Dashboard";
 import {lightTheme} from "./theme";
 
 const toDateOnly = (value: unknown): string | null => {
@@ -241,6 +242,7 @@ const AdminWithDataProvider = ({session, children,}: {
       i18nProvider={i18nProvider}
       layout={Layout}
       theme={lightTheme}
+      dashboard={Dashboard}
     >
       {!!children && children}
     </HydraAdmin>

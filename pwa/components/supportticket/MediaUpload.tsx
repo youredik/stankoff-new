@@ -66,6 +66,11 @@ const isArchive = (mimeType: string) =>
   mimeType === 'application/zip' ||
   mimeType === 'application/x-rar-compressed' ||
   mimeType === 'application/x-7z-compressed';
+const isOfficeDoc = (mimeType: string) =>
+  mimeType === 'application/msword' ||
+  mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+  mimeType === 'application/vnd.ms-excel' ||
+  mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const isDocument = (mimeType: string) =>
   mimeType.startsWith('application/') ||
   mimeType.startsWith('text/');
@@ -569,13 +574,17 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({ticketId, onMediaChange
                     mb: 1
                   }}
                 >
-                  {media.thumbnailUrl && (isImage(media.mimeType) || isVideo(media.mimeType)) ? (
+                  {media.thumbnailUrl && (isImage(media.mimeType) || isVideo(media.mimeType) || isPDF(media.mimeType) || isOfficeDoc(media.mimeType)) ? (
                     <ThumbnailImage
                       src={media.thumbnailUrl}
                       alt={media.originalName}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handlePreview(media);
+                        if (canPreview(media.mimeType)) {
+                          handlePreview(media);
+                        } else {
+                          handleDownload(media);
+                        }
                       }}
                     />
                   ) : (

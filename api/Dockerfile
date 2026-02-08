@@ -27,6 +27,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 	zip \
 	libgd-dev \
 	ffmpeg \
+	ghostscript \
+	libreoffice-writer \
+	libreoffice-calc \
 	&& rm -rf /var/lib/apt/lists/*
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser

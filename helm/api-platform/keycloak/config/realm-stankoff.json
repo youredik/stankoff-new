@@ -3551,6 +3551,7 @@
           "config": {
             "user.attribute": "foo",
             "introspection.token.claim": "true",
+            "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "realm_access.roles",
             "jsonType.label": "String",

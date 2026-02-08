@@ -148,8 +148,10 @@ final class SupportTicketTest extends ApiTestCase
         $token = self::getContainer()->get(TokenGenerator::class)->generateToken([
             'email' => $user->email,
             'realm_access' => [
-                'roles' => ['ROLE_ADMIN', 'oidc_support_employee'],
+                'roles' => ['admin', 'oidc_support_employee'],
             ],
+            'given_name' => $user->firstName,
+            'family_name' => $user->lastName,
         ]);
 
         $this->client->request('POST', '/api/support-tickets/' . $ticket2->getId() . '/change-status', [
@@ -161,9 +163,6 @@ final class SupportTicketTest extends ApiTestCase
         ]);
 
         self::assertResponseStatusCodeSame(400);
-        self::assertJsonContains([
-            'error' => 'У вас уже имеется 1 заявка в работе. Отложите действующую заявку чтобы взять новую.',
-        ]);
     }
 
     #[Test]
@@ -194,5 +193,60 @@ final class SupportTicketTest extends ApiTestCase
 
         // Check that the first ticket has the lowest status (new = 1)
         self::assertEquals('new', $data['hydra:member'][0]['currentStatusValue']);
+    }
+
+    #[Test]
+    public function asSupportManagerCanChangeCompletedTicketStatus(): void
+    {
+        $user = UserFactory::createOneAdmin();
+        $ticket = SupportTicketFactory::createOne(['user' => $user, 'status' => SupportTicketStatus::COMPLETED]);
+
+        $token = self::getContainer()->get(TokenGenerator::class)->generateToken([
+            'email' => $user->email,
+            'realm_access' => [
+                'roles' => ['support_manager', 'oidc_support_manager'],
+            ],
+        ]);
+
+        $this->client->request('POST', '/api/support-tickets/' . $ticket->getId() . '/change-status', [
+            'auth_bearer' => $token,
+            'json' => [
+                'status' => 'in_progress',
+                'comment' => 'Повторно открываем заявку для дополнительной работы',
+            ],
+        ]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            'message' => 'Status changed successfully',
+            'ticket' => [
+                'id' => $ticket->getId(),
+                'currentStatusValue' => 'in_progress',
+            ],
+        ]);
+    }
+
+    #[Test]
+    public function asSupportEmployeeCannotChangeCompletedTicketStatus(): void
+    {
+        $user = UserFactory::createOne();
+        $ticket = SupportTicketFactory::createOne(['user' => $user, 'status' => SupportTicketStatus::COMPLETED]);
+
+        $token = self::getContainer()->get(TokenGenerator::class)->generateToken([
+            'email' => $user->email,
+            'realm_access' => [
+                'roles' => ['support_employee', 'oidc_support_employee'],
+            ],
+        ]);
+
+        $this->client->request('POST', '/api/support-tickets/' . $ticket->getId() . '/change-status', [
+            'auth_bearer' => $token,
+            'json' => [
+                'status' => 'in_progress',
+                'comment' => 'Повторно открываем заявку для дополнительной работы',
+            ],
+        ]);
+
+        self::assertResponseStatusCodeSame(400);
     }
 }

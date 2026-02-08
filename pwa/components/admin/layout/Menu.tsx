@@ -1,9 +1,15 @@
 import {Menu} from "react-admin";
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
 const CustomMenu = () => (
   <Menu>
+    <Menu.Item
+      to="/"
+      primaryText="Дашборд"
+      leftIcon={<DashboardIcon/>}
+    />
     <Menu.Item
       to="/support_tickets"
       primaryText="Техническая поддержка"
