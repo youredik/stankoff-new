@@ -8,6 +8,7 @@ import SyncLoader from "react-spinners/SyncLoader";
 import type {ApiPlatformAdminDataProvider, ApiPlatformAdminGetListParams} from "@api-platform/admin";
 import {fetchHydra, HydraAdmin, hydraDataProvider, ResourceGuesser,} from "@api-platform/admin";
 import type {GetListResult} from "react-admin";
+import {Resource} from "react-admin";
 import {parseHydraDocumentation} from "@api-platform/api-doc-parser";
 
 import {type Session} from "../../app/auth";
@@ -18,6 +19,7 @@ import i18nProvider from "./i18nProvider";
 import supportTicketResourceProps from "../supportticket";
 import userResourceProps from "../user";
 import {Dashboard} from "../dashboard/Dashboard";
+import {NpsReport} from "../npsreport/NpsReport";
 import {lightTheme} from "./theme";
 
 const toDateOnly = (value: unknown): string | null => {
@@ -253,6 +255,7 @@ const AdminWithDataProviderAndResources = ({session}: { session: Session }) => (
   <AdminWithDataProvider session={session}>
     <ResourceGuesser name="support_tickets" {...supportTicketResourceProps} />
     <ResourceGuesser name="users" {...userResourceProps} />
+    <Resource name="nps-report" list={NpsReport} />
   </AdminWithDataProvider>
 );
 

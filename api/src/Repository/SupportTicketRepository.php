@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\SupportTicket;
 use App\Entity\User;
+use App\Enum\SupportTicketClosingReason;
 use App\Enum\SupportTicketStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -157,5 +158,48 @@ class SupportTicketRepository extends ServiceEntityRepository
         }
 
         return (int) $conn->fetchOne($sql, $params);
+    }
+
+    /**
+     * @return array<int, array{id: int, subject: string, author_name: string, contractor: ?string, order_id: ?int, user_name: ?string, created_at: string, closed_at: string, handling_time_minutes: float, closing_comment: ?string}>
+     */
+    public function findCompletedResolvedInPeriod(\DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = <<<'SQL'
+            SELECT
+                t.id,
+                t.subject,
+                t.author_name,
+                t.contractor,
+                t.order_id,
+                u.first_name || ' ' || u.last_name AS user_name,
+                t.created_at,
+                t.closed_at,
+                EXTRACT(EPOCH FROM (t.closed_at - t.created_at)) / 60 AS handling_time_minutes,
+                c.comment AS closing_comment
+            FROM support_ticket t
+            LEFT JOIN "user" u ON u.id = t.user_id
+            INNER JOIN support_ticket_comment c ON c.support_ticket_id = t.id
+                AND c.closing_reason = :closingReason
+                AND c.id = (
+                    SELECT MAX(c2.id)
+                    FROM support_ticket_comment c2
+                    WHERE c2.support_ticket_id = t.id
+                      AND c2.status = :status
+                )
+            WHERE t.status = :status
+              AND t.closed_at >= :from
+              AND t.closed_at < :to
+            ORDER BY t.closed_at DESC
+        SQL;
+
+        return $conn->fetchAllAssociative($sql, [
+            'status' => SupportTicketStatus::COMPLETED->value,
+            'closingReason' => SupportTicketClosingReason::RESOLVED->value,
+            'from' => $from->format('Y-m-d H:i:s'),
+            'to' => $to->format('Y-m-d H:i:s'),
+        ]);
     }
 }
