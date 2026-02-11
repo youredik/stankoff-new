@@ -97,6 +97,12 @@ class SupportTicket
     #[ApiFilter(OrderFilter::class)]
     #[ApiFilter(DateFilter::class)]
     #[Groups(['SupportTicket:read',])]
+    public ?DateTimeImmutable $acceptedAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[ApiFilter(OrderFilter::class)]
+    #[ApiFilter(DateFilter::class)]
+    #[Groups(['SupportTicket:read',])]
     public ?DateTimeImmutable $closedAt = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]

@@ -217,6 +217,10 @@ final class SupportTicketController extends AbstractController
             );
         }
 
+        if ($newStatus === SupportTicketStatus::IN_PROGRESS && $supportTicket->acceptedAt === null) {
+            $supportTicket->acceptedAt = new DateTimeImmutable();
+        }
+
         $supportTicket->status = $newStatus;
 
         $comment = new SupportTicketComment();

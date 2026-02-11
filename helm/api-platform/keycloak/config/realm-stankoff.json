@@ -969,7 +969,8 @@
       ],
       "realmRoles": [
         "user",
-        "support_viewer"
+        "support_viewer",
+        "support_employee"
       ],
       "groups": []
     },
@@ -1869,7 +1870,8 @@
       ],
       "realmRoles": [
         "user",
-        "support_viewer"
+        "support_viewer",
+        "support_employee"
       ],
       "groups": []
     },
