@@ -26,6 +26,17 @@ services:
       YANDEX_OBJECT_STORAGE_BUCKET_NAME: ${YANDEX_OBJECT_STORAGE_BUCKET_NAME:-stankoff-dev}
       YANDEX_OBJECT_STORAGE_ACCESS_KEY: ${YANDEX_OBJECT_STORAGE_ACCESS_KEY:-changePass}
       YANDEX_OBJECT_STORAGE_SECRET_KEY: ${YANDEX_OBJECT_STORAGE_SECRET_KEY:-changePass}
+      # Stankoff integration: explicit env so containers don't depend on api/.env
+      # (which is gitignored — its content drifts between environments).
+      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}
+      STANKOFF_INTEGRATION_ENABLED: ${STANKOFF_INTEGRATION_ENABLED:-false}
+      STANKOFF_SHADOW_MODE: ${STANKOFF_SHADOW_MODE:-true}
+      STANKOFF_FILES_ENABLED: ${STANKOFF_FILES_ENABLED:-false}
+      STANKOFF_BASE_URL: ${STANKOFF_BASE_URL:-https://preprod.stankoff.ru}
+      STANKOFF_INTEGRATION_ID: ${STANKOFF_INTEGRATION_ID:-int_01kq7fd1d8eb48hqnf4cm34wmy}
+      STANKOFF_HMAC_SECRET: ${STANKOFF_HMAC_SECRET:-}
+      STANKOFF_API_KEY: ${STANKOFF_API_KEY:-}
+      STANKOFF_FALLBACK_EMPLOYEE_ID: ${STANKOFF_FALLBACK_EMPLOYEE_ID:-148}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -65,6 +76,15 @@ services:
       YANDEX_OBJECT_STORAGE_BUCKET_NAME: ${YANDEX_OBJECT_STORAGE_BUCKET_NAME:-stankoff-dev}
       YANDEX_OBJECT_STORAGE_ACCESS_KEY: ${YANDEX_OBJECT_STORAGE_ACCESS_KEY:-changePass}
       YANDEX_OBJECT_STORAGE_SECRET_KEY: ${YANDEX_OBJECT_STORAGE_SECRET_KEY:-changePass}
+      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}
+      STANKOFF_INTEGRATION_ENABLED: ${STANKOFF_INTEGRATION_ENABLED:-false}
+      STANKOFF_SHADOW_MODE: ${STANKOFF_SHADOW_MODE:-true}
+      STANKOFF_FILES_ENABLED: ${STANKOFF_FILES_ENABLED:-false}
+      STANKOFF_BASE_URL: ${STANKOFF_BASE_URL:-https://preprod.stankoff.ru}
+      STANKOFF_INTEGRATION_ID: ${STANKOFF_INTEGRATION_ID:-int_01kq7fd1d8eb48hqnf4cm34wmy}
+      STANKOFF_HMAC_SECRET: ${STANKOFF_HMAC_SECRET:-}
+      STANKOFF_API_KEY: ${STANKOFF_API_KEY:-}
+      STANKOFF_FALLBACK_EMPLOYEE_ID: ${STANKOFF_FALLBACK_EMPLOYEE_ID:-148}
     # NOTE: only stankoff_integration is consumed. The `failed` transport is for
     # ops to inspect/retry manually via `messenger:failed:retry`.
     entrypoint: []
