@@ -65,6 +65,7 @@ try {
         file_put_contents(REQUESTS_FILE, '[]');
         file_put_contents(SCENARIOS_FILE, '{}');
         file_put_contents(REPLAY_KEYS_FILE, '{}');
+        file_put_contents(STATE_DIR . '/dedupe-rows.json', '{}');
         respond(200, ['status' => 'reset']);
     }
     if ($method === 'POST' && $path === '/__/scenario') {
@@ -104,6 +105,30 @@ try {
     }
     if ($method === 'POST' && preg_match('#^/fake-s3/([^/]+)$#', $path, $m)) {
         handleS3Upload($m[1]);
+    }
+    // Per partner-doc (Stankoff commit f5a91a1): integrationId resolved from
+    // Bearer key, NOT in path.
+    if ($method === 'GET' && preg_match('#^/api/v1/integrations/pull/dedupe/([^/]+)$#', $path, $m)) {
+        handleDedupePull('resolved-from-bearer', $m[1], $headers);
+    }
+    if ($method === 'POST' && $path === '/__/dedupe-set') {
+        // Test harness: arm a specific dedupe-row response
+        // body: {"key":"...","resultStatus":"failed","errorMessage":"..."}
+        $req = json_decode($rawBody, true) ?: [];
+        $key = (string)($req['key'] ?? '');
+        if ($key === '') {
+            respond(400, ['error' => 'key required']);
+        }
+        withLock(STATE_DIR . '/dedupe-rows.json', function (array $st) use ($req, $key) {
+            $st[$key] = [
+                'resultStatus' => $req['resultStatus'] ?? 'processed',
+                'resultRecordId' => $req['resultRecordId'] ?? ('rec_' . substr(md5($key), 0, 24)),
+                'errorMessage' => $req['errorMessage'] ?? null,
+                'retryCount' => (int)($req['retryCount'] ?? 0),
+            ];
+            return $st;
+        });
+        respond(200, ['status' => 'dedupe_set']);
     }
 
     respond(404, ['error' => 'route not found', 'path' => $path]);
@@ -197,6 +222,31 @@ function handleS3Upload(string $uploadKey): void
     }
     // The body we received already has the multipart parts; we just acknowledge.
     respond(204, null);
+}
+
+function handleDedupePull(string $integrationId, string $idempotencyKey, array $headers): void
+{
+    if (consumeScenario('dedupe', $status, $errorCode)) {
+        respond($status, ['error' => ['code' => $errorCode ?? 'SIMULATED']]);
+    }
+    if (empty($headers['authorization'])) {
+        respond(401, ['error' => ['code' => 'MISSING_AUTH']]);
+    }
+
+    // Look up an explicitly-armed dedupe row (from /__/dedupe-set), otherwise
+    // synthesise a default 'processed' answer so the cron doesn't trip in
+    // smoke tests that didn't bother to seed.
+    $rows = json_decode((string)@file_get_contents(STATE_DIR . '/dedupe-rows.json'), true) ?: [];
+    if (isset($rows[$idempotencyKey])) {
+        respond(200, ['data' => $rows[$idempotencyKey]]);
+    }
+
+    respond(200, ['data' => [
+        'resultStatus' => 'processed',
+        'resultRecordId' => 'rec_' . substr(md5($idempotencyKey), 0, 24),
+        'errorMessage' => null,
+        'retryCount' => 0,
+    ]]);
 }
 
 function handleConfirm(string $fileId, array $headers): void

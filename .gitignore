@@ -8,3 +8,4 @@ api/.phpunit.cache
 # macOS metadata
 .DS_Store
 **/.DS_Store
+.deploy-snapshot/

@@ -67,6 +67,24 @@ class IntegrationOutboxEvent
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     public DateTimeImmutable $createdAt;
 
+    /**
+     * Last time we asked Stankoff's /pull/dedupe API about this row's outcome.
+     * Null = never polled. The cron consumer uses this to decide what to fetch.
+     */
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    public ?DateTimeImmutable $lastDedupeCheckAt = null;
+
+    /**
+     * Last reported remote consumer status from /pull/dedupe.
+     * Possible values per Stankoff partner-doc: 'processed' | 'failed' | 'dlq' | 'pending'.
+     * Null = never polled.
+     *
+     * If 'failed' or 'dlq', the local status is also lifted to 'permanently_failed'
+     * with last_error filled from upstream errorMessage.
+     */
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
+    public ?string $dedupeRemoteStatus = null;
+
     public function __construct(
         string $eventType,
         string $aggregateType,
@@ -110,5 +128,26 @@ class IntegrationOutboxEvent
     public function rememberUploadedFile(int $mediaId, string $fileId): void
     {
         $this->uploadedFileIds[$mediaId] = $fileId;
+    }
+
+    /**
+     * Record that we polled Stankoff's /pull/dedupe and got back $remoteStatus.
+     * If terminal-bad ('failed'/'dlq'), the caller should ALSO call
+     * markRemotelyFailed() to lift our local status to permanently_failed.
+     */
+    public function recordDedupeCheck(string $remoteStatus): void
+    {
+        $this->lastDedupeCheckAt = new DateTimeImmutable();
+        $this->dedupeRemoteStatus = $remoteStatus;
+    }
+
+    /**
+     * Lift local status to permanently_failed because Stankoff's async consumer
+     * reported 'failed' or 'dlq'. Used after recordDedupeCheck() with a bad status.
+     */
+    public function markRemotelyFailed(string $errorMessage): void
+    {
+        $this->status = OutboxStatus::PERMANENTLY_FAILED;
+        $this->lastError = $errorMessage;
     }
 }
