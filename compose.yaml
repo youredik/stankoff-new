@@ -28,7 +28,13 @@ services:
       YANDEX_OBJECT_STORAGE_SECRET_KEY: ${YANDEX_OBJECT_STORAGE_SECRET_KEY:-changePass}
       # Stankoff integration: explicit env so containers don't depend on api/.env
       # (which is gitignored — its content drifts between environments).
-      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}
+      # check_delayed_interval=5000: poll for delayed messages every 5s instead of
+      #   the default 60s. Without this, a DelayStamp(30000) message can wait an
+      #   additional 0-60s after its delay expires before the worker picks it up
+      #   (LISTEN/NOTIFY is auto-enabled by PostgreSqlConnection but only fires on
+      #   new INSERTs — delayed messages were inserted earlier, so notify won't
+      #   re-trigger when their available_at finally passes). See symfony/symfony#45056.
+      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0&check_delayed_interval=5000&get_notify_timeout=1000}
       STANKOFF_INTEGRATION_ENABLED: ${STANKOFF_INTEGRATION_ENABLED:-false}
       STANKOFF_SHADOW_MODE: ${STANKOFF_SHADOW_MODE:-true}
       STANKOFF_FILES_ENABLED: ${STANKOFF_FILES_ENABLED:-false}
@@ -37,6 +43,9 @@ services:
       STANKOFF_HMAC_SECRET: ${STANKOFF_HMAC_SECRET:-}
       STANKOFF_API_KEY: ${STANKOFF_API_KEY:-}
       STANKOFF_FALLBACK_EMPLOYEE_ID: ${STANKOFF_FALLBACK_EMPLOYEE_ID:-148}
+      # Delay before worker picks up the message — gives media (POST /media) time
+      # to arrive. 30s covers 99% of upload patterns. Set 0 for instant smoke tests.
+      STANKOFF_DISPATCH_DELAY_MS: ${STANKOFF_DISPATCH_DELAY_MS:-30000}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -76,7 +85,7 @@ services:
       YANDEX_OBJECT_STORAGE_BUCKET_NAME: ${YANDEX_OBJECT_STORAGE_BUCKET_NAME:-stankoff-dev}
       YANDEX_OBJECT_STORAGE_ACCESS_KEY: ${YANDEX_OBJECT_STORAGE_ACCESS_KEY:-changePass}
       YANDEX_OBJECT_STORAGE_SECRET_KEY: ${YANDEX_OBJECT_STORAGE_SECRET_KEY:-changePass}
-      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}
+      MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0&check_delayed_interval=5000&get_notify_timeout=1000}
       STANKOFF_INTEGRATION_ENABLED: ${STANKOFF_INTEGRATION_ENABLED:-false}
       STANKOFF_SHADOW_MODE: ${STANKOFF_SHADOW_MODE:-true}
       STANKOFF_FILES_ENABLED: ${STANKOFF_FILES_ENABLED:-false}
@@ -85,6 +94,7 @@ services:
       STANKOFF_HMAC_SECRET: ${STANKOFF_HMAC_SECRET:-}
       STANKOFF_API_KEY: ${STANKOFF_API_KEY:-}
       STANKOFF_FALLBACK_EMPLOYEE_ID: ${STANKOFF_FALLBACK_EMPLOYEE_ID:-148}
+      STANKOFF_DISPATCH_DELAY_MS: ${STANKOFF_DISPATCH_DELAY_MS:-30000}
     # NOTE: only stankoff_integration is consumed. The `failed` transport is for
     # ops to inspect/retry manually via `messenger:failed:retry`.
     entrypoint: []

@@ -14,7 +14,9 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -41,6 +43,18 @@ final class SupportTicketCreateProcessor implements ProcessorInterface
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,
         #[Autowire(env: 'bool:STANKOFF_INTEGRATION_ENABLED')] private readonly bool $integrationEnabled,
+        /**
+         * Delay (ms) before the worker picks up the dispatched message. Empirically
+         * needed because media (POST /support_tickets/{id}/media) arrive AFTER ticket
+         * creation: real-world observation 2026-04-29 showed an mp4 attachment
+         * arriving 4 seconds after the ticket. Without delay, any media uploaded
+         * post-ticket-create is missed by the webhook (worker handles in <1s).
+         *
+         * Default 30 sec covers 99% of realistic upload patterns including 100MB
+         * files on slow connections. Configurable via env so it can be lowered for
+         * dev/test (e.g. 0 for instant smoke probes).
+         */
+        #[Autowire(env: 'int:STANKOFF_DISPATCH_DELAY_MS')] private readonly int $dispatchDelayMs = 30000,
     ) {
     }
 
@@ -81,7 +95,11 @@ final class SupportTicketCreateProcessor implements ProcessorInterface
             $this->entityManager->persist($outbox);
             $this->entityManager->flush();
 
-            $this->bus->dispatch(new ForwardSupportTicketCreated($outbox->id->toRfc4122()));
+            $message = new ForwardSupportTicketCreated($outbox->id->toRfc4122());
+            $envelope = $this->dispatchDelayMs > 0
+                ? new Envelope($message, [new DelayStamp($this->dispatchDelayMs)])
+                : new Envelope($message);
+            $this->bus->dispatch($envelope);
         } catch (\Throwable $e) {
             $this->logger->critical('stankoff: integration dispatch failed, ticket created without outbox', [
                 'ticketId' => $ticket->getId(),

@@ -42,10 +42,11 @@ final class SignatureFactoryTest extends TestCase
         );
     }
 
-    public function testEmptySecretIsRejected(): void
+    public function testEmptySecretIsRejectedAtSignTime(): void
     {
+        $sf = new SignatureFactory(''); // construct OK
         $this->expectException(\RuntimeException::class);
-        new SignatureFactory('');
+        $sf->sign('ts', 'body'); // throws here, when actually needed
     }
 
     public function testTimestampNowFormatMatchesSpec(): void

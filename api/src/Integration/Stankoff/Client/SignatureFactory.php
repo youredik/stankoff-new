@@ -23,9 +23,10 @@ final class SignatureFactory
     public function __construct(
         #[Autowire(env: 'STANKOFF_HMAC_SECRET')] private readonly string $secret,
     ) {
-        if ($this->secret === '') {
-            throw new \RuntimeException('STANKOFF_HMAC_SECRET must be set');
-        }
+        // Validation deferred to sign() — service is constructed even in
+        // shadow mode (where signing is skipped) and during DI container boot
+        // for unrelated commands (e.g. cache:clear), so failing here would
+        // turn missing-secret into an unrelated worker crash.
     }
 
     /**
@@ -34,6 +35,9 @@ final class SignatureFactory
      */
     public function sign(string $timestamp, string $rawBody): string
     {
+        if ($this->secret === '') {
+            throw new \RuntimeException('STANKOFF_HMAC_SECRET must be set before signing');
+        }
         $hex = hash_hmac('sha256', $timestamp . '.' . $rawBody, $this->secret);
         return 'sha256=' . $hex;
     }
