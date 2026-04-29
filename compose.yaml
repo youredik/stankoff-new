@@ -94,6 +94,12 @@ services:
       - |
         php bin/console messenger:consume stankoff_integration \
           --time-limit=3600 --memory-limit=256M -vv
+    # Disable inherited HTTP healthcheck from FrankenPHP base image — worker doesn't
+    # serve HTTP. Liveness is handled by Compose `restart: unless-stopped` + the
+    # `--memory-limit/--time-limit` self-recycle. A custom check (pgrep messenger:consume)
+    # could be added later if observability tools require explicit health status.
+    healthcheck:
+      disable: true
     networks:
       - stankoff
 
