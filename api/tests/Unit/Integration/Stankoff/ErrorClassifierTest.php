@@ -29,6 +29,10 @@ final class ErrorClassifierTest extends TestCase
             '599 anything 5xx' => [599, null],
             '401 clock drift INVALID_TIMESTAMP' => [401, 'INVALID_TIMESTAMP'],
             '401 replay window exceeded' => [401, 'REPLAY_WINDOW_EXCEEDED'],
+            // RFC-defined transient 4xx — must NOT be permanent
+            '408 request timeout' => [408, null],
+            '429 too many requests (Stankoff Phase 2 rate-limit)' => [429, null],
+            '429 with errorCode' => [429, 'RATE_LIMITED'],
         ];
     }
 

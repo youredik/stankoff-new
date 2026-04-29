@@ -10,7 +10,11 @@ namespace App\Integration\Stankoff\Client;
  *
  *  RETRY (transient):
  *    - any 5xx
- *    - 401 with errorCode == INVALID_TIMESTAMP | REPLAY_WINDOW_EXCEEDED  (clock drift)
+ *    - 408 Request Timeout (rare, but per RFC retryable)
+ *    - 429 Too Many Requests (rate-limit; expected when Stankoff ships their
+ *      Phase 2 throttling — must NOT be permanent)
+ *    - 401 with errorCode == INVALID_TIMESTAMP | REPLAY_WINDOW_EXCEEDED
+ *      (clock drift; next attempt regenerates timestamp)
  *
  *  PERMANENT:
  *    - 400 (any errorCode — payload bug)
@@ -21,6 +25,11 @@ namespace App\Integration\Stankoff\Client;
  *
  * Network errors and timeouts are thrown by HttpClient itself before we get
  * here — those are caught and re-thrown as Transient by StankoffClient.
+ *
+ * Retry-After header (RFC 7231 §7.1.3) is NOT yet honoured — Messenger's
+ * retry_strategy uses its own exp-backoff. If Stankoff begins emitting
+ * Retry-After on 429/503, this is a candidate enhancement (would attach a
+ * DelayStamp to the redelivered message).
  */
 final class ErrorClassifier
 {
@@ -30,11 +39,29 @@ final class ErrorClassifier
         'REPLAY_WINDOW_EXCEEDED',
     ];
 
+    /**
+     * 4xx statuses that are explicitly transient. Everything else 4xx defaults
+     * to permanent (see classify()).
+     */
+    private const TRANSIENT_4XX_STATUSES = [
+        408,  // Request Timeout
+        429,  // Too Many Requests
+    ];
+
     public static function classify(int $status, ?string $errorCode, string $body): StankoffApiException
     {
         if ($status >= 500) {
             return new StankoffTransientException(
                 "Stankoff returned {$status} (server error)",
+                httpStatus: $status,
+                errorCode: $errorCode,
+                responseBody: self::trim($body),
+            );
+        }
+
+        if (in_array($status, self::TRANSIENT_4XX_STATUSES, true)) {
+            return new StankoffTransientException(
+                "Stankoff returned {$status} (transient — back off and retry)",
                 httpStatus: $status,
                 errorCode: $errorCode,
                 responseBody: self::trim($body),

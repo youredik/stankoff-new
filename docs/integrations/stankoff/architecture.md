@@ -226,6 +226,8 @@ non-success response is retryable.
 | Stankoff response                                  | Class    | Action |
 |----------------------------------------------------|----------|--------|
 | 5xx (any)                                          | Transient | retry |
+| **408 Request Timeout**                            | Transient | retry (RFC 7231 §6.5.7) |
+| **429 Too Many Requests**                          | Transient | retry (Stankoff's planned Phase 2 rate-limit) |
 | 401 + `errorCode = INVALID_TIMESTAMP`              | Transient | retry (next attempt has fresh ts) |
 | 401 + `errorCode = REPLAY_WINDOW_EXCEEDED`         | Transient | retry |
 | 401 + other codes (`INVALID_SIGNATURE`, `MISSING_HEADERS`, …) | Permanent | fail to `failed` queue |
