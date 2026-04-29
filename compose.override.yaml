@@ -9,6 +9,9 @@ services:
       - /app/var
       - ./api/frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
       - ./api/frankenphp/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
+      # Live-reload entrypoint without rebuild — useful for the setfacl `|| true` patch
+      # that lets dev containers survive macOS bind-mount ACL limitations.
+      - ./api/frankenphp/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint:ro
       # If you develop on Mac or Windows you can remove the vendor/ directory
       #  from the bind-mount for better performance by enabling the next line:
       #- /app/vendor
@@ -20,6 +23,55 @@ services:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway
     tty: true
+
+  # Dev override: bind-mount sources so worker picks up code changes without rebuild.
+  php-worker:
+    build:
+      context: ./api
+      target: frankenphp_dev
+    volumes:
+      - ./api:/app
+      - /app/var
+      - ./api/frankenphp/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    tty: true
+
+  # E2E test fake server. Reachable inside the docker network as `http://fake-stankoff`
+  # (port 80) and on the host as `http://localhost:8765`. Does NOT auto-replace the
+  # real preprod URL — tests/devs explicitly set STANKOFF_BASE_URL=http://fake-stankoff
+  # when they want to use it.
+  fake-stankoff:
+    image: ${IMAGES_PREFIX:-}app-php
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - |
+        php -d variables_order=EGPCS -S 0.0.0.0:80 -t /fake /fake/server.php
+    # Pull STANKOFF_HMAC_SECRET (and any others) from the same env files the worker
+    # reads, so the fake server verifies the exact same HMAC the worker signs with.
+    # Both files are gitignored; when missing, server.php falls back to a dummy
+    # secret (CI-safe, but signatures from a real worker won't verify against it).
+    env_file:
+      - path: ./api/.env
+        required: false
+      - path: ./api/.env.local
+        required: false
+    volumes:
+      - ./fake-stankoff:/fake:ro
+    ports:
+      - target: 80
+        published: 8765
+        protocol: tcp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1/health || exit 1"]
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - stankoff
 
   pwa:
     build:

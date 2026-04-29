@@ -1,0 +1,38 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            sync: 'sync://'
+
+            stankoff_integration:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: stankoff_integration
+                retry_strategy:
+                    max_retries: 5
+                    delay: 5000          # 5s
+                    multiplier: 2        # 5 -> 10 -> 20 -> 40 -> 80 (capped to max_delay)
+                    max_delay: 60000     # cap 60s
+                    jitter: 0.3
+
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: failed
+
+        routing:
+            App\Integration\Stankoff\Message\ForwardSupportTicketCreated: stankoff_integration
+
+        buses:
+            messenger.bus.default:
+                middleware:
+                    - doctrine_ping_connection
+                    - doctrine_close_connection
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                stankoff_integration: 'in-memory://'
+                failed: 'in-memory://'

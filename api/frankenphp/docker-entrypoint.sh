@@ -33,8 +33,11 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		fi
 	fi
 
-	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
-	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
+	# `|| true`: macOS bind-mounted dev filesystems return "Operation not supported"
+	# for ACLs. On a real Linux prod filesystem (ext4/xfs) these calls always succeed,
+	# so the fallback is a no-op there. Without this, dev containers crash-loop.
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var || true
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var || true
 fi
 
 exec docker-php-entrypoint "$@"

@@ -24,6 +24,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+            StankoffIntegration:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Integration/Stankoff/Outbox'
+                prefix: 'App\Integration\Stankoff\Outbox'
+                alias: StankoffIntegration
         controller_resolver:
             auto_mapping: false
 

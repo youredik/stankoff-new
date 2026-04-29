@@ -11,6 +11,19 @@ services:
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
 
+  # Stankoff integration worker — same image as `php` (so prod build is shared),
+  # but consumes the messenger queue instead of serving HTTP. Single replica is
+  # intentional: keeps outbound concurrency to Stankoff at 1, mitigating their
+  # API's known concurrency degradation at >5 parallel requests.
+  php-worker:
+    image: ${PHP_DOCKER_IMAGE}
+    build:
+      context: ./api
+      target: frankenphp_prod
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET}
+
   pwa:
     image: ${PWA_DOCKER_IMAGE}
     build:
@@ -32,6 +45,10 @@ services:
       retries: 5
 
   database:
+    ports:
+      - target: 5432
+        published: ${POSTGRES_PORT:-5432}
+        protocol: tcp
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
