@@ -14,6 +14,7 @@ use App\Integration\Stankoff\Outbox\IntegrationOutboxEvent;
 use App\Integration\Stankoff\Outbox\IntegrationOutboxEventRepository;
 use App\Integration\Stankoff\Outbox\OutboxStatus;
 use App\Integration\Stankoff\Payload\PayloadBuilder;
+use App\Notification\TelegramAlerter;
 use App\Repository\SupportTicketRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -49,6 +50,7 @@ final class ForwardSupportTicketCreatedHandler
         private readonly StankoffClient $stankoffClient,
         private readonly FilesUploader $filesUploader,
         private readonly LoggerInterface $logger,
+        private readonly TelegramAlerter $alerter,
         #[Autowire(env: 'bool:STANKOFF_SHADOW_MODE')] private readonly bool $shadowMode,
         #[Autowire(env: 'bool:STANKOFF_FILES_ENABLED')] private readonly bool $filesEnabled,
     ) {
@@ -129,6 +131,14 @@ final class ForwardSupportTicketCreatedHandler
                 'ticketId' => $ticket->getId(),
                 'response' => $response,
             ]);
+
+            $this->alerter->notify('✅ Webhook доставлен в Stankoff', [
+                'ticket' => $ticket->getId(),
+                'idempotencyKey' => substr($outbox->idempotencyKey, 0, 16) . '…',
+                'eventId' => isset($response['eventId']) && is_string($response['eventId'])
+                    ? $response['eventId']
+                    : null,
+            ]);
         } catch (StankoffPermanentException $e) {
             $outbox->markPermanentlyFailed(self::summarizeError($e));
             $this->em->flush();
@@ -137,6 +147,12 @@ final class ForwardSupportTicketCreatedHandler
                 'httpStatus' => $e->getHttpStatus(),
                 'errorCode' => $e->getErrorCode(),
                 'message' => $e->getMessage(),
+            ]);
+            $this->alerter->notify('❌ Webhook permanently failed', [
+                'ticket' => $ticket->getId(),
+                'httpStatus' => $e->getHttpStatus(),
+                'errorCode' => $e->getErrorCode(),
+                'message' => mb_substr($e->getMessage(), 0, 200),
             ]);
             throw $e; // halts Messenger retry (extends UnrecoverableMessageHandlingException)
         } catch (StankoffTransientException $e) {

@@ -10,6 +10,7 @@ use App\Entity\SupportTicket;
 use App\Enum\SupportTicketStatus;
 use App\Integration\Stankoff\Message\ForwardSupportTicketCreated;
 use App\Integration\Stankoff\Outbox\IntegrationOutboxEvent;
+use App\Notification\TelegramAlerter;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -42,6 +43,7 @@ final class SupportTicketCreateProcessor implements ProcessorInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly MessageBusInterface $bus,
         private readonly LoggerInterface $logger,
+        private readonly TelegramAlerter $alerter,
         #[Autowire(env: 'bool:STANKOFF_INTEGRATION_ENABLED')] private readonly bool $integrationEnabled,
         /**
          * Delay (ms) before the worker picks up the dispatched message. Empirically
@@ -75,6 +77,13 @@ final class SupportTicketCreateProcessor implements ProcessorInterface
         if ($this->integrationEnabled) {
             $this->scheduleStankoffForward($data);
         }
+
+        $this->alerter->notify('🎫 Тикет создан', [
+            'id' => $data->getId(),
+            'subject' => mb_substr($data->subject, 0, 80),
+            'authorName' => $data->authorName,
+            'orderId' => $data->orderId,
+        ]);
 
         return $data;
     }

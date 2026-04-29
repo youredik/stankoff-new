@@ -6,6 +6,7 @@ namespace App\Integration\Stankoff\Command;
 
 use App\Integration\Stankoff\Client\StankoffClient;
 use App\Integration\Stankoff\Outbox\IntegrationOutboxEventRepository;
+use App\Notification\TelegramAlerter;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,6 +50,7 @@ final class CheckDedupeCommand extends Command
         private readonly StankoffClient $stankoffClient,
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
+        private readonly TelegramAlerter $alerter,
     ) {
         parent::__construct();
     }
@@ -71,7 +73,9 @@ final class CheckDedupeCommand extends Command
         $output->writeln(sprintf('Found %d outbox row(s) to check (limit=%d, minAgeSec=%d, dryRun=%s)',
             count($rows), $limit, $olderThanSec, $dryRun ? 'YES' : 'no'));
 
-        $stats = ['processed' => 0, 'failed' => 0, 'dlq' => 0, 'pending' => 0, 'unknown' => 0, 'error' => 0];
+        // Per partner enum (2026-04-29 commit d498845): processed | deferred | failed | dlq.
+        // 'unknown' is our local synthetic for 404 (row evicted or mapping bug). 'error' counts exceptions.
+        $stats = ['processed' => 0, 'deferred' => 0, 'failed' => 0, 'dlq' => 0, 'unknown' => 0, 'error' => 0];
 
         foreach ($rows as $row) {
             $idemKey = $row->idempotencyKey;
@@ -109,6 +113,13 @@ final class CheckDedupeCommand extends Command
                         'remoteStatus' => $remote,
                         'errorMessage' => $result['errorMessage'] ?? null,
                     ]);
+                    $this->alerter->notify('🔥 Dedupe lift в permanently_failed', [
+                        'ticket' => $row->aggregateId,
+                        'remoteStatus' => $remote,
+                        'errorMessage' => is_string($result['errorMessage'] ?? null)
+                            ? mb_substr((string) $result['errorMessage'], 0, 200)
+                            : null,
+                    ]);
                 } elseif ($remote === 'unknown' && $row->succeededAt !== null) {
                     // 404 from Stankoff. Two semantics per partner-doc 2026-04-29:
                     //   - row younger than ~5min: likely a mapping bug on their consumer
@@ -124,6 +135,10 @@ final class CheckDedupeCommand extends Command
                             'outboxId' => (string) $row->id,
                             'aggregateId' => $row->aggregateId,
                             'idempotencyKey' => $idemKey,
+                            'ageSeconds' => $age,
+                        ]);
+                        $this->alerter->notify('🪦 Dedupe TTL evicted (>7d)', [
+                            'ticket' => $row->aggregateId,
                             'ageSeconds' => $age,
                         ]);
                     }

@@ -67,4 +67,19 @@ final class IntegrationOutboxEventDedupeTest extends TestCase
         self::assertSame(OutboxStatus::SUCCEEDED, $e->status);
         self::assertNull($e->lastError);
     }
+
+    public function testDeferredIsRecordedAsNonTerminal(): void
+    {
+        // 'deferred' = Stankoff initial state, set by webhook receiver inside
+        // persist transaction. Async consumer transitions it to a terminal state
+        // (per partner 2026-04-29 commit d498845). We must NOT lift on 'deferred',
+        // and the row must remain pollable.
+        $e = $this->event();
+        $e->markSucceeded();
+        $e->recordDedupeCheck('deferred');
+
+        self::assertSame(OutboxStatus::SUCCEEDED, $e->status);
+        self::assertNull($e->lastError);
+        self::assertSame('deferred', $e->dedupeRemoteStatus);
+    }
 }

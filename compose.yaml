@@ -46,6 +46,9 @@ services:
       # Delay before worker picks up the message — gives media (POST /media) time
       # to arrive. 30s covers 99% of upload patterns. Set 0 for instant smoke tests.
       STANKOFF_DISPATCH_DELAY_MS: ${STANKOFF_DISPATCH_DELAY_MS:-30000}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      TELEGRAM_ALERTS_ENABLED: ${TELEGRAM_ALERTS_ENABLED:-false}
     volumes:
       - caddy_data:/data
       - caddy_config:/config
@@ -95,6 +98,9 @@ services:
       STANKOFF_API_KEY: ${STANKOFF_API_KEY:-}
       STANKOFF_FALLBACK_EMPLOYEE_ID: ${STANKOFF_FALLBACK_EMPLOYEE_ID:-148}
       STANKOFF_DISPATCH_DELAY_MS: ${STANKOFF_DISPATCH_DELAY_MS:-30000}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      TELEGRAM_ALERTS_ENABLED: ${TELEGRAM_ALERTS_ENABLED:-false}
     # NOTE: only stankoff_integration is consumed. The `failed` transport is for
     # ops to inspect/retry manually via `messenger:failed:retry`.
     entrypoint: []
